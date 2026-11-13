@@ -281,7 +281,23 @@ export default function App() {
             />
           </div>
 
-          {solved ? (
+          {/* The bar stays, so nothing moves when the card comes up over
+              the game. */}
+          <div className='bar'>
+            <span className='bar__level'>
+              {t.level(LEVELS.indexOf(round.level) + 1)}
+            </span>
+            <button
+              className='tool'
+              onClick={() => start(round.level.id)}
+              disabled={fresh || busy || solved}
+              aria-label={t.clear}
+            >
+              <Icon name='clear' />
+            </button>
+          </div>
+
+          {solved && (
             <section
               className='card solved'
               style={{ animationDelay: `${cardWait}ms` }}
@@ -304,20 +320,6 @@ export default function App() {
                 </button>
               </div>
             </section>
-          ) : (
-            <div className='bar'>
-              <span className='bar__level'>
-                {t.level(LEVELS.indexOf(round.level) + 1)}
-              </span>
-              <button
-                className='tool'
-                onClick={() => start(round.level.id)}
-                disabled={fresh || busy}
-                aria-label={t.clear}
-              >
-                <Icon name='clear' />
-              </button>
-            </div>
           )}
         </>
       )}

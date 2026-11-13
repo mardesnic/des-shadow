@@ -605,8 +605,20 @@ h2 {
 }
 
 /* Through the gate, the ninja fades away. */
-.ninja--gone {
-  opacity: 0;
+.ninja--hop {
+  animation: hop 0.5s ease-out 2;
+}
+
+@keyframes hop {
+  40% {
+    transform: translateY(-4px) scale(0.95, 1.08);
+  }
+  70% {
+    transform: none;
+  }
+  85% {
+    transform: scale(1.06, 0.92);
+  }
 }
 
 /* Strong enough to beat each thing's own colours. */
@@ -875,6 +887,14 @@ h2 {
   text-align: center;
   gap: 8px;
   animation: pop 0.3s ease-out both;
+  /* Over the game, so nothing below it moves. */
+  position: fixed;
+  z-index: 5;
+  left: 50%;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  width: min(420px, calc(100% - 32px));
+  translate: -50% 0;
+  box-shadow: 0 10px 40px rgb(0 0 0 / 0.25);
 }
 
 .solved h2 {

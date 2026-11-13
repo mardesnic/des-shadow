@@ -34,7 +34,7 @@ const BOTTOM = 18;
 // The sun goes round the town on a circle, so it moves from side to side
 // over the corners instead of cutting across; just outside the town.
 const sunR = (level: Level) =>
-  Math.max(level.width * CELL, level.rows * ROW) / 2 + 6;
+  Math.max(level.width * CELL, level.rows * ROW) / 2 + 9;
 const ANGLE: Record<Sun, number> = {
   north: 0,
   east: 90,
@@ -595,7 +595,8 @@ export function Board({
   const night = shown === 'moon';
 
   const me = place(round, at);
-  const ninjaY = gone ? gate.top - 12 : me.foot;
+  // Out through the gate, the ninja stands in it, and hops for joy.
+  const ninjaY = gone ? gate.top + 0.4 : me.foot;
 
   // Things further back are drawn first, so the ones in front stand over
   // them.
@@ -814,14 +815,23 @@ export function Board({
 
       {/* The ninja, always on top, so it is never lost behind a tower. */}
       <g
-        className={gone ? 'ninja ninja--gone' : 'ninja'}
+        className='ninja'
         style={{
           transform: `translate(${me.cx}px, ${ninjaY}px)`,
           transitionDuration: `${gone ? stepMs * 2 : stepMs}ms`,
         }}
       >
         <g transform='scale(0.8) translate(-5 0)'>
-          <g className={squint ? 'ninja__pose ninja--crouch' : 'ninja__pose'}>
+          <g
+            className={
+              gone
+                ? 'ninja__pose ninja--hop'
+                : squint
+                  ? 'ninja__pose ninja--crouch'
+                  : 'ninja__pose'
+            }
+            style={gone ? { animationDelay: `${stepMs * 2}ms` } : undefined}
+          >
             <Ninja squint={squint > 0} />
           </g>
         </g>
@@ -876,24 +886,27 @@ export function Board({
         >
           <circle className='sun__hit' r={11} />
           <title>{t.suns[nextSun(level, round.sun)]}</title>
-          {Array.from({ length: 8 }, (_, i) => (
-            <path
-              key={i}
-              className={night ? 'sun__ray sun--off' : 'sun__ray'}
-              d='M0 -6 L0 -7.8'
-              transform={`rotate(${i * 45})`}
+          {/* Smaller than the hit round it, to keep out of the way. */}
+          <g transform='scale(0.72)'>
+            {Array.from({ length: 8 }, (_, i) => (
+              <path
+                key={i}
+                className={night ? 'sun__ray sun--off' : 'sun__ray'}
+                d='M0 -6 L0 -7.8'
+                transform={`rotate(${i * 45})`}
+              />
+            ))}
+            <circle
+              className={night ? 'sun__disc sun--off' : 'sun__disc'}
+              r={4.6}
             />
-          ))}
-          <circle
-            className={night ? 'sun__disc sun--off' : 'sun__disc'}
-            r={4.6}
-          />
-          {/* At the bottom the sun turns into the moon. */}
-          <g className={night ? 'moon' : 'moon moon--off'}>
-            <path
-              className='moon__disc'
-              d='M0 -4.6 A4.6 4.6 0 1 0 0 4.6 A6 6 0 0 1 0 -4.6 Z'
-            />
+            {/* At the bottom the sun turns into the moon. */}
+            <g className={night ? 'moon' : 'moon moon--off'}>
+              <path
+                className='moon__disc'
+                d='M0 -4.6 A4.6 4.6 0 1 0 0 4.6 A6 6 0 0 1 0 -4.6 Z'
+              />
+            </g>
           </g>
         </g>
       </g>
