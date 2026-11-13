@@ -21,6 +21,11 @@
   --cloud: #ffffff;
   --ground: #7d766b;
   --garden: #a9cf8a;
+  --night: #141a3c;
+  --moon: #f8f4e3;
+  --lantern: #9a9ea6;
+  --fire: #ffc94d;
+  --light: #ffd66b;
   --garden-dark: #8dbb6c;
   --block: #8f887c;
   --joint: #9e978b;
@@ -86,6 +91,11 @@
     --cloud: #aeb6c6;
     --ground: #34312c;
     --garden: #2c3f2a;
+    --night: #070a1c;
+    --moon: #e9e4cc;
+    --lantern: #7a7e86;
+    --fire: #ffc23a;
+    --light: #f5c451;
     --garden-dark: #243523;
     --block: #403c36;
     --joint: #4a4640;
@@ -495,6 +505,57 @@ h2 {
 
 .shadows--off {
   opacity: 0;
+}
+
+/* Night: the town goes dark, and the lanterns light up round them. */
+.night {
+  fill: var(--night);
+  opacity: 0.55;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.night--off,
+.lights--off,
+.sun--off,
+.moon--off {
+  opacity: 0;
+}
+
+.lights,
+.moon,
+.sun__disc,
+.sun__ray {
+  transition: opacity 0.5s ease-in-out;
+}
+
+.light {
+  fill: var(--light);
+  opacity: 0.45;
+}
+
+.lantern__stone {
+  fill: var(--lantern);
+}
+
+.lantern__window {
+  fill: #3a3a3a;
+}
+
+.lantern__fire {
+  fill: var(--fire);
+}
+
+.lantern__halo {
+  fill: var(--light);
+  opacity: 0.4;
+}
+
+.moon__disc {
+  fill: var(--moon);
+}
+
+.spot__ring--moon {
+  stroke: var(--moon);
 }
 
 .tower__base {

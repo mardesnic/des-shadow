@@ -4,7 +4,6 @@ import {
   LEVELS,
   cell,
   dark,
-  hideFrom,
   isSolved,
   moveSun,
   newRound,
@@ -73,15 +72,27 @@ describe('walking', () => {
     expect(tryWalk(r, c(1, 1))).toBeNull();
   });
 
-  it('runs into the nearest shadow when the sun leaves it in the open', () => {
+  it('goes back to the start when the sun leaves it in the open', () => {
     const r = { ...newRound(TOWN), ninja: c(1, 3) };
-    expect(moveSun(r, 'east').ninja).toBe(c(1, 2));
-    expect(hideFrom(TOWN, 'north', c(1, 3))).toBe(c(1, 3));
+    expect(moveSun(r, 'east')).toEqual(newRound(TOWN));
+    expect(moveSun(r, 'moon')).toEqual({ ...r, sun: 'moon' });
+  });
+
+  it('at night is hidden everywhere but round the lanterns', () => {
+    const night: Level = {
+      ...TOWN,
+      things: [...TOWN.things, { kind: 'lantern', x: 0, y: 0, height: 1 }],
+    };
+    expect(sorted(dark(night, 'moon'))).toEqual(
+      cells(c(2, 0), c(1, 1), c(2, 1), c(0, 2), c(1, 2), c(2, 2)).concat(
+        cells(c(0, 3), c(1, 3), c(2, 3))
+      )
+    );
   });
 
   it('is solved at the gate', () => {
     let r = walk(newRound(TOWN), c(2, 2));
-    r = moveSun(r, 'south');
+    r = moveSun(r, 'moon');
     expect(isSolved(walk(r, c(2, 0)))).toBe(true);
   });
 });
@@ -93,8 +104,8 @@ describe('every level', () => {
       expect(dark(level, level.sun).has(level.start)).toBe(true);
     });
 
-  it('the first needs the sun on every side', () => {
+  it('the first needs both the sun and the moon', () => {
     const suns = new Set(solution(LEVELS[0])!.map((r) => r.sun));
-    expect(suns.size).toBe(4);
+    expect(suns.has('moon') && suns.size).toBeGreaterThanOrEqual(3);
   });
 });

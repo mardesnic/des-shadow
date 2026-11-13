@@ -28,7 +28,7 @@ const en = {
   suns: {
     north: 'Sun at the top',
     east: 'Sun on the right',
-    south: 'Sun at the bottom',
+    moon: 'Moon',
     west: 'Sun on the left',
   } as Record<Sun, string>,
   ground: 'Go here',
@@ -64,7 +64,7 @@ const hr: Strings = {
   suns: {
     north: 'Sunce gore',
     east: 'Sunce desno',
-    south: 'Sunce dolje',
+    moon: 'Mjesec',
     west: 'Sunce lijevo',
   },
   ground: 'Idi ovamo',

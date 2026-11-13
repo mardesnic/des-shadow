@@ -2,7 +2,9 @@ import { useState } from 'react';
 
 import {
   SUNS,
+  cell,
   dark,
+  lit,
   gateCell,
   xy,
   type Round,
@@ -29,7 +31,7 @@ const SUN_R = 38;
 const ANGLE: Record<Sun, number> = {
   north: 0,
   east: 90,
-  south: 180,
+  moon: 180,
   west: 270,
 };
 
@@ -202,7 +204,59 @@ function Tree() {
   );
 }
 
-function ThingShape({ thing }: { thing: Thing }) {
+// A stone lantern, with a fire behind its little window at night.
+function Lantern({ on }: { on: boolean }) {
+  return (
+    <g className={on ? 'lantern lantern--on' : 'lantern'}>
+      <rect
+        className='lantern__stone'
+        x={-2.4}
+        y={-1.4}
+        width={4.8}
+        height={1.4}
+        rx={0.3}
+      />
+      <rect
+        className='lantern__stone'
+        x={-0.8}
+        y={-4.6}
+        width={1.6}
+        height={3.4}
+      />
+      <rect
+        className='lantern__stone'
+        x={-2}
+        y={-5.4}
+        width={4}
+        height={1}
+        rx={0.3}
+      />
+      <rect
+        className='lantern__stone'
+        x={-1.7}
+        y={-8.4}
+        width={3.4}
+        height={3.1}
+      />
+      <rect
+        className='lantern__window'
+        x={-1}
+        y={-7.8}
+        width={2}
+        height={1.9}
+        rx={0.3}
+      />
+      <path
+        className='lantern__stone'
+        d='M-3.3 -8.2 Q0 -9 3.3 -8.2 L1.6 -10.4 L-1.6 -10.4 Z'
+      />
+      <circle className='lantern__stone' cx={0} cy={-11} r={0.7} />
+    </g>
+  );
+}
+
+function ThingShape({ thing, night }: { thing: Thing; night: boolean }) {
+  if (thing.kind === 'lantern') return <Lantern on={night} />;
   if (thing.kind === 'tower') return <Tower height={thing.height} />;
   if (thing.kind === 'bamboo') return <Bamboo />;
   return <Tree />;
@@ -431,6 +485,7 @@ export function Board({
   t: Strings;
 }) {
   const { level } = round;
+  const night = round.sun === 'moon';
   const w = SIDE * 2 + level.width * CELL;
   const h = TOP + BOTTOM + level.rows * ROW;
   const centre = {
@@ -493,7 +548,7 @@ export function Board({
       {/* The shadows for each side the sun can be on; only the one for
           where it is shows, and they fade into each other. One see-through
           layer each, so overlapping shadows are no darker. */}
-      {SUNS.map((s) => {
+      {SUNS.filter((s) => s !== 'moon').map((s) => {
         const shade = dark(level, s);
         return (
           <g
@@ -533,10 +588,54 @@ export function Board({
         const p = place(round, thing.y * level.width + thing.x);
         return (
           <g key={i} transform={`translate(${p.cx} ${p.foot})`}>
-            <ThingShape thing={thing} />
+            <ThingShape thing={thing} night={night} />
           </g>
         );
       })}
+
+      {/* At night all the town is dark, but round the lanterns. */}
+      <rect
+        className={night ? 'night' : 'night night--off'}
+        x={0}
+        y={0}
+        width={w}
+        height={h}
+      />
+      <g className={night ? 'lights' : 'lights lights--off'}>
+        {[...lit(level)].map((c) => {
+          const p = place(round, c);
+          return (
+            <rect
+              key={c}
+              className='light'
+              x={p.left + 0.4}
+              y={p.top + 0.4}
+              width={CELL - 0.8}
+              height={ROW - 0.8}
+              rx={1.2}
+            />
+          );
+        })}
+        {/* The lanterns' fires, bright over the dark. */}
+        {level.things
+          .filter((t) => t.kind === 'lantern')
+          .map((t, i) => {
+            const p = place(round, cell(level, t.x, t.y));
+            return (
+              <g key={i} transform={`translate(${p.cx} ${p.foot})`}>
+                <circle className='lantern__halo' cx={0} cy={-6.6} r={3.8} />
+                <rect
+                  className='lantern__fire'
+                  x={-1}
+                  y={-7.8}
+                  width={2}
+                  height={1.9}
+                  rx={0.3}
+                />
+              </g>
+            );
+          })}
+      </g>
 
       {/* The ninja, always on top, so it is never lost behind a tower. */}
       <g
@@ -580,7 +679,14 @@ export function Board({
           <g key={s} className='spot' onClick={() => onSun(s)}>
             <circle className='spot__hit' cx={sx} cy={sy} r={8} />
             {s !== round.sun && (
-              <circle className='spot__ring' cx={sx} cy={sy} r={4.5} />
+              <circle
+                className={
+                  s === 'moon' ? 'spot__ring spot__ring--moon' : 'spot__ring'
+                }
+                cx={sx}
+                cy={sy}
+                r={4.5}
+              />
             )}
             <title>{t.suns[s]}</title>
           </g>
@@ -597,12 +703,22 @@ export function Board({
           {Array.from({ length: 8 }, (_, i) => (
             <path
               key={i}
-              className='sun__ray'
+              className={night ? 'sun__ray sun--off' : 'sun__ray'}
               d='M0 -6 L0 -7.8'
               transform={`rotate(${i * 45})`}
             />
           ))}
-          <circle className='sun__disc' r={4.6} />
+          <circle
+            className={night ? 'sun__disc sun--off' : 'sun__disc'}
+            r={4.6}
+          />
+          {/* At the bottom the sun turns into the moon. */}
+          <g className={night ? 'moon' : 'moon moon--off'}>
+            <path
+              className='moon__disc'
+              d='M0 -4.6 A4.6 4.6 0 1 0 0 4.6 A6 6 0 0 1 0 -4.6 Z'
+            />
+          </g>
         </g>
       </g>
     </svg>

@@ -4,25 +4,31 @@
 // tall. The little ninja may only stand and walk in the shadow: the child
 // moves the sun to move the shadows, and walks the ninja through them, round
 // the towers and bamboo, past the sleeping samurai and out through the gate.
+//
+// At the bottom there is the moon instead of a sun: then it is night, dark
+// everywhere but round the stone lanterns, which light up.
 
-export type Sun = 'north' | 'east' | 'south' | 'west';
-export const SUNS: readonly Sun[] = ['north', 'east', 'south', 'west'];
+export type Sun = 'north' | 'east' | 'moon' | 'west';
+export const SUNS: readonly Sun[] = ['north', 'east', 'moon', 'west'];
 
-// Which way shadows fall, away from the sun, as [across, down].
+// Which way shadows fall, away from the sun, as [across, down]. There are
+// none at night.
 export const FALL: Record<Sun, [number, number]> = {
   north: [0, 1],
   east: [-1, 0],
-  south: [0, -1],
+  moon: [0, 0],
   west: [1, 0],
 };
 
-export type Kind = 'tower' | 'bamboo' | 'tree';
+export type Kind = 'tower' | 'bamboo' | 'tree' | 'lantern';
 
-// Towers and bamboo are in the way; the ninja walks under a tree.
+// Towers, bamboo and stone lanterns are in the way; the ninja walks under
+// a tree.
 export const SOLID: Record<Kind, boolean> = {
   tower: true,
   bamboo: true,
   tree: false,
+  lantern: true,
 };
 
 export type Thing = {
@@ -72,13 +78,17 @@ export const LEVELS: Level[] = [
     width: 6,
     rows: 8,
     things: [
-      { kind: 'bamboo', x: 3, y: 0, height: 1 },
-      { kind: 'tree', x: 2, y: 1, height: 2 },
-      { kind: 'tower', x: 5, y: 1, height: 2 },
-      { kind: 'tower', x: 3, y: 2, height: 3 },
-      { kind: 'tower', x: 0, y: 3, height: 3 },
-      { kind: 'tree', x: 5, y: 4, height: 2 },
-      { kind: 'tree', x: 1, y: 7, height: 2 },
+      { kind: 'tower', x: 3, y: 1, height: 3 },
+      { kind: 'bamboo', x: 1, y: 1, height: 1 },
+      { kind: 'tower', x: 1, y: 2, height: 1 },
+      { kind: 'lantern', x: 1, y: 3, height: 1 },
+      { kind: 'bamboo', x: 5, y: 3, height: 1 },
+      { kind: 'tree', x: 0, y: 4, height: 2 },
+      { kind: 'tower', x: 2, y: 4, height: 2 },
+      { kind: 'lantern', x: 3, y: 4, height: 1 },
+      { kind: 'tree', x: 4, y: 4, height: 2 },
+      { kind: 'tower', x: 0, y: 5, height: 1 },
+      { kind: 'tree', x: 2, y: 7, height: 2 },
     ],
     start: 42,
     gate: 5,
@@ -105,10 +115,29 @@ export function open(level: Level, c: number) {
   return !t || !SOLID[t.kind];
 }
 
-// The cells in shadow while the sun is where it is: under each thing, and
-// as many cells on from it, away from the sun, as it is tall.
+// The cells a lantern lights at night: its own and the four next to it.
+export function lit(level: Level): Set<number> {
+  const cells = new Set<number>();
+  for (const t of level.things)
+    if (t.kind === 'lantern') {
+      const c = cell(level, t.x, t.y);
+      cells.add(c);
+      for (const n of neighbours(level, c)) cells.add(n);
+    }
+  return cells;
+}
+
+// The cells where the ninja is hidden. By day, the shadows: under each
+// thing, and as many cells on from it, away from the sun, as it is tall. At
+// night, everywhere the lanterns don't light.
 export function dark(level: Level, sun: Sun): Set<number> {
   const cells = new Set<number>();
+  if (sun === 'moon') {
+    const light = lit(level);
+    for (let c = 0; c < level.width * level.rows; c++)
+      if (!light.has(c)) cells.add(c);
+    return cells;
+  }
   const [dx, dy] = FALL[sun];
   for (const t of level.things)
     for (let i = 0; i <= t.height; i++) {
@@ -174,8 +203,8 @@ export const isSolved = (r: Round) => r.ninja === gateCell(r.level);
 // Where the ninja goes when the child taps a cell: the shortest way through
 // the shadow to it, or, when there is none, the shortest way round the
 // towers, up to the first sunny cell, where the samurai wakes and the ninja
-// runs back. `path` ends at that sunny cell. Null when the cell can't be
-// got to at all.
+// runs back to the start. `path` ends at that sunny cell. Null when the
+// cell can't be got to at all.
 export function tryWalk(
   r: Round,
   to: number
@@ -195,32 +224,21 @@ export function walk(r: Round, to: number): Round {
   return tryWalk(r, to)?.ok ? { ...r, ninja: to } : r;
 }
 
-// Where the ninja runs to when the sun leaves it out in the open: the
-// nearest shadow it can get to, or where it is if there is none.
-export function hideFrom(level: Level, sun: Sun, from: number): number {
-  const shade = dark(level, sun);
-  if (shade.has(from)) return from;
-  const seen = new Set([from]);
-  const queue = [from];
-  while (queue.length) {
-    const c = queue.shift()!;
-    if (shade.has(c)) return c;
-    for (const n of neighbours(level, c))
-      if (!seen.has(n) && open(level, n)) {
-        seen.add(n);
-        queue.push(n);
-      }
-  }
-  return from;
-}
-
-// The way the ninja runs from one cell to another when it hides.
+// The way the ninja runs back to the start when it is seen, round the
+// walls, sun or not.
 export const runWay = (level: Level, from: number, to: number) =>
   route(level, from, to, (c) => open(level, c)) ?? [to];
 
+// Whether the ninja would be out in the light with the sun there: then
+// the samurai wakes, and the ninja runs back to the start.
+export const seen = (r: Round, sun: Sun) => !dark(r.level, sun).has(r.ninja);
+
+// The sun moves. If that leaves the ninja in the light, the samurai wakes
+// and it all starts again: the ninja back at the start, the sun where it
+// was at first.
 export function moveSun(r: Round, sun: Sun): Round {
   if (sun === r.sun) return r;
-  return { ...r, sun, ninja: hideFrom(r.level, sun, r.ninja) };
+  return seen(r, sun) ? newRound(r.level) : { ...r, sun };
 }
 
 // Every round one tap away.

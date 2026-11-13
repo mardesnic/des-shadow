@@ -17,6 +17,7 @@ import {
   newRound,
   nextLevel,
   runWay,
+  seen,
   tryWalk,
   type Round,
   type Stats,
@@ -123,18 +124,28 @@ export default function App() {
 
   // Seen: the samurai wakes, the ninja ducks and runs back, fast, along
   // `back` to where it is safe.
-  const caught = (from: number, back: number[], at: number) => {
+  // Seen at `from`: the samurai wakes, the ninja ducks and runs, fast, all
+  // the way back to the start, and the sun goes back to where it was at
+  // first.
+  const caught = (from: number, at: number) => {
+    const { level } = round;
     later(at, () => {
       plop('no');
       setAwake(Date.now());
       setSquint(Date.now());
     });
-    const home = along(from, back, STEP_MS / 2, at + FROZEN_MS);
+    later(at + FROZEN_MS, () => setStore({ round: newRound(level) }));
+    const home = along(
+      from,
+      runWay(level, from, level.start),
+      STEP_MS / 2,
+      at + FROZEN_MS
+    );
     later(home, () => {
       setPos(null);
       setSquint(0);
     });
-    later(at + AWAKE_MS, () => setAwake(0));
+    later(Math.max(home, at + AWAKE_MS), () => setAwake(0));
   };
 
   const onCell = (c: number) => {
@@ -144,10 +155,8 @@ export default function App() {
     const { path, ok } = w;
     const from = round.ninja;
     if (!ok) {
-      // Out into the sun, and back the same way.
-      const there = along(from, path, STEP_MS);
-      const back = [...path.slice(0, -1).reverse(), from];
-      caught(path[path.length - 1], back, there);
+      // Out into the sun, and seen.
+      caught(path[path.length - 1], along(from, path, STEP_MS));
       return;
     }
     setPos(from);
@@ -172,14 +181,13 @@ export default function App() {
   const onSun = (s: Sun) => {
     if (solved || busy || s === round.sun) return;
     plop('sun');
-    const next = moveSun(round, s);
-    setStore({ round: next });
-    if (next.ninja === round.ninja) return;
-    // Left out in the sun: the ninja stays put while the sun goes round,
-    // then the samurai wakes and it runs into the shadow.
+    if (!seen(round, s)) return setStore({ round: moveSun(round, s) });
+    // Left out in the light: the sun goes round, and then the samurai sees
+    // the ninja.
+    setStore({ round: { ...round, sun: s } });
     setStepMs(STEP_MS);
     setPos(round.ninja);
-    caught(round.ninja, runWay(round.level, round.ninja, next.ninja), SUN_MS);
+    caught(round.ninja, SUN_MS);
   };
 
   const start = (id: string) => {
