@@ -33,6 +33,9 @@
   --joint: #9e978b;
   --stone: #d6d1c7;
   --cobble: #e2ded5;
+  --rock: #a39c8e;
+  --rock-top: #cdc6b7;
+  --rock-line: #5e584e;
   --shadow: #282c46;
   --sun: #ffc61a;
   --sun-ray: #ffa94d;
@@ -106,6 +109,9 @@
     --joint: #4a4640;
     --stone: #8a857c;
     --cobble: #969188;
+    --rock: #8b8579;
+    --rock-top: #b3ac9e;
+    --rock-line: #1f1d1a;
     --shadow: #080a14;
     --sun: #ffd43b;
     --sun-ray: #f59f00;
@@ -584,6 +590,21 @@ h2 {
 
 .shelter__ridge {
   fill: var(--gold);
+}
+
+.rock__body {
+  fill: var(--rock);
+  stroke: var(--rock-line);
+  stroke-width: 0.4;
+  stroke-linejoin: round;
+}
+
+.rock__top {
+  fill: var(--rock-top);
+}
+
+.rock__moss {
+  fill: var(--garden-dark);
 }
 
 .tower__base {

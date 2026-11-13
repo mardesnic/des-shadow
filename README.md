@@ -1,6 +1,6 @@
 # Shadow
 
-A free shadow puzzle for young kids that works offline. A little ninja wants to sneak past a sleeping samurai and out through the gate of a little town, but it may only walk in the shadows. Tap a side of the town to move the sun there: every pagoda, bamboo clump and cherry tree casts a shadow away from it, as long as the thing is tall. At the bottom is the moon: then it is night, dark everywhere but round the stone lanterns, which light up. The pagodas and bamboo are in the way, so the ninja has to find a way round them, through the shadows, moving the sun as it goes.
+A free shadow puzzle for young kids that works offline. A little ninja wants to sneak past a sleeping samurai and out through the gate of a little town, but it may only walk in the shadows. Tap a side of the town to move the sun there: every pagoda, rock, bamboo clump and cherry tree casts a shadow away from it, as long as the thing is tall. At the bottom is the moon: then it is night, dark everywhere but round the stone lanterns, which light up. The pagodas, rocks and bamboo are in the way, so the ninja has to find a way round them, through the shadows, moving the sun as it goes.
 
 Made for ages 5 and up. There is no timer and no way to lose: nothing moves until you tap, and when the ninja steps into the light, the samurai only wakes for a moment and the ninja runs back to the start, under a little shelter where it is always shady, to try again.
 

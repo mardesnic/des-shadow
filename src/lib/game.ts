@@ -28,12 +28,13 @@ export const quarters = (from: Sun, to: Sun) =>
 // How long the sun takes for each quarter.
 export const QUARTER_MS = 350;
 
-export type Kind = 'tower' | 'bamboo' | 'tree' | 'lantern';
+export type Kind = 'tower' | 'rock' | 'bamboo' | 'tree' | 'lantern';
 
-// Towers, bamboo and stone lanterns are in the way; the ninja walks under
+// Towers, rocks, bamboo and stone lanterns are in the way; the ninja walks under
 // a tree.
 export const SOLID: Record<Kind, boolean> = {
   tower: true,
+  rock: true,
   bamboo: true,
   tree: false,
   lantern: true,
@@ -89,14 +90,14 @@ export const LEVELS: Level[] = [
     things: [
       { kind: 'tower', x: 3, y: 1, height: 3 },
       { kind: 'bamboo', x: 1, y: 1, height: 1 },
-      { kind: 'tower', x: 1, y: 2, height: 1 },
+      { kind: 'rock', x: 1, y: 2, height: 1 },
       { kind: 'lantern', x: 1, y: 3, height: 1 },
       { kind: 'bamboo', x: 5, y: 3, height: 1 },
       { kind: 'tree', x: 0, y: 4, height: 2 },
       { kind: 'tower', x: 2, y: 4, height: 2 },
       { kind: 'lantern', x: 3, y: 4, height: 1 },
       { kind: 'tree', x: 4, y: 4, height: 2 },
-      { kind: 'tower', x: 0, y: 5, height: 1 },
+      { kind: 'rock', x: 0, y: 5, height: 1 },
       { kind: 'tree', x: 2, y: 7, height: 2 },
     ],
     start: 42,
