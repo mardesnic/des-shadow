@@ -18,9 +18,12 @@ export function detectLang(): Lang {
 const en = {
   title: 'Shadow',
   levels: 'Levels',
+  won: 'done',
+  locked: 'locked',
   level: (n: number) => `Level ${n}`,
   worlds: {
-    town: 'Town',
+    pagoda: 'Pagodas',
+    night: 'Night',
   } as Record<World, string>,
   clear: 'Start over',
   settings: 'Settings',
@@ -54,9 +57,12 @@ export type Strings = typeof en;
 const hr: Strings = {
   title: 'Sjena',
   levels: 'Razine',
+  won: 'riješeno',
+  locked: 'zaključano',
   level: (n: number) => `Razina ${n}`,
   worlds: {
-    town: 'Grad',
+    pagoda: 'Pagode',
+    night: 'Noć',
   },
   clear: 'Ispočetka',
   settings: 'Postavke',

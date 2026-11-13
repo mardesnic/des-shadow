@@ -47,8 +47,10 @@ export type Thing = {
   height: number;
 };
 
-export type World = 'town';
-export const WORLDS: readonly World[] = ['town'];
+// The worlds, each shown by a picture: first the pagodas, with only the
+// sun; then the night, with the moon and the lanterns.
+export type World = 'pagoda' | 'night';
+export const WORLDS: readonly World[] = ['pagoda', 'night'];
 
 export type Level = {
   id: string;
@@ -82,8 +84,82 @@ export type Round = {
 // The levels, made by hand and checked by the solver in the tests.
 export const LEVELS: Level[] = [
   {
+    id: 'pagoda-1',
+    world: 'pagoda',
+    width: 4,
+    rows: 5,
+    things: [
+      { kind: 'tower', x: 3, y: 0, height: 3 },
+      { kind: 'tower', x: 1, y: 1, height: 2 },
+      { kind: 'tower', x: 1, y: 2, height: 2 },
+      { kind: 'tree', x: 0, y: 3, height: 2 },
+    ],
+    start: 16,
+    gate: 0,
+    sun: 'west',
+  },
+  {
+    id: 'pagoda-2',
+    world: 'pagoda',
+    width: 4,
+    rows: 5,
+    things: [
+      { kind: 'tower', x: 0, y: 0, height: 3 },
+      { kind: 'tree', x: 1, y: 1, height: 1 },
+      { kind: 'tower', x: 1, y: 2, height: 2 },
+    ],
+    start: 18,
+    gate: 3,
+    sun: 'north',
+  },
+  {
+    id: 'pagoda-3',
+    world: 'pagoda',
+    width: 5,
+    rows: 6,
+    things: [
+      { kind: 'tower', x: 1, y: 0, height: 3 },
+      { kind: 'tree', x: 1, y: 1, height: 1 },
+      { kind: 'tower', x: 2, y: 2, height: 3 },
+    ],
+    start: 26,
+    gate: 4,
+    sun: 'east',
+  },
+  {
+    id: 'pagoda-4',
+    world: 'pagoda',
+    width: 5,
+    rows: 6,
+    things: [
+      { kind: 'tree', x: 1, y: 0, height: 2 },
+      { kind: 'tower', x: 0, y: 2, height: 2 },
+      { kind: 'tower', x: 1, y: 3, height: 2 },
+      { kind: 'tower', x: 0, y: 4, height: 3 },
+    ],
+    start: 26,
+    gate: 0,
+    sun: 'west',
+  },
+  {
+    id: 'pagoda-5',
+    world: 'pagoda',
+    width: 5,
+    rows: 6,
+    things: [
+      { kind: 'tower', x: 1, y: 0, height: 2 },
+      { kind: 'tower', x: 2, y: 1, height: 2 },
+      { kind: 'tree', x: 4, y: 2, height: 2 },
+      { kind: 'tower', x: 1, y: 3, height: 3 },
+      { kind: 'tower', x: 3, y: 4, height: 2 },
+    ],
+    start: 29,
+    gate: 0,
+    sun: 'north',
+  },
+  {
     id: 'town-1',
-    world: 'town',
+    world: 'night',
     width: 6,
     rows: 8,
     things: [
@@ -114,6 +190,13 @@ export function nextLevel(id: string): Level {
 }
 
 export const gateCell = (level: Level) => cell(level, level.gate, 0);
+
+// Where the sun can be: the moon only comes out where there are lanterns,
+// or the night would hide the ninja everywhere.
+export const sunsOf = (level: Level): readonly Sun[] =>
+  level.things.some((t) => t.kind === 'lantern')
+    ? SUNS
+    : SUNS.filter((s) => s !== 'moon');
 
 export const thingAt = (level: Level, c: number) =>
   level.things.find((t) => cell(level, t.x, t.y) === c);
@@ -239,22 +322,36 @@ export function walk(r: Round, to: number): Round {
 export const runWay = (level: Level, from: number, to: number) =>
   route(level, from, to, (c) => open(level, c)) ?? [to];
 
-// Whether the ninja would be out in the light with the sun there: then
-// the samurai wakes, and the ninja runs back to the start.
-export const seen = (r: Round, sun: Sun) => !dark(r.level, sun).has(r.ninja);
+// Whether the samurai sees the ninja as the sun goes round to a new side:
+// after how many quarters, or null if never. Every side the sun goes by on
+// the way counts, not only the one it stops at; only where there is no
+// moon, the sun going by the bottom lights nothing.
+export function seenAfter(r: Round, to: Sun): number | null {
+  const suns = sunsOf(r.level);
+  const q = quarters(r.sun, to);
+  for (let k = 1; k <= q; k++) {
+    const s = SUNS[(SUNS.indexOf(r.sun) + k) % SUNS.length];
+    if (suns.includes(s) && !dark(r.level, s).has(r.ninja)) return k;
+  }
+  return null;
+}
 
-// The sun moves. If that leaves the ninja in the light, the samurai wakes
-// and the ninja runs back to the start, under the shelter.
+// The sun moves. If on the way it leaves the ninja in the light, the
+// samurai wakes and the ninja runs back to the start, under the shelter.
 export function moveSun(r: Round, sun: Sun): Round {
-  if (sun === r.sun) return r;
-  return { ...r, sun, ninja: seen(r, sun) ? r.level.start : r.ninja };
+  if (sun === r.sun || !sunsOf(r.level).includes(sun)) return r;
+  return {
+    ...r,
+    sun,
+    ninja: seenAfter(r, sun) === null ? r.ninja : r.level.start,
+  };
 }
 
 // Every round one tap away.
 function moves(r: Round): Round[] {
   const { level } = r;
   const all = [
-    ...SUNS.map((s) => moveSun(r, s)),
+    ...sunsOf(level).map((s) => moveSun(r, s)),
     ...Array.from({ length: level.width * level.rows }, (_, c) => walk(r, c)),
   ];
   return all.filter((o) => o !== r);
@@ -285,6 +382,18 @@ export function solution(level: Level): Round[] | null {
 }
 
 export const solve = (level: Level) => solution(level)?.length ?? null;
+
+// Whether a level can be played: the first one, one already won, the one
+// being played, and the one right after a level that's won.
+export function isOpen(id: string, won: string[], current: string) {
+  const at = LEVELS.findIndex((l) => l.id === id);
+  return (
+    at === 0 ||
+    id === current ||
+    won.includes(id) ||
+    (at > 0 && won.includes(LEVELS[at - 1].id))
+  );
+}
 
 export type Stats = { solved: number; won?: string[] };
 export const initialStats: Stats = { solved: 0, won: [] };

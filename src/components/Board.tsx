@@ -1,4 +1,4 @@
-import { useId, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 
 import {
   SUNS,
@@ -10,6 +10,8 @@ import {
   QUARTER_MS,
   gateCell,
   xy,
+  sunsOf,
+  type Level,
   type Round,
   type Sun,
   type Thing,
@@ -29,8 +31,9 @@ const TOP = 23;
 const BOTTOM = 14;
 
 // The sun goes round the town on a circle, so it moves from side to side
-// over the corners instead of cutting across.
-const SUN_R = 38;
+// over the corners instead of cutting across; just outside the town.
+const sunR = (level: Level) =>
+  Math.max(level.width * CELL, level.rows * ROW) / 2 + 6;
 const ANGLE: Record<Sun, number> = {
   north: 0,
   east: 90,
@@ -54,6 +57,15 @@ const COBBLES: [number, number, number, number][] = [
   [7.3, 5.75, 1.7, 1.4],
 ];
 
+// After how many quarters the sun, going round from one side to another,
+// is at the bottom where the moon is; null if it doesn't go by it.
+function byMoon(from: Sun, to: Sun): number | null {
+  const q = quarters(from, to);
+  for (let k = 1; k <= q; k++)
+    if (SUNS[(SUNS.indexOf(from) + k) % SUNS.length] === 'moon') return k;
+  return null;
+}
+
 function place(round: Round, c: number) {
   const [x, y] = xy(round.level, c);
   const left = SIDE + x * CELL;
@@ -64,7 +76,7 @@ function place(round: Round, c: number) {
 // A pagoda seen from the front and a little above: a white wall between red
 // posts and a dark curved roof on every floor, one floor for each cell of
 // its height, and a gold spire on top.
-function Tower({ height }: { height: number }) {
+export function Tower({ height }: { height: number }) {
   const FLOOR = 4.6;
   return (
     <g className='tower'>
@@ -222,7 +234,7 @@ function Tree() {
 }
 
 // A stone lantern, with a fire behind its little window at night.
-function Lantern({ on }: { on: boolean }) {
+export function Lantern({ on }: { on: boolean }) {
   return (
     <g className={on ? 'lantern lantern--on' : 'lantern'}>
       <rect
@@ -531,13 +543,13 @@ export function Board({
   t: Strings;
 }) {
   const { level } = round;
-  const night = round.sun === 'moon';
   const w = SIDE * 2 + level.width * CELL;
   const h = TOP + BOTTOM + level.rows * ROW;
   const centre = {
     x: SIDE + (level.width * CELL) / 2,
     y: TOP + (level.rows * ROW) / 2,
   };
+  const SUN_R = sunR(level);
   const cells = Array.from({ length: level.width * level.rows }, (_, c) => c);
   const gate = place(round, gateCell(level));
   const cobbles = useId();
@@ -548,12 +560,36 @@ export function Board({
   const [angle, setAngle] = useState(ANGLE[round.sun]);
   const [was, setWas] = useState(round.sun);
   const [turn, setTurn] = useState(1);
+  // What the sky shows: the sun's side, whose shadows are drawn, or the
+  // moon, by night. Where the sun goes by the bottom it turns into the moon
+  // on the way: for a moment if it goes on, or once it gets there if it
+  // stops. Until then the shadows of the side it left stay.
+  // Where there are no lanterns there is no moon: the sun just goes by.
+  const moonOut = sunsOf(level).includes('moon');
+  const [from, setFrom] = useState(round.sun);
+  const [shown, setShown] = useState(round.sun);
   if (was !== round.sun) {
     const q = quarters(was, round.sun);
     setWas(round.sun);
+    setFrom(was);
     setTurn(q);
     setAngle((a) => a + q * 90);
+    if (!moonOut || byMoon(was, round.sun) === null) setShown(round.sun);
   }
+  useEffect(() => {
+    const k = byMoon(from, round.sun);
+    if (!moonOut || k === null) return;
+    const q = quarters(from, round.sun);
+    const ids =
+      k === q
+        ? [setTimeout(() => setShown('moon'), q * QUARTER_MS)]
+        : [
+            setTimeout(() => setShown('moon'), (k - 0.75) * QUARTER_MS),
+            setTimeout(() => setShown(round.sun), (k + 0.75) * QUARTER_MS),
+          ];
+    return () => ids.forEach(clearTimeout);
+  }, [from, moonOut, round.sun, turn]);
+  const night = shown === 'moon';
 
   const me = place(round, at);
   const ninjaY = gone ? gate.top - 12 : me.foot;
@@ -667,7 +703,7 @@ export function Board({
         return (
           <g
             key={s}
-            className={s === round.sun ? 'shadows' : 'shadows shadows--off'}
+            className={s === shown ? 'shadows' : 'shadows shadows--off'}
           >
             {/* Only on the street: a wall is never somewhere to hide. */}
             {[...shade]
@@ -697,8 +733,10 @@ export function Board({
       <g transform={`translate(${gate.left} ${gate.top + 0.6}) scale(1 0.78)`}>
         <Gate />
       </g>
+      {/* The samurai dozes beside the gate, on the side away from the
+          middle, out of the way of the sun at the top. */}
       <g
-        transform={`translate(${gate.left - 5} ${gate.top + 0.5}) scale(0.62)`}
+        transform={`translate(${level.gate > (level.width - 1) / 2 ? gate.left + CELL + 0.6 : gate.left - 5} ${gate.top + 0.5}) scale(0.62)`}
       >
         <Samurai awake={awake > 0} />
       </g>
@@ -805,7 +843,7 @@ export function Board({
       })}
 
       {/* The four sides the sun can be on, and the sun, turned round. */}
-      {SUNS.map((s) => {
+      {sunsOf(level).map((s) => {
         const a = (ANGLE[s] * Math.PI) / 180;
         const sx = centre.x + SUN_R * Math.sin(a);
         const sy = centre.y - SUN_R * Math.cos(a);

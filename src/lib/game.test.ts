@@ -4,6 +4,7 @@ import {
   LEVELS,
   cell,
   dark,
+  isOpen,
   isSolved,
   moveSun,
   newRound,
@@ -11,7 +12,9 @@ import {
   SUNS,
   quarters,
   solution,
+  seenAfter,
   solve,
+  sunsOf,
   tryWalk,
   walk,
   type Level,
@@ -25,7 +28,7 @@ import {
 //   N . .        the ninja starts at the bottom left
 const TOWN: Level = {
   id: 'test',
-  world: 'town',
+  world: 'pagoda',
   width: 3,
   rows: 4,
   things: [
@@ -36,6 +39,11 @@ const TOWN: Level = {
   start: 9,
   gate: 2,
   sun: 'north',
+};
+// The same town with a stone lantern in the top left, so the moon comes out.
+const NIGHT: Level = {
+  ...TOWN,
+  things: [...TOWN.things, { kind: 'lantern', x: 0, y: 0, height: 1 }],
 };
 const c = (x: number, y: number) => cell(TOWN, x, y);
 const cells = (...xs: number[]) => xs.sort((a, b) => a - b);
@@ -84,21 +92,22 @@ describe('walking', () => {
   });
 
   it('goes back to the start when the sun leaves it in the open', () => {
-    const r = { ...newRound(TOWN), ninja: c(1, 3) };
+    const r = { ...newRound(NIGHT), ninja: c(1, 3) };
     expect(moveSun(r, 'east')).toEqual({
       ...r,
       sun: 'east',
       ninja: TOWN.start,
     });
-    expect(moveSun(r, 'moon')).toEqual({ ...r, sun: 'moon' });
+    // The sun at the right, on the way to the moon, lights it too.
+    expect(seenAfter(r, 'moon')).toBe(1);
+    expect(moveSun(r, 'moon').ninja).toBe(TOWN.start);
+    // In the tree's shadow it stays hidden from the right into the night.
+    const hid = { ...r, sun: 'east' as const, ninja: c(1, 2) };
+    expect(moveSun(hid, 'moon')).toEqual({ ...hid, sun: 'moon' });
   });
 
   it('at night is hidden everywhere but round the lanterns', () => {
-    const night: Level = {
-      ...TOWN,
-      things: [...TOWN.things, { kind: 'lantern', x: 0, y: 0, height: 1 }],
-    };
-    expect(sorted(dark(night, 'moon'))).toEqual(
+    expect(sorted(dark(NIGHT, 'moon'))).toEqual(
       cells(c(2, 0), c(1, 1), c(2, 1), c(0, 2), c(1, 2), c(2, 2)).concat(
         cells(c(0, 3), c(1, 3), c(2, 3))
       )
@@ -106,9 +115,28 @@ describe('walking', () => {
   });
 
   it('is solved at the gate', () => {
-    let r = walk(newRound(TOWN), c(2, 2));
+    let r = walk(newRound(NIGHT), c(2, 2));
     r = moveSun(r, 'moon');
     expect(isSolved(walk(r, c(2, 0)))).toBe(true);
+  });
+});
+
+describe('the moon', () => {
+  it('only comes out where there are lanterns', () => {
+    expect(sunsOf(TOWN)).toEqual(['north', 'east', 'west']);
+    expect(sunsOf(NIGHT)).toEqual(SUNS);
+    const r = newRound(TOWN);
+    expect(moveSun(r, 'moon')).toBe(r);
+  });
+});
+
+describe('levels', () => {
+  it('open one by one, as each before is won', () => {
+    const [a, b, d] = LEVELS.map((l) => l.id);
+    expect(isOpen(a, [], a)).toBe(true);
+    expect(isOpen(b, [], a)).toBe(false);
+    expect(isOpen(b, [a], a)).toBe(true);
+    expect(isOpen(d, [a], a)).toBe(false);
   });
 });
 
@@ -122,12 +150,19 @@ describe('the start', () => {
 describe('every level', () => {
   for (const level of LEVELS)
     it(`${level.id} can be solved, and the ninja starts in shadow`, () => {
-      expect(solve(level)).toBeGreaterThan(3);
+      expect(solve(level)).toBeGreaterThanOrEqual(2);
       expect(dark(level, level.sun).has(level.start)).toBe(true);
     });
 
-  it('the first needs both the sun and the moon', () => {
-    const suns = new Set(solution(LEVELS[0])!.map((r) => r.sun));
-    expect(suns.has('moon') && suns.size).toBeGreaterThanOrEqual(3);
+  it('gets no easier from one to the next', () => {
+    const taps = LEVELS.map((l) => solve(l)!);
+    expect(taps).toEqual([...taps].sort((a, b) => a - b));
+  });
+
+  it('by night needs both the sun and the moon', () => {
+    for (const level of LEVELS.filter((l) => l.world === 'night')) {
+      const suns = new Set(solution(level)!.map((r) => r.sun));
+      expect(suns.has('moon') && suns.size).toBeGreaterThanOrEqual(3);
+    }
   });
 });

@@ -17,9 +17,8 @@ import {
   newRound,
   nextLevel,
   runWay,
-  quarters,
   QUARTER_MS,
-  seen,
+  seenAfter,
   tryWalk,
   type Round,
   type Stats,
@@ -182,13 +181,14 @@ export default function App() {
   const onSun = (s: Sun) => {
     if (solved || busy || s === round.sun) return;
     plop('sun');
-    if (!seen(round, s)) return setStore({ round: moveSun(round, s) });
-    // Left out in the light: the sun goes round, and then the samurai sees
-    // the ninja.
+    const k = seenAfter(round, s);
+    if (k === null) return setStore({ round: moveSun(round, s) });
+    // Left out in the light: the sun goes round, and where it first lights
+    // the ninja on the way the samurai sees it.
     setStore({ round: { ...round, sun: s } });
     setStepMs(STEP_MS);
     setPos(round.ninja);
-    caught(round.ninja, quarters(round.sun, s) * QUARTER_MS, s);
+    caught(round.ninja, k * QUARTER_MS, s);
   };
 
   const start = (id: string) => {

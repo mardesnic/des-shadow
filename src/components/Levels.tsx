@@ -1,7 +1,22 @@
-import { LEVELS, WORLDS } from '../lib/game';
+import { LEVELS, WORLDS, isOpen, type World } from '../lib/game';
 import type { Strings } from '../lib/i18n';
+import { Lantern, Tower } from './Board';
 
-// Every level, by world. For now every level is open, to try them all.
+// Each world's picture: a pagoda for the days in town, a lit stone lantern
+// for the nights.
+function WorldIcon({ world }: { world: World }) {
+  return world === 'pagoda' ? (
+    <svg className='world__icon' viewBox='-7 -12.5 14 13.5' aria-hidden>
+      <Tower height={2} />
+    </svg>
+  ) : (
+    <svg className='world__icon' viewBox='-6 -13 12 14' aria-hidden>
+      <Lantern on />
+    </svg>
+  );
+}
+
+// Every level, by world. A level opens once the one before it is won.
 export function Levels({
   current,
   won,
@@ -26,22 +41,34 @@ export function Levels({
             role='group'
             aria-label={t.worlds[world]}
           >
-            <span className='world__name'>{t.worlds[world]}</span>
+            <div className='world__name'>
+              <WorldIcon world={world} />
+            </div>
             <div className='levels'>
               {levels.map((level) => {
                 const n = LEVELS.indexOf(level) + 1;
+                const done = won.includes(level.id);
+                const open = isOpen(level.id, won, current);
                 return (
                   <button
                     key={level.id}
                     className={[
                       'level',
-                      won.includes(level.id) && 'level--won',
+                      done && 'level--won',
                       level.id === current && 'level--current',
+                      !open && 'level--locked',
                     ]
                       .filter(Boolean)
                       .join(' ')}
                     onClick={() => onPick(level.id)}
-                    aria-label={t.level(n)}
+                    disabled={!open}
+                    aria-label={
+                      done
+                        ? `${t.level(n)}, ${t.won}`
+                        : open
+                          ? t.level(n)
+                          : `${t.level(n)}, ${t.locked}`
+                    }
                   >
                     {n}
                   </button>

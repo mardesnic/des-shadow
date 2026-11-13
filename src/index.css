@@ -106,7 +106,7 @@
     --joint: #4a4640;
     --stone: #8a857c;
     --cobble: #969188;
-          --shadow: #080a14;
+    --shadow: #080a14;
     --sun: #ffd43b;
     --sun-ray: #f59f00;
     --leaf: #2f8a47;
@@ -935,8 +935,21 @@ h2 {
 }
 
 .world__name {
-  font-weight: 650;
-  color: var(--muted);
+  display: flex;
+  align-items: center;
+}
+
+.world__icon {
+  width: 34px;
+  height: 34px;
+}
+
+.level--locked {
+  opacity: 0.35;
+}
+
+.level--locked:active {
+  transform: none;
 }
 
 .levels {
