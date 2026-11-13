@@ -1,4 +1,4 @@
-import { SUNS, shade, type Round, type Sun, type Thing } from '../lib/game';
+import { SUNS, type Round, type Sun, type Thing } from '../lib/game';
 import type { Strings } from '../lib/i18n';
 
 // How long the ninja takes to walk one cell, in milliseconds.
@@ -22,6 +22,78 @@ function sunAt(sun: Sun, width: number) {
     x: (width * CELL) / 2 + ARC_R * Math.sin(a),
     y: NOON_Y + ARC_R - ARC_R * Math.cos(a),
   };
+}
+
+// The top of the ground, where shadows lie.
+const SURFACE = 7;
+
+// How far a shadow reaches, as a share of its full length: all the way
+// away from the sun in the morning and evening, and at noon just under the
+// thing. Moving the sun from one side to the other, it shrinks to nothing
+// and grows out the other way, as a real shadow does.
+function reach(thing: Thing, sun: Sun) {
+  const full = thing.height * CELL + CELL / 2;
+  if (sun === 'morning') return 1;
+  if (sun === 'evening') return -1;
+  return CELL / 2 / full;
+}
+
+// A thing's shadow, lying flat on the ground: drawn reaching right from the
+// middle of the thing, then stretched or turned round for the sun. A tree's
+// has its round top at the far end.
+function Shadow({ thing, sun }: { thing: Thing; sun: Sun }) {
+  const base = thing.x * CELL + CELL / 2;
+  const full = thing.height * CELL + CELL / 2;
+  const top = GROUND + 1;
+  const mid = GROUND + SURFACE / 2;
+  const end = base + full;
+  return (
+    <g>
+      {/* Right under the thing it is always dark. */}
+      <ellipse
+        className='shadow'
+        cx={base}
+        cy={mid}
+        rx={CELL / 2}
+        ry={SURFACE / 2 - 0.8}
+      />
+      <g
+        className='shadow__cast'
+        style={{
+          transformOrigin: `${base}px ${mid}px`,
+          transform: `scaleX(${reach(thing, sun)})`,
+        }}
+      >
+        {thing.kind === 'tree' ? (
+          <>
+            <rect
+              className='shadow'
+              x={base}
+              y={mid - 0.9}
+              width={full - CELL}
+              height={1.8}
+            />
+            <ellipse
+              className='shadow'
+              cx={end - CELL / 2 - 0.5}
+              cy={mid}
+              rx={CELL / 2 + 0.5}
+              ry={SURFACE / 2 - 0.6}
+            />
+          </>
+        ) : (
+          <rect
+            className='shadow'
+            x={base}
+            y={top + 0.6}
+            width={full}
+            height={SURFACE - 3.2}
+            rx={1.6}
+          />
+        )}
+      </g>
+    </g>
+  );
 }
 
 function ThingShape({ thing }: { thing: Thing }) {
@@ -212,6 +284,8 @@ export function Board({
   round,
   steps,
   squint,
+  awake,
+  out,
   sunWobble,
   onCell,
   onSun,
@@ -220,8 +294,11 @@ export function Board({
   round: Round;
   // How many cells the ninja is walking now, for how long it takes.
   steps: number;
-  // Set while the ninja has just bumped into the sun.
+  // Set while the ninja screws its eyes shut, and while the samurai is up.
   squint: number;
+  awake: number;
+  // Where the ninja stands out in the sun, before it runs back.
+  out: number | null;
   sunWobble: number;
   onCell: (x: number) => void;
   onSun: (s: Sun) => void;
@@ -229,11 +306,10 @@ export function Board({
 }) {
   const { level } = round;
   const w = level.width * CELL;
-  const dark = shade(level, round.sun);
   const solved = round.ninja === level.gate;
   const centre = { x: w / 2, y: NOON_Y + ARC_R };
   // Once at the gate, the ninja slips through it and off the board.
-  const ninjaX = solved ? level.width + 0.5 : round.ninja;
+  const ninjaX = solved ? level.width + 0.5 : (out ?? round.ninja);
 
   return (
     <svg
@@ -245,7 +321,7 @@ export function Board({
     >
       <rect className='sky' x={0} y={0} width={w} height={GROUND} />
 
-      {/* The ground: each cell bright in the sun or dark in the shadow. */}
+      {/* The ground, its sunny top, and the shadows lying on it. */}
       <rect
         className='ground'
         x={0}
@@ -253,23 +329,20 @@ export function Board({
         width={w}
         height={HEIGHT - GROUND}
       />
-      {Array.from({ length: level.width }, (_, x) => (
-        <rect
-          key={x}
-          className={dark.has(x) ? 'cell cell--dark' : 'cell'}
-          x={x * CELL + 0.4}
-          y={GROUND + 0.6}
-          width={CELL - 0.8}
-          height={4}
-          rx={1}
-        />
-      ))}
+      <rect className='surface' x={0} y={GROUND} width={w} height={SURFACE} />
+      {/* One see-through layer, so two shadows on top of each other are
+          no darker than one. */}
+      <g className='shadows'>
+        {level.things.map((thing) => (
+          <Shadow key={thing.x} thing={thing} sun={round.sun} />
+        ))}
+      </g>
 
       {level.things.map((thing) => (
         <ThingShape key={thing.x} thing={thing} />
       ))}
 
-      <Samurai x={level.gate} awake={squint > 0} />
+      <Samurai x={level.gate} awake={awake > 0} />
 
       <g
         className='ninja'

@@ -12,7 +12,7 @@ import {
   isSolved,
   moveSun,
   newRound,
-  pathTo,
+  tryWalk,
   type Stats,
   type Store,
   type Sun,
@@ -26,8 +26,10 @@ import { useWakeLock } from './lib/use-wake-lock';
 
 type View = 'play' | 'settings';
 
-// How long the samurai stays awake when the ninja bumps into the sun.
-const SQUINT_MS = 1200;
+// How long the samurai stays awake when the ninja steps into the sun.
+const AWAKE_MS = 1300;
+// How long the ninja stands frozen in the sun before it runs back.
+const FROZEN_MS = 350;
 
 export default function App() {
   // Keys are prefixed: other apps on the same GitHub Pages origin share
@@ -61,44 +63,71 @@ export default function App() {
 
   const [steps, setSteps] = useState(0);
   const [squint, setSquint] = useState(0);
+  const [awake, setAwake] = useState(0);
   const [sunWobble, setSunWobble] = useState(0);
-  const timer = useRef<number | undefined>(undefined);
-  useEffect(() => () => clearTimeout(timer.current), []);
+  // Where the ninja is shown while it is out in the sun, before it runs
+  // back to where it was; null the rest of the time.
+  const [out, setOut] = useState<number | null>(null);
+  const timers = useRef<number[]>([]);
+  const later = (ms: number, fn: () => void) =>
+    timers.current.push(window.setTimeout(fn, ms));
+  useEffect(() => () => timers.current.forEach(clearTimeout), []);
 
   const solved = isSolved(round);
+  const busy = out !== null;
 
-  const sunInTheWay = () => {
-    plop('no');
-    setSquint(Date.now());
-    clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => setSquint(0), SQUINT_MS);
+  // The ninja walks out into the sun, the samurai wakes, and the ninja
+  // runs back, faster, to where it was.
+  const intoTheSun = (path: number[]) => {
+    const there = path.length * STEP_MS;
+    const back = there / 2;
+    setSteps(path.length);
+    setOut(path[path.length - 1]);
+    path.forEach((_, i) => later(i * STEP_MS, () => plop('step')));
+    later(there, () => {
+      plop('no');
+      setAwake(Date.now());
+      setSquint(Date.now());
+    });
+    later(there + FROZEN_MS, () => {
+      setSteps(path.length / 2);
+      setOut(null);
+    });
+    later(there + FROZEN_MS + back, () => setSquint(0));
+    later(there + AWAKE_MS, () => setAwake(0));
   };
 
   const onCell = (x: number) => {
-    if (solved || x === round.ninja) return;
-    const path = pathTo(round, x);
-    if (!path) return sunInTheWay();
+    if (solved || busy) return;
+    const walk = tryWalk(round, x);
+    if (!walk) return;
+    const { path, ok } = walk;
+    if (!ok) return intoTheSun(path);
     const next = { ...round, ninja: x };
     const won = isSolved(next);
     // At the gate the ninja walks on through it, a step and a half more.
     const walking = won ? path.length + 1.5 : path.length;
     setSteps(walking);
     setStore({ round: next });
-    path.forEach((_, i) => setTimeout(() => plop('step'), i * STEP_MS));
+    path.forEach((_, i) => later(i * STEP_MS, () => plop('step')));
     if (won) {
       setStats({ solved: stats.solved + 1 });
-      setTimeout(() => {
+      later(walking * STEP_MS, () => {
         setCelebrating(true);
         cheer();
-      }, walking * STEP_MS);
+      });
     }
   };
 
   const onSun = (s: Sun) => {
-    if (solved || s === round.sun) return;
+    if (solved || busy || s === round.sun) return;
+    // The sun won't go where it would leave the ninja out in the open.
     if (!canMoveSun(round, s)) {
+      plop('no');
       setSunWobble(Date.now());
-      return sunInTheWay();
+      setSquint(Date.now());
+      later(700, () => setSquint(0));
+      return;
     }
     plop('sun');
     setStore({ round: moveSun(round, s) });
@@ -169,6 +198,8 @@ export default function App() {
               round={round}
               steps={steps}
               squint={squint}
+              awake={awake}
+              out={out}
               sunWobble={sunWobble}
               onCell={onCell}
               onSun={onSun}

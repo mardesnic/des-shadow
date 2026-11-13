@@ -84,6 +84,24 @@ export function pathTo(r: Round, to: number): number[] | null {
   return path;
 }
 
+// Where the ninja goes when the child taps a cell: through the shadow to
+// it, or, when the sun is in the way, up to the first sunny cell, where the
+// samurai wakes and the ninja runs back. `path` ends at that sunny cell.
+export function tryWalk(
+  r: Round,
+  to: number
+): { path: number[]; ok: boolean } | null {
+  if (to < 0 || to >= r.level.width || to === r.ninja) return null;
+  const dark = shade(r.level, r.sun);
+  const step = to > r.ninja ? 1 : -1;
+  const path: number[] = [];
+  for (let x = r.ninja + step; x !== to + step; x += step) {
+    path.push(x);
+    if (!dark.has(x)) return { path, ok: false };
+  }
+  return { path, ok: true };
+}
+
 export function walk(r: Round, to: number): Round {
   return pathTo(r, to) ? { ...r, ninja: to } : r;
 }

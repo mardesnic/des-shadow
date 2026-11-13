@@ -6,12 +6,12 @@
   --border: #e2e5ea;
   --accent: #3b4f8c;
   --on-accent: #ffffff;
-  --sky-morning: #ffe3c2;
+  --sky-morning: #c9e2f7;
   --sky-noon: #bfe3ff;
-  --sky-evening: #ffc59a;
-  --ground: #c9a46b;
-  --lit: #f7d774;
-  --dark: #5b6478;
+  --sky-evening: #d3def4;
+  --ground: #b8915a;
+  --surface: #f2d58c;
+  --shadow: #282c46;
   --sun: #ffc61a;
   --sun-ray: #ffa94d;
   --leaf: #40a35a;
@@ -53,12 +53,12 @@
     --border: #2c3038;
     --accent: #8ea2e6;
     --on-accent: #141a33;
-    --sky-morning: #4a3b4f;
+    --sky-morning: #2a3e58;
     --sky-noon: #26405c;
-    --sky-evening: #5a3a2c;
-    --ground: #6b5534;
-    --lit: #c9a945;
-    --dark: #1f2330;
+    --sky-evening: #2e3b5a;
+    --ground: #5e4a2d;
+    --surface: #b3974a;
+    --shadow: #080a14;
     --sun: #ffd43b;
     --sun-ray: #f59f00;
     --leaf: #2f8a47;
@@ -270,13 +270,21 @@ h2 {
   fill: var(--ground);
 }
 
-.cell {
-  fill: var(--lit);
-  transition: fill 0.5s ease-out;
+.surface {
+  fill: var(--surface);
 }
 
-.cell--dark {
-  fill: var(--dark);
+.shadows {
+  opacity: 0.55;
+}
+
+.shadow {
+  fill: var(--shadow);
+}
+
+/* As long as the sun takes to go over the sky. */
+.shadow__cast {
+  transition: transform 0.5s ease-in-out;
 }
 
 .bush circle,
@@ -486,7 +494,7 @@ h2 {
 
 @media (prefers-reduced-motion: reduce) {
   .sky,
-  .cell,
+  .shadow__cast,
   .ninja,
   .sun {
     transition: none !important;

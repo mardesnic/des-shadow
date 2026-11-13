@@ -9,6 +9,7 @@ import {
   pathTo,
   shade,
   solve,
+  tryWalk,
   walk,
 } from './game';
 
@@ -36,6 +37,16 @@ describe('walking', () => {
     const evening = moveSun(r, 'evening');
     expect(pathTo(evening, 5)).toEqual([1, 2, 3, 4, 5]);
     expect(walk(evening, 5).ninja).toBe(5);
+  });
+
+  it('steps into the first sunny cell when the sun is in the way', () => {
+    const r = newRound();
+    expect(tryWalk(r, 4)).toEqual({ path: [1], ok: false });
+    expect(tryWalk(moveSun(r, 'evening'), 4)).toEqual({
+      path: [1, 2, 3, 4],
+      ok: true,
+    });
+    expect(tryWalk(r, 0)).toBeNull();
   });
 
   it('keeps the sun from leaving the ninja in the sun', () => {
