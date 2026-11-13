@@ -9,13 +9,19 @@ const CELL = 10;
 const GROUND = 56;
 const HEIGHT = 70;
 
-// Where the sun stands in the sky: low on the left in the morning, high in
-// the middle at noon, low on the right in the evening.
+// The sun goes round an arc, so from morning to evening it rises over the
+// top at noon instead of cutting straight across. The arc's middle is far
+// below the board; the sun is turned round it.
+const ARC_R = 80;
+const NOON_Y = 9;
+const ANGLE: Record<Sun, number> = { morning: -27.5, noon: 0, evening: 27.5 };
+
 function sunAt(sun: Sun, width: number) {
-  const w = width * CELL;
-  if (sun === 'morning') return { x: 8, y: 18 };
-  if (sun === 'noon') return { x: w / 2, y: 9 };
-  return { x: w - 8, y: 18 };
+  const a = (ANGLE[sun] * Math.PI) / 180;
+  return {
+    x: (width * CELL) / 2 + ARC_R * Math.sin(a),
+    y: NOON_Y + ARC_R - ARC_R * Math.cos(a),
+  };
 }
 
 function ThingShape({ thing }: { thing: Thing }) {
@@ -76,10 +82,10 @@ function ThingShape({ thing }: { thing: Thing }) {
 }
 
 // The little ninja: a dark suit with a band of face, two eyes and a red
-// headband. When the sun is in the way it screws its eyes shut.
+// headband. When it bumps into the sun it screws its eyes shut.
 function Ninja({ squint }: { squint: boolean }) {
   return (
-    <g className='ninja__body'>
+    <g>
       <path className='ninja__band' d='M6.4 -8.2 L9 -9.5 M6.4 -8.2 L8.6 -7' />
       <rect
         className='ninja__suit'
@@ -110,34 +116,94 @@ function Ninja({ squint }: { squint: boolean }) {
   );
 }
 
-function Scroll({ x }: { x: number }) {
-  const cx = x * CELL + 5;
+// The gate at the end of the street, which the ninja slips through.
+function Gate({ x }: { x: number }) {
+  const left = x * CELL;
   return (
-    <g className='scroll'>
+    <g className='gate'>
       <rect
-        className='scroll__paper'
-        x={cx - 3.5}
-        y={GROUND - 6}
-        width={7}
-        height={5}
+        className='gate__post'
+        x={left + 1}
+        y={GROUND - 16}
+        width={1.6}
+        height={16}
+      />
+      <rect
+        className='gate__post'
+        x={left + 7.4}
+        y={GROUND - 16}
+        width={1.6}
+        height={16}
+      />
+      <rect
+        className='gate__beam'
+        x={left - 0.5}
+        y={GROUND - 17.5}
+        width={11}
+        height={2}
         rx={0.6}
       />
       <rect
-        className='scroll__rod'
-        x={cx - 4.2}
-        y={GROUND - 6.8}
-        width={8.4}
-        height={1.4}
-        rx={0.7}
+        className='gate__beam'
+        x={left + 0.5}
+        y={GROUND - 13.5}
+        width={9}
+        height={1.2}
       />
-      <rect
-        className='scroll__rod'
-        x={cx - 4.2}
-        y={GROUND - 1.6}
-        width={8.4}
-        height={1.4}
-        rx={0.7}
-      />
+    </g>
+  );
+}
+
+// The samurai dozing in the gate. The ninja has to sneak past without
+// waking him. When it bumps into the sun he wakes for a moment, looks
+// round, and nods off again.
+function Samurai({ x, awake }: { x: number; awake: boolean }) {
+  const cx = x * CELL + 5;
+  return (
+    // The shake goes on an inner group: a CSS animation would replace the
+    // outer one's place on the board.
+    <g transform={`translate(${cx} ${GROUND})`}>
+      <g className={awake ? 'samurai--awake' : undefined}>
+        {/* Legs crossed on the ground, the body, the head and the helmet. */}
+        <ellipse className='samurai__robe' cx={0} cy={-1.3} rx={4.6} ry={1.6} />
+        <path
+          className='samurai__robe'
+          d='M-3 -1.5 L-2.2 -7 L2.2 -7 L3 -1.5 Z'
+        />
+        <circle className='samurai__face' cx={0} cy={-9.2} r={2.4} />
+        <path className='samurai__helmet' d='M-3 -9.6 Q0 -14 3 -9.6 Z' />
+        <path
+          className='samurai__horns'
+          d='M-1.6 -12.2 L-3.2 -14.6 M1.6 -12.2 L3.2 -14.6'
+        />
+        {awake ? (
+          <>
+            <circle className='samurai__eye' cx={-0.9} cy={-9} r={0.45} />
+            <circle className='samurai__eye' cx={0.9} cy={-9} r={0.45} />
+            <text className='samurai__alert' x={-6} y={-12}>
+              !
+            </text>
+          </>
+        ) : (
+          <>
+            <path
+              className='samurai__shut'
+              d='M-1.5 -9 q0.6 0.5 1.2 0 M0.3 -9 q0.6 0.5 1.2 0'
+            />
+            <g className='zzz'>
+              <text x={-5.5} y={-13}>
+                z
+              </text>
+              <text x={-7.5} y={-16}>
+                z
+              </text>
+              <text x={-10} y={-19.5}>
+                Z
+              </text>
+            </g>
+          </>
+        )}
+      </g>
     </g>
   );
 }
@@ -154,7 +220,7 @@ export function Board({
   round: Round;
   // How many cells the ninja is walking now, for how long it takes.
   steps: number;
-  // Changes each time the ninja meets the sun, to play the squint again.
+  // Set while the ninja has just bumped into the sun.
   squint: number;
   sunWobble: number;
   onCell: (x: number) => void;
@@ -164,7 +230,10 @@ export function Board({
   const { level } = round;
   const w = level.width * CELL;
   const dark = shade(level, round.sun);
-  const sun = sunAt(round.sun, level.width);
+  const solved = round.ninja === level.gate;
+  const centre = { x: w / 2, y: NOON_Y + ARC_R };
+  // Once at the gate, the ninja slips through it and off the board.
+  const ninjaX = solved ? level.width + 0.5 : round.ninja;
 
   return (
     <svg
@@ -200,23 +269,24 @@ export function Board({
         <ThingShape key={thing.x} thing={thing} />
       ))}
 
-      <Scroll x={level.scroll} />
+      <Samurai x={level.gate} awake={squint > 0} />
 
       <g
         className='ninja'
         style={{
-          transform: `translateX(${round.ninja * CELL}px)`,
+          transform: `translateX(${ninjaX * CELL}px)`,
           transitionDuration: `${steps * STEP_MS}ms`,
         }}
       >
-        <g
-          key={squint}
-          className={squint ? 'ninja__shake' : undefined}
-          transform={`translate(0 ${GROUND})`}
-        >
-          <Ninja squint={squint > 0} />
+        <g transform={`translate(0 ${GROUND})`}>
+          <g key={squint} className={squint ? 'ninja__shake' : undefined}>
+            <Ninja squint={squint > 0} />
+          </g>
         </g>
       </g>
+
+      {/* The gate goes in front, so the ninja walks through it. */}
+      <Gate x={level.gate} />
 
       {/* A tap anywhere on a cell, from the ground up, sends the ninja. */}
       {Array.from({ length: level.width }, (_, x) => (
@@ -229,11 +299,11 @@ export function Board({
           height={HEIGHT - 26}
           onClick={() => onCell(x)}
         >
-          <title>{x === level.scroll ? t.scroll : t.ground}</title>
+          <title>{x === level.gate ? t.gate : t.ground}</title>
         </rect>
       ))}
 
-      {/* The spots the sun can go to, and the sun itself. */}
+      {/* The spots the sun can go to, and the sun, turned round the arc. */}
       {SUNS.map((s) => {
         const at = sunAt(s, level.width);
         return (
@@ -248,18 +318,23 @@ export function Board({
       })}
       <g
         className='sun'
-        style={{ transform: `translate(${sun.x}px, ${sun.y}px)` }}
+        style={{
+          transformOrigin: `${centre.x}px ${centre.y}px`,
+          transform: `rotate(${ANGLE[round.sun]}deg)`,
+        }}
       >
-        <g key={sunWobble} className={sunWobble ? 'sun__shake' : undefined}>
-          {Array.from({ length: 8 }, (_, i) => (
-            <path
-              key={i}
-              className='sun__ray'
-              d='M0 -6.5 L0 -8.5'
-              transform={`rotate(${i * 45})`}
-            />
-          ))}
-          <circle className='sun__disc' r={5} />
+        <g transform={`translate(${centre.x} ${NOON_Y})`}>
+          <g key={sunWobble} className={sunWobble ? 'sun__shake' : undefined}>
+            {Array.from({ length: 8 }, (_, i) => (
+              <path
+                key={i}
+                className='sun__ray'
+                d='M0 -6.5 L0 -8.5'
+                transform={`rotate(${i * 45})`}
+              />
+            ))}
+            <circle className='sun__disc' r={5} />
+          </g>
         </g>
       </g>
     </svg>

@@ -26,15 +26,16 @@ import { useWakeLock } from './lib/use-wake-lock';
 
 type View = 'play' | 'settings';
 
-// How long the ninja keeps its eyes shut when the sun is in the way.
-const SQUINT_MS = 700;
+// How long the samurai stays awake when the ninja bumps into the sun.
+const SQUINT_MS = 1200;
 
 export default function App() {
   // Keys are prefixed: other apps on the same GitHub Pages origin share
   // this storage.
   const [store, setStore] = useStoredState<Store>('shadow', initialStore);
   const [stats, setStats] = useStoredState<Stats>('shadow-stats', initialStats);
-  const round = store.round;
+  // A game saved before the gate came in has no gate: start it again.
+  const round = store.round.level.gate === undefined ? newRound() : store.round;
 
   const [language, setLanguage] = useLanguage();
   const lang = language === 'auto' ? detectLang() : language;
@@ -78,15 +79,18 @@ export default function App() {
     const path = pathTo(round, x);
     if (!path) return sunInTheWay();
     const next = { ...round, ninja: x };
-    setSteps(path.length);
+    const won = isSolved(next);
+    // At the gate the ninja walks on through it, a step and a half more.
+    const walking = won ? path.length + 1.5 : path.length;
+    setSteps(walking);
     setStore({ round: next });
     path.forEach((_, i) => setTimeout(() => plop('step'), i * STEP_MS));
-    if (isSolved(next)) {
+    if (won) {
       setStats({ solved: stats.solved + 1 });
       setTimeout(() => {
         setCelebrating(true);
         cheer();
-      }, path.length * STEP_MS);
+      }, walking * STEP_MS);
     }
   };
 

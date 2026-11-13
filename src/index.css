@@ -23,8 +23,10 @@
   --suit: #23263a;
   --skin: #f5c9a0;
   --band: #e03131;
-  --paper: #fff4d6;
-  --rod: #a8642a;
+  --gate: #d9480f;
+  --robe: #364fc7;
+  --helmet: #495057;
+  --horns: #f2b200;
   --wrong: #e5484d;
   --selected: #f2b200;
   --good: #2fa36b;
@@ -68,8 +70,10 @@
     --suit: #0d0f18;
     --skin: #e0b48a;
     --band: #ff6b6b;
-    --paper: #e8dcb8;
-    --rod: #8a5222;
+    --gate: #c2410c;
+    --robe: #4c6ef5;
+    --helmet: #868e96;
+    --horns: #fcc419;
     --wrong: #ff6b6f;
     --good: #4cc38a;
   }
@@ -298,12 +302,77 @@ h2 {
   fill: var(--window);
 }
 
-.scroll__paper {
-  fill: var(--paper);
+.gate__post,
+.gate__beam {
+  fill: var(--gate);
 }
 
-.scroll__rod {
-  fill: var(--rod);
+.samurai__robe {
+  fill: var(--robe);
+}
+
+.samurai__face {
+  fill: var(--skin);
+}
+
+.samurai__helmet {
+  fill: var(--helmet);
+}
+
+.samurai__horns {
+  stroke: var(--horns);
+  stroke-width: 0.8;
+  stroke-linecap: round;
+}
+
+.samurai__eye {
+  fill: var(--suit);
+}
+
+.samurai__shut {
+  fill: none;
+  stroke: var(--suit);
+  stroke-width: 0.4;
+  stroke-linecap: round;
+}
+
+.samurai__alert {
+  text-anchor: middle;
+  fill: var(--wrong);
+  font-size: 6px;
+  font-weight: 800;
+}
+
+.samurai--awake {
+  animation: shake 0.45s ease-in-out;
+}
+
+/* Each z rises and fades, one after the other, over and over. */
+.zzz text {
+  fill: var(--text);
+  font-size: 3px;
+  font-weight: 700;
+  animation: snore 2.4s ease-in-out infinite both;
+}
+
+.zzz text:nth-child(2) {
+  animation-delay: 0.4s;
+}
+
+.zzz text:nth-child(3) {
+  font-size: 4px;
+  animation-delay: 0.8s;
+}
+
+@keyframes snore {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  40%,
+  70% {
+    opacity: 0.8;
+  }
 }
 
 .ninja {
@@ -423,7 +492,9 @@ h2 {
     transition: none !important;
   }
   .ninja__shake,
-  .sun__shake {
+  .sun__shake,
+  .samurai--awake,
+  .zzz text {
     animation: none !important;
   }
   .solved {

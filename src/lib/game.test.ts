@@ -45,7 +45,7 @@ describe('walking', () => {
     expect(canMoveSun(r, 'evening')).toBe(true);
   });
 
-  it('is solved at the scroll', () => {
+  it('is solved at the gate', () => {
     let r = moveSun(newRound(), 'evening');
     r = walk(r, 5);
     r = moveSun(r, 'morning');

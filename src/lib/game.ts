@@ -2,7 +2,7 @@
 // sky, and every tree and tower casts a shadow on the ground away from it,
 // as long as the thing is tall. The little ninja may only stand in the
 // shadow: the child moves the sun to move the shadows, and walks the ninja
-// through them to the scroll.
+// through them, past the sleeping samurai and out through the gate.
 
 export type Sun = 'morning' | 'noon' | 'evening';
 export const SUNS: readonly Sun[] = ['morning', 'noon', 'evening'];
@@ -18,7 +18,8 @@ export type Level = {
   width: number;
   things: Thing[];
   start: number;
-  scroll: number;
+  // The gate at the end, with the samurai asleep in it.
+  gate: number;
   sun: Sun;
 };
 
@@ -30,7 +31,7 @@ export type Round = {
 
 // The first level, made by hand. With the sun in the evening the shadows
 // fall left and join up to the tower; in the morning they fall right, from
-// the tower to the scroll.
+// the tower to the gate.
 export const FIRST: Level = {
   width: 9,
   things: [
@@ -39,7 +40,7 @@ export const FIRST: Level = {
     { kind: 'tower', x: 5, height: 3 },
   ],
   start: 0,
-  scroll: 8,
+  gate: 8,
   sun: 'noon',
 };
 
@@ -67,7 +68,7 @@ export const newRound = (level: Level = FIRST): Round => ({
   ninja: level.start,
 });
 
-export const isSolved = (r: Round) => r.ninja === r.level.scroll;
+export const isSolved = (r: Round) => r.ninja === r.level.gate;
 
 // The ninja walks to a cell if every cell on the way is in shadow.
 // Returns the cells it walks through, or null when the sun is in the way.
@@ -95,7 +96,7 @@ export function moveSun(r: Round, sun: Sun): Round {
   return canMoveSun(r, sun) ? { ...r, sun } : r;
 }
 
-// The fewest taps (sun moves and walks) to the scroll, or null if there is
+// The fewest taps (sun moves and walks) to the gate, or null if there is
 // no way: every level is checked with it.
 export function solve(level: Level): number | null {
   const key = (r: Round) => `${r.sun}:${r.ninja}`;
