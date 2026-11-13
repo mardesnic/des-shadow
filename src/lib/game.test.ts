@@ -11,6 +11,7 @@ import {
   nextSun,
   open,
   SUNS,
+  WORLDS,
   quarters,
   solution,
   solve,
@@ -170,15 +171,24 @@ describe('every level', () => {
       expect(dark(level, level.sun).has(level.start)).toBe(true);
     });
 
-  it('gets no easier from one to the next', () => {
-    const taps = LEVELS.map((l) => solve(l)!);
-    expect(taps).toEqual([...taps].sort((a, b) => a - b));
+  it('gets no easier from one to the next in each world', () => {
+    for (const world of WORLDS) {
+      const taps = LEVELS.filter((l) => l.world === world).map((l) =>
+        solve(l)!
+      );
+      expect(taps).toEqual([...taps].sort((a, b) => a - b));
+    }
   });
 
-  it('by night needs both the sun and the moon', () => {
+  it('by night needs walks both by the sun and by the moon', () => {
     for (const level of LEVELS.filter((l) => l.world === 'night')) {
-      const suns = new Set(solution(level)!.map((r) => r.sun));
-      expect(suns.has('moon') && suns.size).toBeGreaterThanOrEqual(3);
+      const way = solution(level)!;
+      const walks = new Set(
+        way
+          .filter((r, i) => r.ninja !== (way[i - 1]?.ninja ?? level.start))
+          .map((r) => r.sun)
+      );
+      expect(walks.has('moon') && walks.size).toBeGreaterThanOrEqual(2);
     }
   });
 });

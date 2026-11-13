@@ -81,7 +81,8 @@ export type Round = {
   ninja: number;
 };
 
-// The levels, made by hand and checked by the solver in the tests.
+// The levels, picked from towns found by scripts/find-levels.ts, and
+// checked by the solver in the tests.
 export const LEVELS: Level[] = [
   {
     id: 'pagoda-1',
@@ -158,6 +159,79 @@ export const LEVELS: Level[] = [
     sun: 'east',
   },
   {
+    id: 'pagoda-6',
+    world: 'pagoda',
+    width: 5,
+    rows: 7,
+    things: [
+      { kind: 'tower', x: 0, y: 0, height: 3 },
+      { kind: 'tower', x: 4, y: 0, height: 3 },
+      { kind: 'tree', x: 3, y: 1, height: 1 },
+      { kind: 'tower', x: 2, y: 3, height: 3 },
+      { kind: 'tree', x: 4, y: 3, height: 1 },
+      { kind: 'tower', x: 4, y: 4, height: 2 },
+      { kind: 'tower', x: 4, y: 5, height: 3 },
+    ],
+    start: 32,
+    chest: 3,
+    sun: 'north',
+  },
+  {
+    id: 'night-1',
+    world: 'night',
+    width: 5,
+    rows: 6,
+    things: [
+      { kind: 'tower', x: 1, y: 0, height: 3 },
+      { kind: 'tree', x: 4, y: 0, height: 1 },
+      { kind: 'tower', x: 1, y: 1, height: 3 },
+      { kind: 'lantern', x: 2, y: 1, height: 1 },
+      { kind: 'tower', x: 4, y: 3, height: 2 },
+    ],
+    start: 27,
+    chest: 2,
+    sun: 'east',
+  },
+  {
+    id: 'night-2',
+    world: 'night',
+    width: 5,
+    rows: 6,
+    things: [
+      { kind: 'tower', x: 1, y: 0, height: 2 },
+      { kind: 'tower', x: 4, y: 0, height: 2 },
+      { kind: 'tree', x: 1, y: 2, height: 2 },
+      { kind: 'tower', x: 3, y: 2, height: 3 },
+      { kind: 'lantern', x: 2, y: 3, height: 1 },
+      { kind: 'tower', x: 4, y: 3, height: 3 },
+      { kind: 'tower', x: 4, y: 4, height: 2 },
+      { kind: 'bamboo', x: 1, y: 5, height: 1 },
+    ],
+    start: 29,
+    chest: 2,
+    sun: 'west',
+  },
+  {
+    id: 'night-3',
+    world: 'night',
+    width: 6,
+    rows: 7,
+    things: [
+      { kind: 'tree', x: 3, y: 1, height: 2 },
+      { kind: 'tower', x: 5, y: 1, height: 3 },
+      { kind: 'tower', x: 2, y: 2, height: 3 },
+      { kind: 'tower', x: 4, y: 2, height: 3 },
+      { kind: 'lantern', x: 0, y: 3, height: 1 },
+      { kind: 'tower', x: 3, y: 3, height: 2 },
+      { kind: 'tree', x: 0, y: 4, height: 1 },
+    ],
+    start: 40,
+    chest: 3,
+    sun: 'moon',
+  },
+  // The first night level made, still with its old name so saved games
+  // know it.
+  {
     id: 'town-1',
     world: 'night',
     width: 6,
@@ -178,6 +252,25 @@ export const LEVELS: Level[] = [
     start: 42,
     chest: 5,
     sun: 'moon',
+  },
+  {
+    id: 'night-5',
+    world: 'night',
+    width: 6,
+    rows: 8,
+    things: [
+      { kind: 'tower', x: 2, y: 1, height: 3 },
+      { kind: 'tower', x: 3, y: 1, height: 3 },
+      { kind: 'tree', x: 0, y: 2, height: 2 },
+      { kind: 'lantern', x: 3, y: 2, height: 1 },
+      { kind: 'tower', x: 5, y: 2, height: 3 },
+      { kind: 'tower', x: 5, y: 3, height: 3 },
+      { kind: 'tower', x: 0, y: 4, height: 3 },
+      { kind: 'lantern', x: 2, y: 5, height: 1 },
+    ],
+    start: 45,
+    chest: 2,
+    sun: 'west',
   },
 ];
 
