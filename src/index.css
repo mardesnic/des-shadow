@@ -405,6 +405,10 @@ h2 {
   fill: var(--skin);
 }
 
+.samurai__moustache {
+  fill: var(--suit);
+}
+
 .samurai__helmet {
   fill: var(--helmet);
 }

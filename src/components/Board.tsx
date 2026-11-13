@@ -479,22 +479,30 @@ function Samurai({ x, awake }: { x: number; awake: boolean }) {
     // outer one's place on the board.
     <g transform={`translate(${cx} ${GROUND})`}>
       <g className={awake ? 'samurai--awake' : undefined}>
-        {/* Legs crossed on the ground, the body, the head and the helmet. */}
-        <ellipse className='samurai__robe' cx={0} cy={-1.3} rx={4.6} ry={1.6} />
-        <path
+        {/* The same body as the ninja's, in a blue robe, with a helmet
+            and a big moustache. */}
+        <rect
           className='samurai__robe'
-          d='M-3 -1.5 L-2.2 -7 L2.2 -7 L3 -1.5 Z'
+          x={-3}
+          y={-5.5}
+          width={6}
+          height={5.5}
+          rx={2}
         />
-        <circle className='samurai__face' cx={0} cy={-9.2} r={2.4} />
-        <path className='samurai__helmet' d='M-3 -9.6 Q0 -14 3 -9.6 Z' />
+        <circle className='samurai__face' cx={0} cy={-8} r={3.2} />
+        <path className='samurai__helmet' d='M-3.6 -8.4 Q0 -13.6 3.6 -8.4 Z' />
         <path
           className='samurai__horns'
-          d='M-1.6 -12.2 L-3.2 -14.6 M1.6 -12.2 L3.2 -14.6'
+          d='M-1.6 -11.6 L-3.4 -14 M1.6 -11.6 L3.4 -14'
+        />
+        <path
+          className='samurai__moustache'
+          d='M0 -7 q-0.9 -0.6 -1.8 0 q-0.6 0.5 -1.3 -0.1 q0.6 1.1 1.6 0.7 q0.9 -0.3 1.5 -0.6 q0.6 0.3 1.5 0.6 q1 0.4 1.6 -0.7 q-0.7 0.6 -1.3 0.1 q-0.9 -0.6 -1.8 0 Z'
         />
         {awake ? (
           <>
-            <circle className='samurai__eye' cx={-0.9} cy={-9} r={0.45} />
-            <circle className='samurai__eye' cx={0.9} cy={-9} r={0.45} />
+            <circle className='samurai__eye' cx={-1} cy={-8.3} r={0.45} />
+            <circle className='samurai__eye' cx={1} cy={-8.3} r={0.45} />
             <text className='samurai__alert' x={-9.5} y={-13}>
               !
             </text>
@@ -503,7 +511,7 @@ function Samurai({ x, awake }: { x: number; awake: boolean }) {
           <>
             <path
               className='samurai__shut'
-              d='M-1.5 -9 q0.6 0.5 1.2 0 M0.3 -9 q0.6 0.5 1.2 0'
+              d='M-1.6 -8.3 q0.6 0.5 1.2 0 M0.4 -8.3 q0.6 0.5 1.2 0'
             />
             <g className='zzz'>
               <text x={-7.5} y={-13}>
