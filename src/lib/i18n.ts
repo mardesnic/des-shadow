@@ -1,4 +1,4 @@
-import type { Sun } from './game';
+import type { Sun, World } from './game';
 
 export const LANGS = ['en', 'hr'] as const;
 export type Lang = (typeof LANGS)[number];
@@ -17,15 +17,28 @@ export function detectLang(): Lang {
 
 const en = {
   title: 'Shadow',
-  newGame: 'New game',
+  levels: 'Levels',
+  level: (n: number) => `Level ${n}`,
+  worlds: {
+    town: 'Town',
+    bamboo: 'Bamboo',
+    cart: 'Cart',
+    cloud: 'Cloud',
+    night: 'Night',
+  } as Record<World, string>,
+  clear: 'Start over',
   settings: 'Settings',
   close: 'Close',
   suns: {
+    dawn: 'Dawn',
     morning: 'Morning',
     noon: 'Noon',
     evening: 'Evening',
+    dusk: 'Dusk',
   } as Record<Sun, string>,
   ground: 'Go here',
+  push: 'Push the cart',
+  blow: 'Blow out the lantern',
   gate: 'Gate',
   solved: 'Well done!',
   next: 'Next',
@@ -46,15 +59,28 @@ export type Strings = typeof en;
 
 const hr: Strings = {
   title: 'Sjena',
-  newGame: 'Nova igra',
+  levels: 'Razine',
+  level: (n: number) => `Razina ${n}`,
+  worlds: {
+    town: 'Grad',
+    bamboo: 'Bambus',
+    cart: 'Kolica',
+    cloud: 'Oblak',
+    night: 'Noć',
+  },
+  clear: 'Ispočetka',
   settings: 'Postavke',
   close: 'Zatvori',
   suns: {
+    dawn: 'Zora',
     morning: 'Jutro',
     noon: 'Podne',
     evening: 'Večer',
+    dusk: 'Sumrak',
   },
   ground: 'Idi ovamo',
+  push: 'Gurni kolica',
+  blow: 'Ugasi lampion',
   gate: 'Vrata',
   solved: 'Bravo!',
   next: 'Dalje',

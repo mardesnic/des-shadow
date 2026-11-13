@@ -9,6 +9,18 @@
   --sky-morning: #c9e2f7;
   --sky-noon: #bfe3ff;
   --sky-evening: #d3def4;
+  --sky-dawn: #dfe2f0;
+  --sky-dusk: #e3dcee;
+  --sky-night: #27305e;
+  --moon: #f8f4e3;
+  --star: #f8f4e3;
+  --hay: #e8c25a;
+  --straw: #c99a2e;
+  --wood: #8b5a2b;
+  --lantern: #8d9096;
+  --fire: #ffc94d;
+  --light: #ffd66b;
+  --cloud: #ffffff;
   --ground: #7d766b;
   --block: #8f887c;
   --joint: #9e978b;
@@ -62,6 +74,18 @@
     --sky-morning: #2a3e58;
     --sky-noon: #26405c;
     --sky-evening: #2e3b5a;
+    --sky-dawn: #33395a;
+    --sky-dusk: #383656;
+    --sky-night: #121733;
+    --moon: #e9e4cc;
+    --star: #d9d4bc;
+    --hay: #c9a443;
+    --straw: #9c7622;
+    --wood: #6b4420;
+    --lantern: #6d7076;
+    --fire: #ffc23a;
+    --light: #f5c451;
+    --cloud: #aeb6c6;
     --ground: #34312c;
     --block: #403c36;
     --joint: #4a4640;
@@ -244,7 +268,7 @@ h2 {
    height is left after the header, program and controls. */
 .app--play {
   height: 100dvh;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
 }
 
 .stage {
@@ -276,6 +300,178 @@ h2 {
 
 .board--evening .sky {
   fill: var(--sky-evening);
+}
+
+.board--dawn .sky {
+  fill: var(--sky-dawn);
+}
+
+.board--dusk .sky {
+  fill: var(--sky-dusk);
+}
+
+/* Night: a dark sky, and the street dim but for the lanterns' light. */
+.board--night .sky,
+.moon__cut {
+  fill: var(--sky-night);
+}
+
+.moon {
+  fill: var(--moon);
+}
+
+.star {
+  fill: var(--star);
+  opacity: 0.8;
+}
+
+.board--night .zzz text {
+  fill: var(--moon);
+}
+
+.board--night .dim {
+  filter: brightness(0.5) saturate(0.7);
+}
+
+.light {
+  fill: var(--light);
+  opacity: 0.7;
+  transition: opacity 0.4s ease-out;
+}
+
+.light--out {
+  opacity: 0;
+}
+
+/* A thing that moves (a pushed cart) rolls to its new cell. */
+.thing {
+  transition: transform 0.35s ease-out;
+}
+
+/* Bamboo that has just grown springs up from the ground. */
+.grown {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: grow 0.5s ease-out;
+}
+
+@keyframes grow {
+  from {
+    transform: scaleY(0.85);
+  }
+}
+
+.cart__hay {
+  fill: var(--hay);
+}
+
+.cart__straw {
+  fill: none;
+  stroke: var(--straw);
+  stroke-width: 0.4;
+  stroke-linecap: round;
+}
+
+.cart__wood,
+.cart__wheel {
+  fill: var(--wood);
+}
+
+.cart__hub {
+  fill: var(--straw);
+}
+
+.lantern__stone {
+  fill: var(--lantern);
+}
+
+.lantern__fire {
+  fill: var(--fire);
+  transition: fill 0.4s;
+}
+
+.lantern__fire--out {
+  fill: #3a3a3a;
+}
+
+.lantern__halo {
+  fill: var(--light);
+  opacity: 0.3;
+  transition: opacity 0.4s;
+}
+
+.lantern__halo--out {
+  opacity: 0;
+}
+
+/* A wisp of smoke rises from a lantern just blown out, and goes. */
+.lantern__smoke {
+  fill: none;
+  stroke: var(--moon);
+  stroke-width: 0.5;
+  stroke-linecap: round;
+  animation: smoke 1.4s ease-out both;
+}
+
+@keyframes smoke {
+  from {
+    opacity: 0.8;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+}
+
+/* The cloud drifts as long as the sun takes to go over. */
+.cloud {
+  transition: transform 0.5s ease-in-out;
+}
+
+.cloud__puff {
+  fill: var(--cloud);
+  opacity: 0.95;
+  pointer-events: none;
+}
+
+/* The ninja leans into a push, or puffs at a lantern. */
+.ninja__act--push {
+  animation: shove 0.35s ease-out;
+}
+
+.ninja__act--push-left {
+  animation: shove-left 0.35s ease-out;
+}
+
+@keyframes shove {
+  50% {
+    transform: translateX(1.5px);
+  }
+}
+
+@keyframes shove-left {
+  50% {
+    transform: translateX(-1.5px);
+  }
+}
+
+.ninja__puff path {
+  fill: none;
+  stroke: var(--moon);
+  stroke-width: 0.5;
+  stroke-linecap: round;
+  animation: puff 0.6s ease-out both;
+}
+
+@keyframes puff {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translateX(2px);
+  }
 }
 
 .ground {
@@ -529,6 +725,34 @@ h2 {
   stroke-linecap: round;
 }
 
+/* Under the board: which level, and Start over. */
+.bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+}
+
+.bar__level {
+  font-weight: 650;
+  color: var(--muted);
+}
+
+.tool {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  padding: 12px 2px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.tool:disabled {
+  opacity: 0.4;
+}
+
 /* Solved */
 
 .solved {
@@ -567,10 +791,15 @@ h2 {
   .sky,
   .shadow__cast,
   .ninja,
-  .sun {
+  .sun,
+  .thing,
+  .cloud {
     transition: none !important;
   }
   .samurai--awake,
+  .grown,
+  .ninja__act--push,
+  .ninja__act--push-left,
   .zzz text {
     animation: none !important;
   }
@@ -581,44 +810,43 @@ h2 {
 
 /* New game and settings */
 
+.world {
+  display: grid;
+  gap: 10px;
+}
+
+.world__name {
+  font-weight: 650;
+  color: var(--muted);
+}
+
 .levels {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
 }
 
 .level {
-  display: grid;
-  justify-items: center;
-  gap: 12px;
-  padding: 28px 12px 20px;
-  border: 0;
+  aspect-ratio: 1;
+  border: 2px solid transparent;
   border-radius: 16px;
   background: var(--bg);
   font-weight: 700;
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   transition: transform 0.1s;
 }
 
 .level:active {
-  transform: scale(0.97);
+  transform: scale(0.95);
 }
 
-/* How hard the level is, as one to four filled dots. */
-.level__pips {
-  display: flex;
-  gap: 5px;
-}
-
-.pip {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--muted) 30%, transparent);
-}
-
-.pip--on {
+.level--won {
   background: var(--accent);
+  color: var(--on-accent);
+}
+
+.level--current {
+  border-color: var(--accent);
 }
 
 .stats {
