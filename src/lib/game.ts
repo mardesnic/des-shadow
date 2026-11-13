@@ -56,7 +56,7 @@ export type Level = {
   width: number;
   rows: number;
   things: Thing[];
-  // Where the ninja starts, as a cell: under a big parasol, so always in
+  // Where the ninja starts, as a cell: under a little shelter, so always in
   // the shade.
   start: number;
   // The column of the gate, over the top row; the ninja leaves through it
@@ -140,7 +140,7 @@ export function lit(level: Level): Set<number> {
 // thing, and as many cells on from it, away from the sun, as it is tall. At
 // night, everywhere the lanterns don't light.
 export function dark(level: Level, sun: Sun): Set<number> {
-  // Under the parasol at the start it is always shady.
+  // Under the shelter at the start it is always shady.
   const cells = new Set([level.start]);
   if (sun === 'moon') {
     const light = lit(level);
@@ -244,7 +244,7 @@ export const runWay = (level: Level, from: number, to: number) =>
 export const seen = (r: Round, sun: Sun) => !dark(r.level, sun).has(r.ninja);
 
 // The sun moves. If that leaves the ninja in the light, the samurai wakes
-// and the ninja runs back to the start, under the parasol.
+// and the ninja runs back to the start, under the shelter.
 export function moveSun(r: Round, sun: Sun): Round {
   if (sun === r.sun) return r;
   return { ...r, sun, ninja: seen(r, sun) ? r.level.start : r.ninja };

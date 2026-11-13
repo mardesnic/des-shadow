@@ -576,23 +576,7 @@ h2 {
   fill: var(--block-side);
 }
 
-.parasol__top {
-  fill: var(--post);
-}
-
-.parasol__pole {
-  stroke: var(--trunk);
-  stroke-width: 0.6;
-}
-
-.parasol__spokes {
-  fill: none;
-  stroke: var(--gold);
-  stroke-width: 0.3;
-  opacity: 0.8;
-}
-
-.parasol__knob {
+.shelter__ridge {
   fill: var(--gold);
 }
 

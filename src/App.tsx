@@ -125,7 +125,7 @@ export default function App() {
   // Seen: the samurai wakes, the ninja ducks and runs back, fast, along
   // `back` to where it is safe.
   // Seen at `from`: the samurai wakes, and the ninja ducks and runs, fast,
-  // all the way back to the start, under the parasol. The sun stays.
+  // all the way back to the start, under the shelter. The sun stays.
   const caught = (from: number, at: number, sun: Sun) => {
     const { level } = round;
     later(at, () => {

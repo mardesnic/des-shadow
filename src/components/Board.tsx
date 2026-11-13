@@ -258,20 +258,31 @@ function Lantern({ on }: { on: boolean }) {
   );
 }
 
-// A big paper parasol, red with thin spokes, over the start.
-function Parasol() {
+// A little open shelter over the start, in the town's own style: two red
+// posts and a dark curved roof, like a pagoda's. Under it is always shady.
+function Shelter() {
   return (
-    <g className='parasol'>
-      <path className='parasol__pole' d='M0 0 V-13' />
-      <path
-        className='parasol__top'
-        d='M-6.4 -11 Q-5 -15.6 0 -16.2 Q5 -15.6 6.4 -11 Q3.2 -12 0 -11.6 Q-3.2 -12 -6.4 -11 Z'
+    <g className='shelter'>
+      <rect
+        className='tower__post'
+        x={-4.6}
+        y={-9.4}
+        width={0.9}
+        height={9.4}
       />
+      <rect className='tower__post' x={3.7} y={-9.4} width={0.9} height={9.4} />
       <path
-        className='parasol__spokes'
-        d='M0 -16.2 L-4.6 -11.4 M0 -16.2 L-1.6 -11.6 M0 -16.2 L1.6 -11.6 M0 -16.2 L4.6 -11.4'
+        className='tower__roof'
+        d='M-6.8 -9 Q-5 -8.8 -4 -11.4 L4 -11.4 Q5 -8.8 6.8 -9 L5.8 -8.3 L-5.8 -8.3 Z'
       />
-      <circle className='parasol__knob' cx={0} cy={-16.4} r={0.6} />
+      <rect
+        className='shelter__ridge'
+        x={-3.6}
+        y={-12}
+        width={7.2}
+        height={0.7}
+        rx={0.3}
+      />
     </g>
   );
 }
@@ -690,11 +701,11 @@ export function Board({
           })}
       </g>
 
-      {/* The big red parasol over the start, always in the shade. */}
+      {/* The shelter over the start, always in the shade. */}
       <g
         transform={`translate(${place(round, level.start).cx} ${place(round, level.start).foot})`}
       >
-        <Parasol />
+        <Shelter />
       </g>
 
       {/* The ninja, always on top, so it is never lost behind a tower. */}
