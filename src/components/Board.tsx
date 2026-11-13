@@ -133,7 +133,9 @@ function Shadow({ thing, sun }: { thing: Thing; sun: Sun }) {
         />
       )}
       <g
-        className='shadow__cast'
+        className={
+          sun === 'noon' ? 'shadow__cast shadow__cast--noon' : 'shadow__cast'
+        }
         style={{
           transformOrigin: `${base}px ${mid}px`,
           transform: `scaleX(${reach(sun)})`,
@@ -368,40 +370,103 @@ function Ninja({ squint }: { squint: boolean }) {
   );
 }
 
-// The gate at the end of the street, which the ninja slips through.
+// The grand gate at the end of the street, which the ninja slips through:
+// red posts with gold bands, a dark curved roof with a gold ridge and a
+// little gold dragon at each end, and a gold plaque with a dragon on it.
 function Gate({ x }: { x: number }) {
-  const left = x * CELL;
+  const l = x * CELL;
+  const g = GROUND;
+  // A curled gold dragon tail at one end of the roof; `dir` turns it.
+  const dragon = (cx: number, dir: 1 | -1) =>
+    `M${cx} ${g - 24.1} q${-0.6 * dir} -1.4 ${0.5 * dir} -2.2 q${1.1 * dir} -0.4 ${0.9 * dir} 0.7 q${-0.4 * dir} 0.4 ${-0.7 * dir} -0.1`;
   return (
     <g className='gate'>
+      {[l + 0.6, l + 7.2].map((px) => (
+        <g key={px}>
+          <rect
+            className='gate__post'
+            x={px}
+            y={g - 21}
+            width={2.2}
+            height={21}
+          />
+          <rect
+            className='gate__gold'
+            x={px - 0.3}
+            y={g - 1.6}
+            width={2.8}
+            height={1.6}
+            rx={0.3}
+          />
+          <rect
+            className='gate__gold'
+            x={px - 0.1}
+            y={g - 13}
+            width={2.4}
+            height={0.7}
+          />
+        </g>
+      ))}
+      {/* The lower beam, and the plaque hanging above it. */}
       <rect
         className='gate__post'
-        x={left + 1}
-        y={GROUND - 16}
-        width={1.6}
-        height={16}
+        x={l - 0.8}
+        y={g - 16.5}
+        width={11.6}
+        height={1.4}
       />
+      <rect
+        className='gate__gold'
+        x={l + 3.1}
+        y={g - 20.9}
+        width={3.8}
+        height={4.6}
+        rx={0.4}
+      />
+      <rect
+        className='gate__plaque'
+        x={l + 3.6}
+        y={g - 20.4}
+        width={2.8}
+        height={3.6}
+        rx={0.2}
+      />
+      <path
+        className='gate__dragon'
+        d={`M${l + 4.1} ${g - 17.4} q0.4 -1.2 1 -0.6 q0.6 0.6 0.9 -0.6 q0.2 -0.9 -0.4 -1 q-0.5 0 -0.4 0.5`}
+      />
+      <circle className='gate__eye' cx={l + 5.5} cy={g - 19.4} r={0.25} />
+      {/* The top beam and the roof over it. */}
       <rect
         className='gate__post'
-        x={left + 7.4}
-        y={GROUND - 16}
-        width={1.6}
-        height={16}
+        x={l - 0.8}
+        y={g - 21.6}
+        width={11.6}
+        height={1.5}
+      />
+      <path
+        className='gate__roof'
+        d={`M${l - 2.2} ${g - 22.6} Q${l + 0.4} ${g - 21.9} ${l + 1.6} ${g - 24.1} L${l + 8.4} ${g - 24.1} Q${l + 9.6} ${g - 21.9} ${l + 12.2} ${g - 22.6} L${l + 11} ${g - 21.4} L${l - 1} ${g - 21.4} Z`}
       />
       <rect
-        className='gate__beam'
-        x={left - 0.5}
-        y={GROUND - 17.5}
-        width={11}
-        height={2}
-        rx={0.6}
+        className='gate__gold'
+        x={l + 1.6}
+        y={g - 24.5}
+        width={6.8}
+        height={0.6}
+        rx={0.3}
       />
-      <rect
-        className='gate__beam'
-        x={left + 0.5}
-        y={GROUND - 13.5}
-        width={9}
-        height={1.2}
-      />
+      {[l + 1.5, l + 3.5, l + 5, l + 6.5, l + 8.5].map((cx) => (
+        <circle
+          key={cx}
+          className='gate__gold'
+          cx={cx}
+          cy={g - 20.85}
+          r={0.3}
+        />
+      ))}
+      <path className='gate__tail' d={dragon(l + 1.8, -1)} />
+      <path className='gate__tail' d={dragon(l + 8.2, 1)} />
     </g>
   );
 }
@@ -432,7 +497,7 @@ function Samurai({ x, awake }: { x: number; awake: boolean }) {
           <>
             <circle className='samurai__eye' cx={-0.9} cy={-9} r={0.45} />
             <circle className='samurai__eye' cx={0.9} cy={-9} r={0.45} />
-            <text className='samurai__alert' x={-8.5} y={-13}>
+            <text className='samurai__alert' x={-9.5} y={-13}>
               !
             </text>
           </>
@@ -443,13 +508,13 @@ function Samurai({ x, awake }: { x: number; awake: boolean }) {
               d='M-1.5 -9 q0.6 0.5 1.2 0 M0.3 -9 q0.6 0.5 1.2 0'
             />
             <g className='zzz'>
-              <text x={-5.5} y={-13}>
+              <text x={-7.5} y={-13}>
                 z
               </text>
-              <text x={-7.5} y={-16}>
+              <text x={-9.5} y={-16}>
                 z
               </text>
-              <text x={-10} y={-19.5}>
+              <text x={-12} y={-19.5}>
                 Z
               </text>
             </g>

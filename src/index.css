@@ -27,6 +27,7 @@
   --roof: #3f4a5a;
   --window: #c92a2a;
   --spire: #c9a227;
+  --gold: #e0a800;
   --suit: #23263a;
   --skin: #f5c9a0;
   --band: #e03131;
@@ -81,6 +82,7 @@
     --roof: #25303d;
     --window: #a82424;
     --spire: #b08d1e;
+    --gold: #f2b600;
     --suit: #0d0f18;
     --skin: #e0b48a;
     --band: #ff6b6b;
@@ -309,7 +311,14 @@ h2 {
 
 /* As long as the sun takes to go over the sky. */
 .shadow__cast {
-  transition: transform 0.5s ease-in-out;
+  transition:
+    transform 0.5s ease-in-out,
+    opacity 0.5s ease-in-out;
+}
+
+/* At noon it has shrunk to nothing: hide what is left of it. */
+.shadow__cast--noon {
+  opacity: 0;
 }
 
 .bamboo__stalk {
@@ -362,9 +371,30 @@ h2 {
   fill: var(--window);
 }
 
-.gate__post,
-.gate__beam {
+.gate__post {
   fill: var(--gate);
+}
+
+.gate__gold,
+.gate__eye {
+  fill: var(--gold);
+}
+
+.gate__roof {
+  fill: var(--roof);
+}
+
+.gate__plaque {
+  fill: var(--roof);
+}
+
+.gate__dragon,
+.gate__tail {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 0.45;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .samurai__robe {
