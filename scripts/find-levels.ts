@@ -50,11 +50,8 @@ function town(): Level | null {
     things.push({ kind, x, y, height });
   };
   for (let i = int(3, 6); i > 0; i--) add('tower', int(2, 3));
-  for (let i = int(1, 2); i > 0; i--) add('tree', int(1, 2));
-  if (world === 'night') {
-    for (let i = int(0, 2); i > 0; i--) add('bamboo', 1);
-    for (let i = int(1, 2); i > 0; i--) add('lantern', 1);
-  }
+  for (let i = int(1, 2); i > 0; i--) add('bamboo', 1);
+  if (world === 'night') for (let i = int(1, 2); i > 0; i--) add('lantern', 1);
   // A lantern too near the start would light up the shelter.
   const [sx, sy] = [start % width, Math.floor(start / width)];
   if (
@@ -82,7 +79,6 @@ function draw(level: Level) {
   const sign: Record<Kind, string> = {
     tower: 'T',
     bamboo: 'B',
-    tree: 'r',
     lantern: 'L',
   };
   const out: string[] = [];
@@ -119,7 +115,7 @@ for (let tries = 0; tries < 200000 && found < Number(n); tries++) {
       .map((r) => r.sun)
   );
   if (world === 'night' && !(walks.has('moon') && walks.size >= 2)) continue;
-  if (world === 'pagoda' && walks.size < 2) continue;
+  if (world === 'pagoda' && walks.size < 2 && Number(hi) > 3) continue;
   if (from && level.sun !== from) continue;
   found++;
   const { id: _, ...rest } = level;

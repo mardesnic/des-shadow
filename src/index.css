@@ -650,18 +650,6 @@ h2 {
   fill: var(--leaf-dark);
 }
 
-.tree__crown {
-  fill: var(--blossom);
-}
-
-.tree__edge {
-  fill: var(--blossom-edge);
-}
-
-.tree__petal {
-  fill: var(--petal);
-}
-
 .tower__post {
   fill: var(--post);
 }
@@ -673,10 +661,6 @@ h2 {
 
 .tower__spire-ball {
   fill: var(--spire);
-}
-
-.tree__trunk {
-  fill: var(--trunk);
 }
 
 .tower__wall {

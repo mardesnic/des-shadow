@@ -177,55 +177,6 @@ function Bamboo() {
   );
 }
 
-// A cherry tree in bloom, which the ninja can walk under.
-const CROWN = [
-  [0, -10, 2.9],
-  [-2, -8.4, 2.2],
-  [2, -8.4, 2.2],
-  [-1.3, -6.5, 2],
-  [1.3, -6.5, 2],
-  [0, -12.6, 2.1],
-];
-
-function Tree() {
-  return (
-    <g className='tree'>
-      <path
-        className='tree__trunk'
-        d='M-1.1 0 Q-0.6 -2 -0.8 -5 L0.8 -5 Q0.6 -2 1.1 0 Z'
-      />
-      {(['edge', 'crown'] as const).map((part) =>
-        CROWN.map(([cx, cy, r], i) => (
-          <circle
-            key={`${part}${i}`}
-            className={`tree__${part}`}
-            cx={cx}
-            cy={cy}
-            r={part === 'edge' ? r + 0.45 : r}
-          />
-        ))
-      )}
-      {[
-        [-1.1, -11],
-        [1, -12.8],
-        [2.1, -8.6],
-        [-2.3, -8],
-        [0.3, -7],
-        [-0.6, -9.4],
-        [1.2, -10.2],
-      ].map(([cx, cy], i) => (
-        <circle
-          key={i}
-          className='tree__petal'
-          cx={cx}
-          cy={cy}
-          r={i % 3 ? 0.45 : 0.6}
-        />
-      ))}
-    </g>
-  );
-}
-
 // A stone lantern, with a fire behind its little window at night.
 export function Lantern({ on }: { on: boolean }) {
   return (
@@ -307,43 +258,63 @@ function Shelter() {
 }
 
 // The same things seen straight from above, each in the middle of its
-// cell: a pagoda as its roofs one inside the other, a floor each, the spire
-// in the middle.
+// cell: a pagoda as its roofs one over the other, a floor each.
 function TopTower({ height }: { height: number }) {
+  // Each floor sits on the roof of the one under it, a step higher up the
+  // picture, with its white wall showing under its roof: a taller pagoda
+  // has more floors and stands up out of its cell.
+  const WALL = 1.8;
+  const floors = Array.from({ length: height }, (_, i) => {
+    const w = 9 - i * 2.2;
+    const deep = w - 2;
+    const mid = -0.8 - i * WALL;
+    return { w, deep, mid };
+  });
+  const last = floors[floors.length - 1];
   return (
     <g className='tower'>
-      <rect
-        className='tower__base'
-        x={-4.6}
-        y={-4.6}
-        width={9.2}
-        height={9.2}
-        rx={1}
-      />
-      {Array.from({ length: height }, (_, i) => {
-        const s = 8.4 - i * 2.4;
-        return (
-          <g key={i}>
-            <rect
-              className='tower__post'
-              x={-s / 2}
-              y={-s / 2}
-              width={s}
-              height={s}
-              rx={1}
-            />
-            <rect
-              className='tower__roof'
-              x={-s / 2 + 0.5}
-              y={-s / 2 + 0.5}
-              width={s - 1}
-              height={s - 1}
-              rx={0.8}
-            />
-          </g>
-        );
-      })}
-      <circle className='tower__spire-ball' r={0.9} />
+      {floors.map(({ w, deep, mid }, i) => (
+        <g key={i}>
+          <rect
+            className='tower__wall'
+            x={-w / 2 + 0.5}
+            y={mid}
+            width={w - 1}
+            height={deep / 2 + WALL}
+          />
+          <rect
+            className='tower__post'
+            x={-w / 2 + 0.5}
+            y={mid}
+            width={0.8}
+            height={deep / 2 + WALL}
+          />
+          <rect
+            className='tower__post'
+            x={w / 2 - 1.3}
+            y={mid}
+            width={0.8}
+            height={deep / 2 + WALL}
+          />
+          <rect
+            className='tower__post'
+            x={-w / 2}
+            y={mid - deep / 2}
+            width={w}
+            height={deep}
+            rx={1}
+          />
+          <rect
+            className='tower__roof'
+            x={-w / 2 + 0.45}
+            y={mid - deep / 2 + 0.45}
+            width={w - 0.9}
+            height={deep - 0.9}
+            rx={0.7}
+          />
+        </g>
+      ))}
+      <circle className='tower__spire-ball' cy={last.mid} r={0.8} />
     </g>
   );
 }
@@ -371,50 +342,6 @@ function TopBamboo() {
           <circle className='bamboo__stalk' cx={x} cy={y} r={0.95} />
           <circle className='bamboo__joint' cx={x} cy={y} r={0.4} />
         </g>
-      ))}
-    </g>
-  );
-}
-
-const TOP_CROWN = [
-  [0, 0, 2.6],
-  [-2.3, -1.6, 2],
-  [2.3, -1.6, 2],
-  [-2.2, 1.8, 2],
-  [2.2, 1.8, 2],
-  [0, -2.8, 1.8],
-  [0, 2.9, 1.8],
-];
-
-function TopTree() {
-  return (
-    <g className='tree'>
-      {(['edge', 'crown'] as const).map((part) =>
-        TOP_CROWN.map(([cx, cy, r], i) => (
-          <circle
-            key={`${part}${i}`}
-            className={`tree__${part}`}
-            cx={cx}
-            cy={cy}
-            r={part === 'edge' ? r + 0.45 : r}
-          />
-        ))
-      )}
-      {[
-        [-1.2, -0.8],
-        [1.4, 0.6],
-        [-2.6, 1.6],
-        [2.6, -1.8],
-        [0.2, 2.4],
-        [0, -2.6],
-      ].map(([cx, cy], i) => (
-        <circle
-          key={i}
-          className='tree__petal'
-          cx={cx}
-          cy={cy}
-          r={i % 3 ? 0.45 : 0.6}
-        />
       ))}
     </g>
   );
@@ -507,15 +434,13 @@ function TopNinja({ squint }: { squint: boolean }) {
 function TopShape({ thing }: { thing: Thing }) {
   if (thing.kind === 'lantern') return <TopLantern />;
   if (thing.kind === 'tower') return <TopTower height={thing.height} />;
-  if (thing.kind === 'bamboo') return <TopBamboo />;
-  return <TopTree />;
+  return <TopBamboo />;
 }
 
 function ThingShape({ thing, night }: { thing: Thing; night: boolean }) {
   if (thing.kind === 'lantern') return <Lantern on={night} />;
   if (thing.kind === 'tower') return <Tower height={thing.height} />;
-  if (thing.kind === 'bamboo') return <Bamboo />;
-  return <Tree />;
+  return <Bamboo />;
 }
 
 // The little ninja: a dark suit with a band of face and two eyes. When it

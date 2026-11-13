@@ -24,8 +24,8 @@ import {
 // A small town for the tests:
 //
 //   . . C        the last cell, top right, under the treasure chest
-//   . T .        a tower two cells tall in the middle
-//   B . r        bamboo on the left, a cherry tree on the right
+//   . T .        a pagoda two floors tall in the middle
+//   B . .        bamboo on the left
 //   N . .        the ninja starts at the bottom left
 const TOWN: Level = {
   id: 'test',
@@ -35,7 +35,6 @@ const TOWN: Level = {
   things: [
     { kind: 'tower', x: 1, y: 1, height: 2 },
     { kind: 'bamboo', x: 0, y: 2, height: 1 },
-    { kind: 'tree', x: 2, y: 2, height: 2 },
   ],
   start: 9,
   chest: 2,
@@ -54,12 +53,12 @@ describe('shadows', () => {
   it('fall away from the sun, as long as each thing is tall', () => {
     // Sun at the top: shadows fall down.
     expect(sorted(dark(TOWN, 'north'))).toEqual(
-      cells(c(1, 1), c(1, 2), c(1, 3), c(0, 2), c(0, 3), c(2, 2), c(2, 3))
+      cells(c(1, 1), c(1, 2), c(1, 3), c(0, 2), c(0, 3))
     );
     // Sun on the right: shadows fall left, and stop at the edge; and the
     // start is always in the shade.
     expect(sorted(dark(TOWN, 'east'))).toEqual(
-      cells(c(1, 1), c(0, 1), c(0, 2), c(2, 2), c(1, 2), c(0, 3))
+      cells(c(1, 1), c(0, 1), c(0, 2), c(0, 3))
     );
   });
 });
@@ -73,7 +72,7 @@ describe('the sun', () => {
 });
 
 describe('walking', () => {
-  it('cannot go into a tower or bamboo, but can go under a tree', () => {
+  it('cannot go into a tower or bamboo', () => {
     expect(open(TOWN, c(1, 1))).toBe(false);
     expect(open(TOWN, c(0, 2))).toBe(false);
     expect(open(TOWN, c(2, 2))).toBe(true);
@@ -81,13 +80,13 @@ describe('walking', () => {
 
   it('goes round the walls, through the shadow', () => {
     const r = newRound(TOWN);
-    // Sun at the top: the bottom row is all in shadow.
-    expect(tryWalk(r, c(2, 3))).toEqual({
-      path: [c(1, 3), c(2, 3)],
+    // Sun at the top: the tower's shadow falls down to the bottom row.
+    expect(tryWalk(r, c(1, 3))).toEqual({
+      path: [c(1, 3)],
       ok: true,
-      to: c(2, 3),
+      to: c(1, 3),
     });
-    expect(walk(r, c(2, 2)).ninja).toBe(c(2, 2));
+    expect(walk(r, c(1, 2)).ninja).toBe(c(1, 2));
   });
 
   it('steps into the first sunny cell when the sun is in the way', () => {
@@ -107,7 +106,7 @@ describe('walking', () => {
       sun: 'east',
       ninja: TOWN.start,
     });
-    // In the tree's shadow it stays hidden from the right into the night.
+    // Where it is dark by night too, it stays hidden into the night.
     const hid = { ...r, sun: 'east' as const, ninja: c(1, 2) };
     expect(moveSun(hid, 'moon')).toEqual({ ...hid, sun: 'moon' });
   });
@@ -121,8 +120,7 @@ describe('walking', () => {
   });
 
   it('is solved at the chest', () => {
-    let r = walk(newRound(NIGHT), c(2, 2));
-    r = moveSun(moveSun(r, 'east'), 'moon');
+    const r = moveSun(moveSun(newRound(NIGHT), 'east'), 'moon');
     expect(r.sun).toBe('moon');
     expect(isSolved(walk(r, c(2, 0)))).toBe(true);
   });
