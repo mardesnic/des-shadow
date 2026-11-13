@@ -74,23 +74,26 @@ describe('walking', () => {
 
 describe('the new things', () => {
   it('a cart rolls a cell away from the ninja', () => {
-    let r = { ...round('cart-1'), ninja: 4 };
-    expect(pushTo(r, 5)).toBe(6);
-    expect(pushTo({ ...r, ninja: 3 }, 5)).toBeNull();
-    r = push(r, 5);
+    let r = { ...round('cart-1'), ninja: 3 };
+    expect(pushTo(r, 4)).toBe(5);
+    expect(pushTo({ ...r, ninja: 2 }, 4)).toBeNull();
+    r = push(r, 4);
+    expect(r.things[2].x).toBe(5);
+    // Not into the bamboo: it only gives a jolt.
+    r = push({ ...r, ninja: 4 }, 5);
     expect(r.things[2].x).toBe(6);
-    // Not into the gate.
+    expect(tap({ ...r, ninja: 5 }, 6)?.type).toBe('stuck');
+    // Not into the gate either.
     expect(
       pushTo({ ...r, ninja: 6, things: [{ ...r.things[2], x: 7 }] }, 7)
     ).toBeNull();
-    expect(tap({ ...r, ninja: 5 }, 6)?.type).toBe('push');
-    // Against the tree it only gives a jolt.
-    expect(
-      tap(
-        { ...r, ninja: 5, things: [r.things[1], { ...r.things[2], x: 4 }] },
-        4
-      )?.type
-    ).toBe('stuck');
+  });
+
+  it('the ninja walks up to a cart, never onto it', () => {
+    const r = moveSun(round('cart-1'), 'evening');
+    const move = tap(r, 4);
+    expect(move?.type === 'walk' && move.to).toBe(3);
+    expect(move?.next.ninja).toBe(3);
   });
 
   it('the cloud drifts a cell with every move and turns at the end', () => {

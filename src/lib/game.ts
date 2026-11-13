@@ -79,8 +79,9 @@ export const LEVELS: Level[] = [
     sun: 'noon',
     suns: THREE,
   },
-  // In the morning the cart's shadow stops short of the gate: push it one
-  // cell on first.
+  // In the morning there is a gap between the cart's shadow and the
+  // bamboo's: push the cart a cell on. It can't go past the bamboo, so it
+  // can never be pushed too far.
   {
     id: 'cart-1',
     world: 'cart',
@@ -88,7 +89,8 @@ export const LEVELS: Level[] = [
     things: [
       { kind: 'bamboo', x: 0, height: 1 },
       { kind: 'tree', x: 3, height: 2 },
-      { kind: 'cart', x: 5, height: 2 },
+      { kind: 'cart', x: 4, height: 1 },
+      { kind: 'bamboo', x: 7, height: 1 },
     ],
     start: 0,
     gate: 8,
@@ -213,16 +215,23 @@ export function tryWalk(
 // Where the ninja runs to when it is left out in the light: back the way
 // it came, to the nearest dark cell towards the start, or, if there is
 // none that way, to the nearest one the other way.
+// It never hides on a cart, only next to one.
 export function hideFrom(r: Round, from: number): number {
-  const free = dark(r);
-  if (free.has(from)) return from;
+  const dk = dark(r);
+  const free = (x: number) => dk.has(x) && !cartAt(r, x);
+  if (free(from)) return from;
   const { start, gate, width } = r.level;
   const back = start < gate ? -1 : 1;
   for (const dir of [back, -back])
     for (let x = from + dir; x >= 0 && x < width; x += dir)
-      if (free.has(x)) return x;
+      if (free(x)) return x;
   return from;
 }
+
+// Whether there is a cart at `x`. The ninja walks past a cart, but never
+// stops on one.
+export const cartAt = (r: Round, x: number) =>
+  r.things.some((t) => t.x === x && t.kind === 'cart');
 
 // After every move the cloud drifts a cell, turning round at the ends of
 // its way, and the ninja runs into the dark if it is left in the light.
@@ -242,6 +251,7 @@ function settle(r: Round): Round {
 }
 
 export function walk(r: Round, to: number): Round {
+  if (cartAt(r, to)) return r;
   const w = tryWalk(r, to);
   return w?.ok ? settle({ ...r, ninja: to }) : r;
 }
@@ -290,17 +300,20 @@ export type Move =
   | { type: 'push'; to: number; next: Round }
   | { type: 'stuck'; next: Round }
   | { type: 'blow'; next: Round }
-  | { type: 'walk'; path: number[]; ok: boolean; next: Round };
+  | { type: 'walk'; to: number; path: number[]; ok: boolean; next: Round };
 
 export function tap(r: Round, x: number): Move | null {
   const to = pushTo(r, x);
   if (to !== null) return { type: 'push', to, next: push(r, x) };
-  const cart = r.things.some((t) => t.x === x && t.kind === 'cart');
-  if (cart && Math.abs(x - r.ninja) === 1) return { type: 'stuck', next: r };
+  if (cartAt(r, x)) {
+    if (Math.abs(x - r.ninja) === 1) return { type: 'stuck', next: r };
+    // A cart further off: the ninja walks up to it.
+    x -= Math.sign(x - r.ninja);
+  }
   if (canBlow(r, x)) return { type: 'blow', next: blow(r, x) };
   const w = tryWalk(r, x);
   if (!w) return null;
-  return { type: 'walk', ...w, next: w.ok ? walk(r, x) : r };
+  return { type: 'walk', to: x, ...w, next: w.ok ? walk(r, x) : r };
 }
 
 const key = (r: Round) =>

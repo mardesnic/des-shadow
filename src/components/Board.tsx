@@ -235,7 +235,7 @@ function ThingShape({ thing, flat }: { thing: Thing; flat?: boolean }) {
       <g className='cart'>
         {flat ? (
           <path
-            d={`M${x + 1} ${GROUND} V${top + 5} Q${x + 5} ${top - 1} ${x + 9} ${top + 5} V${GROUND} Z`}
+            d={`M${x + 1} ${GROUND} V${top + 3} Q${x + 5} ${top - 1} ${x + 9} ${top + 3} V${GROUND} Z`}
           />
         ) : (
           <>
@@ -249,11 +249,14 @@ function ThingShape({ thing, flat }: { thing: Thing; flat?: boolean }) {
             />
             <path
               className='cart__hay'
-              d={`M${x + 1} ${GROUND - 5.5} V${top + 5} Q${x + 5} ${top - 1} ${x + 9} ${top + 5} V${GROUND - 5.5} Z`}
+              d={`M${x + 1} ${GROUND - 5.5} V${top + 3} Q${x + 5} ${top - 1} ${x + 9} ${top + 3} V${GROUND - 5.5} Z`}
             />
             <path
               className='cart__straw'
-              d={`M${x + 2.5} ${top + 7} q2.5 -1.2 5 0 M${x + 2} ${top + 11} q3 -1.2 6 0 M${x + 2} ${top + 14.5} q3 -1 6 0`}
+              d={Array.from(
+                { length: Math.floor((GROUND - 7 - (top + 2)) / 3.5) },
+                (_, i) => `M${x + 2} ${top + 4 + i * 3.5} q3 -1.2 6 0`
+              ).join(' ')}
             />
             <rect
               className='cart__wood'

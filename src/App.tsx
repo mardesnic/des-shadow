@@ -169,7 +169,7 @@ export default function App() {
       if (next.ninja !== round.ninja) runBack(round.ninja, next.ninja, ROLL_MS);
       return;
     }
-    const { path, ok } = move;
+    const { path, ok, to } = move;
     if (!ok) return intoTheSun(path);
     const win = isSolved(next);
     // At the gate the ninja walks on through it, a step and a half more.
@@ -179,9 +179,9 @@ export default function App() {
     setStore({ round: next });
     path.forEach((_, i) => later(i * STEP_MS, () => plop('step')));
     // The cloud drifted off after the walk and left the ninja in the sun.
-    if (next.ninja !== x) {
-      setOut(x);
-      later(walking * STEP_MS, () => runBack(x, next.ninja, SUN_MS));
+    if (next.ninja !== to) {
+      setOut(to);
+      later(walking * STEP_MS, () => runBack(to, next.ninja, SUN_MS));
     }
     if (win) {
       setStats({
