@@ -103,29 +103,72 @@ function ThingShape({ thing, flat }: { thing: Thing; flat?: boolean }) {
         <circle cx={x + 5} cy={GROUND - 6} r={3.8} />
       </g>
     );
+  // A cherry tree in bloom: a dark trunk and a cloud of pink blossom.
   if (thing.kind === 'tree')
     return (
       <g className='tree'>
-        <rect
+        <path
           className='tree__trunk'
-          x={x + 4}
-          y={top + 9}
-          width={2}
-          height={GROUND - top - 9}
+          d={`M${x + 4} ${GROUND} L${x + 4.4} ${top + 9} L${x + 3} ${top + 6.5} L${x + 4.9} ${top + 8} L${x + 5.6} ${top + 6} L${x + 5.7} ${top + 9} L${x + 6} ${GROUND} Z`}
         />
-        <circle className='tree__crown' cx={x + 5} cy={top + 6} r={5.5} />
+        <circle className='tree__crown' cx={x + 5} cy={top + 5} r={4} />
+        <circle className='tree__crown' cx={x + 2} cy={top + 7} r={3} />
+        <circle className='tree__crown' cx={x + 8} cy={top + 7} r={3} />
+        {!flat && (
+          <>
+            <circle className='tree__petal' cx={x + 3.5} cy={top + 4} r={0.7} />
+            <circle className='tree__petal' cx={x + 7} cy={top + 5} r={0.7} />
+            <circle className='tree__petal' cx={x + 5} cy={top + 7.5} r={0.7} />
+            <circle className='tree__petal' cx={x + 1.5} cy={top + 8} r={0.6} />
+            <circle
+              className='tree__petal'
+              cx={x + 8.6}
+              cy={top + 8.2}
+              r={0.6}
+            />
+          </>
+        )}
       </g>
     );
-  // A narrow tower with a little roof on every floor.
+  // A narrow pagoda: white walls between red posts, and a dark roof with
+  // turned-up tips on every floor, and a spire on top.
   return (
     <g className='tower'>
       <rect
         className='tower__wall'
-        x={x + 1.5}
+        x={x + 2}
         y={top + 3}
-        width={7}
+        width={6}
         height={GROUND - top - 3}
       />
+      {!flat && (
+        <>
+          <rect
+            className='tower__post'
+            x={x + 2}
+            y={top + 3}
+            width={1}
+            height={GROUND - top - 3}
+          />
+          <rect
+            className='tower__post'
+            x={x + 7}
+            y={top + 3}
+            width={1}
+            height={GROUND - top - 3}
+          />
+          <path
+            className='tower__spire'
+            d={`M${x + 5} ${top + 1.5} V${top - 3}`}
+          />
+          <circle
+            className='tower__spire-ball'
+            cx={x + 5}
+            cy={top - 3.2}
+            r={0.7}
+          />
+        </>
+      )}
       {Array.from({ length: thing.height }, (_, i) => {
         const y = top + i * CELL;
         return (
@@ -135,17 +178,19 @@ function ThingShape({ thing, flat }: { thing: Thing; flat?: boolean }) {
               d={
                 flat
                   ? `M${x - 0.5} ${y + 1.5} H${x + 10.5} V${y + 4} H${x - 0.5} Z`
-                  : `M${x - 0.5} ${y + 4} L${x + 2.5} ${y + 1} L${x + 7.5} ${y + 1} L${x + 10.5} ${y + 4} Z`
+                  : `M${x - 1} ${y + 2.6} Q${x + 1.2} ${y + 3.6} ${x + 3} ${y + 1} L${x + 7} ${y + 1} Q${x + 8.8} ${y + 3.6} ${x + 11} ${y + 2.6} L${x + 10} ${y + 4.2} L${x} ${y + 4.2} Z`
               }
             />
-            <rect
-              className='tower__window'
-              x={x + 4}
-              y={y + 5.5}
-              width={2}
-              height={2.5}
-              rx={1}
-            />
+            {!flat && (
+              <rect
+                className='tower__window'
+                x={x + 3.8}
+                y={y + 5.6}
+                width={2.4}
+                height={2.6}
+                rx={0.3}
+              />
+            )}
           </g>
         );
       })}

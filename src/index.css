@@ -16,10 +16,15 @@
   --sun-ray: #ffa94d;
   --leaf: #40a35a;
   --leaf-dark: #2f8a47;
-  --trunk: #8a5a32;
-  --wall: #f1e3c8;
-  --roof: #c0392b;
-  --window: #3b2b20;
+  --blossom: #f7b8cf;
+  --blossom-edge: #e891b2;
+  --petal: #fff0f5;
+  --trunk: #5c3b2a;
+  --wall: #fbf6ec;
+  --post: #c92a2a;
+  --roof: #3f4a5a;
+  --window: #c92a2a;
+  --spire: #c9a227;
   --suit: #23263a;
   --skin: #f5c9a0;
   --band: #e03131;
@@ -63,10 +68,15 @@
     --sun-ray: #f59f00;
     --leaf: #2f8a47;
     --leaf-dark: #23703a;
-    --trunk: #6e4626;
-    --wall: #c9b896;
-    --roof: #a32d22;
-    --window: #2a1f17;
+    --blossom: #c9839e;
+    --blossom-edge: #a8657f;
+    --petal: #f3d6e1;
+    --trunk: #4a3022;
+    --wall: #d8d2c4;
+    --post: #a82424;
+    --roof: #25303d;
+    --window: #a82424;
+    --spire: #b08d1e;
     --suit: #0d0f18;
     --skin: #e0b48a;
     --band: #ff6b6b;
@@ -290,11 +300,33 @@ h2 {
   transition: transform 0.5s ease-in-out;
 }
 
-.bush circle,
-.tree__crown {
+.bush circle {
   fill: var(--leaf);
   stroke: var(--leaf-dark);
   stroke-width: 0.6;
+}
+
+.tree__crown {
+  fill: var(--blossom);
+  stroke: var(--blossom-edge);
+  stroke-width: 0.5;
+}
+
+.tree__petal {
+  fill: var(--petal);
+}
+
+.tower__post {
+  fill: var(--post);
+}
+
+.tower__spire {
+  stroke: var(--spire);
+  stroke-width: 0.6;
+}
+
+.tower__spire-ball {
+  fill: var(--spire);
 }
 
 .tree__trunk {
