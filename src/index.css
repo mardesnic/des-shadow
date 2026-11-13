@@ -32,6 +32,7 @@
   --block: #8f887c;
   --joint: #9e978b;
   --stone: #d6d1c7;
+  --cobble: #e2ded5;
   --shadow: #282c46;
   --sun: #ffc61a;
   --sun-ray: #ffa94d;
@@ -104,6 +105,7 @@
     --block: #403c36;
     --joint: #4a4640;
     --stone: #8a857c;
+    --cobble: #969188;
     --shadow: #080a14;
     --sun: #ffd43b;
     --sun-ray: #f59f00;
@@ -491,6 +493,10 @@ h2 {
 
 .stone {
   fill: var(--stone);
+}
+
+.cobble {
+  fill: var(--cobble);
 }
 
 .surface {

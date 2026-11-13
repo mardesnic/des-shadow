@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 
 import {
   SUNS,
@@ -40,6 +40,20 @@ const ANGLE: Record<Sun, number> = {
 
 // Where a cell is: its left, its top, and the spot low in the middle of it
 // that things and the ninja stand on.
+// The cobbles in a cell, as [left, top, width, height], in three rows that
+// don't line up, like an old street.
+const COBBLES: [number, number, number, number][] = [
+  [1, 0.95, 2.6, 2],
+  [4.1, 0.95, 2.5, 2],
+  [7.1, 0.95, 1.9, 2],
+  [1, 3.4, 1.4, 1.9],
+  [2.9, 3.4, 2.5, 1.9],
+  [5.9, 3.4, 3.1, 1.9],
+  [1, 5.75, 2.9, 1.4],
+  [4.4, 5.75, 2.4, 1.4],
+  [7.3, 5.75, 1.7, 1.4],
+];
+
 function place(round: Round, c: number) {
   const [x, y] = xy(round.level, c);
   const left = SIDE + x * CELL;
@@ -526,6 +540,7 @@ export function Board({
   };
   const cells = Array.from({ length: level.width * level.rows }, (_, c) => c);
   const gate = place(round, gateCell(level));
+  const cobbles = useId();
 
   // The sun always goes round clockwise to its new side, a quarter at a
   // time.
@@ -554,6 +569,29 @@ export function Board({
       role='group'
       aria-label={t.title}
     >
+      <defs>
+        {/* Little cobbles, as in an old town, the same in every cell. */}
+        <pattern
+          id={cobbles}
+          patternUnits='userSpaceOnUse'
+          x={SIDE}
+          y={TOP}
+          width={CELL}
+          height={ROW}
+        >
+          {COBBLES.map(([x, y, w, h], i) => (
+            <rect
+              key={i}
+              className='cobble'
+              x={x}
+              y={y}
+              width={w}
+              height={h}
+              rx={0.8}
+            />
+          ))}
+        </pattern>
+      </defs>
       <rect className='garden' x={0} y={0} width={w} height={h} />
       {/* The street, a stone for each cell. */}
       <rect
@@ -589,16 +627,28 @@ export function Board({
               />
             </g>
           );
+        const goal = c === gateCell(level);
         return (
-          <rect
-            key={c}
-            className={c === gateCell(level) ? 'stone stone--goal' : 'stone'}
-            x={p.left + 0.35}
-            y={p.top + 0.35}
-            width={CELL - 0.7}
-            height={ROW - 0.7}
-            rx={1}
-          />
+          <g key={c}>
+            <rect
+              className={goal ? 'stone stone--goal' : 'stone'}
+              x={p.left + 0.35}
+              y={p.top + 0.35}
+              width={CELL - 0.7}
+              height={ROW - 0.7}
+              rx={1}
+            />
+            {!goal && (
+              <rect
+                x={p.left + 0.35}
+                y={p.top + 0.35}
+                width={CELL - 0.7}
+                height={ROW - 0.7}
+                rx={1}
+                fill={`url(#${cobbles})`}
+              />
+            )}
+          </g>
         );
       })}
 
