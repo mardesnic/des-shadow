@@ -493,6 +493,11 @@ export function Board({
   // Things further back are drawn first, so the ones in front stand over
   // them.
   const things = [...level.things].sort((a, b) => a.y - b.y || a.x - b.x);
+  // The things in front of the ninja, nearer the bottom, stand over it: a
+  // tower in front hides all of the ninja behind it but its head.
+  const row = Math.floor(at / level.width);
+  const front = things.filter((thing) => thing.y > row);
+  const hide = useId();
 
   return (
     <svg
@@ -503,6 +508,26 @@ export function Board({
       aria-label={t.title}
     >
       <defs>
+        <mask
+          id={hide}
+          maskUnits='userSpaceOnUse'
+          x={0}
+          y={0}
+          width={w}
+          height={h}
+        >
+          <rect x={0} y={0} width={w} height={h} fill='#fff' />
+          <g className='cut'>
+            {front.map((thing, i) => {
+              const p = place(round, thing.y * level.width + thing.x);
+              return (
+                <g key={i} transform={`translate(${p.cx} ${p.foot})`}>
+                  <ThingShape thing={thing} night={false} />
+                </g>
+              );
+            })}
+          </g>
+        </mask>
         {/* Little cobbles, as in an old town, the same in every cell. */}
         <pattern
           id={cobbles}
@@ -692,26 +717,28 @@ export function Board({
         <Chest open={gone} />
       </g>
 
-      {/* The ninja, always on top, so it is never lost behind a tower. */}
-      <g
-        className='ninja'
-        style={{
-          transform: `translate(${me.cx}px, ${ninjaY}px)`,
-          transitionDuration: `${gone ? stepMs * 2 : stepMs}ms`,
-        }}
-      >
-        <g transform='scale(0.8) translate(-5 0)'>
-          <g
-            className={
-              gone
-                ? 'ninja__pose ninja--hop'
-                : squint
-                  ? 'ninja__pose ninja--crouch'
-                  : 'ninja__pose'
-            }
-            style={gone ? { animationDelay: `${stepMs * 2}ms` } : undefined}
-          >
-            <Ninja squint={squint > 0} />
+      {/* The ninja, over everything but the things in front of it. */}
+      <g mask={`url(#${hide})`}>
+        <g
+          className='ninja'
+          style={{
+            transform: `translate(${me.cx}px, ${ninjaY}px)`,
+            transitionDuration: `${gone ? stepMs * 2 : stepMs}ms`,
+          }}
+        >
+          <g transform='scale(0.8) translate(-5 0)'>
+            <g
+              className={
+                gone
+                  ? 'ninja__pose ninja--hop'
+                  : squint
+                    ? 'ninja__pose ninja--crouch'
+                    : 'ninja__pose'
+              }
+              style={gone ? { animationDelay: `${stepMs * 2}ms` } : undefined}
+            >
+              <Ninja squint={squint > 0} />
+            </g>
           </g>
         </g>
       </g>

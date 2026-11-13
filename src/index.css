@@ -689,6 +689,12 @@ h2 {
   transition-timing-function: linear;
 }
 
+/* What hides the ninja, cut out of it. */
+.cut * {
+  fill: #000 !important;
+  stroke: #000 !important;
+}
+
 .ninja__suit {
   fill: var(--suit);
 }
