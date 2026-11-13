@@ -842,6 +842,12 @@ h2 {
   }
 }
 
+@keyframes chest-open {
+  40% {
+    transform: scale(1.15);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .sky,
   .shadow__cast,
@@ -1025,8 +1031,9 @@ h2 {
   opacity: 0.35;
 }
 
+/* The lid flies open with a little bounce; the chest never goes away. */
 .chest--open {
-  animation: pop 0.3s ease-out both;
+  animation: chest-open 0.35s ease-out;
   transform-box: fill-box;
   transform-origin: 50% 100%;
 }
