@@ -1,0 +1,557 @@
+:root {
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --text: #1a1d23;
+  --muted: #6b7280;
+  --border: #e2e5ea;
+  --accent: #3b4f8c;
+  --on-accent: #ffffff;
+  --sky-morning: #ffe3c2;
+  --sky-noon: #bfe3ff;
+  --sky-evening: #ffc59a;
+  --ground: #c9a46b;
+  --lit: #f7d774;
+  --dark: #5b6478;
+  --sun: #ffc61a;
+  --sun-ray: #ffa94d;
+  --leaf: #40a35a;
+  --leaf-dark: #2f8a47;
+  --trunk: #8a5a32;
+  --wall: #f1e3c8;
+  --roof: #c0392b;
+  --window: #3b2b20;
+  --suit: #23263a;
+  --skin: #f5c9a0;
+  --band: #e03131;
+  --paper: #fff4d6;
+  --rod: #a8642a;
+  --wrong: #e5484d;
+  --selected: #f2b200;
+  --good: #2fa36b;
+  --radius: 18px;
+
+  color-scheme: light dark;
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121418;
+    --surface: #1b1e24;
+    --text: #e8eaee;
+    --muted: #9aa1ad;
+    --border: #2c3038;
+    --accent: #8ea2e6;
+    --on-accent: #141a33;
+    --sky-morning: #4a3b4f;
+    --sky-noon: #26405c;
+    --sky-evening: #5a3a2c;
+    --ground: #6b5534;
+    --lit: #c9a945;
+    --dark: #1f2330;
+    --sun: #ffd43b;
+    --sun-ray: #f59f00;
+    --leaf: #2f8a47;
+    --leaf-dark: #23703a;
+    --trunk: #6e4626;
+    --wall: #c9b896;
+    --roof: #a32d22;
+    --window: #2a1f17;
+    --suit: #0d0f18;
+    --skin: #e0b48a;
+    --band: #ff6b6b;
+    --paper: #e8dcb8;
+    --rod: #8a5222;
+    --wrong: #ff6b6f;
+    --good: #4cc38a;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+button:disabled {
+  cursor: default;
+}
+
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: max(16px, env(safe-area-inset-top)) 16px
+    max(24px, env(safe-area-inset-bottom));
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 0 2px 4px;
+}
+
+.header__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* Small enough on a narrow phone for the icon, the title and both buttons. */
+.header__title h1 {
+  font-size: clamp(1.1rem, 5vw, 1.5rem);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.home-link {
+  flex: none;
+  display: block;
+  width: clamp(32px, 10vw, 40px);
+  height: clamp(32px, 10vw, 40px);
+  border-radius: 25%;
+}
+
+.home-link svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.header__actions {
+  display: flex;
+  gap: 8px;
+}
+
+h1 {
+  font-size: 1.5rem;
+  white-space: nowrap;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: 1.05rem;
+  font-weight: 650;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
+
+.icon {
+  width: 22px;
+  height: 22px;
+  flex: none;
+}
+
+/* Buttons */
+
+.button {
+  border: 0;
+  border-radius: 14px;
+  padding: 14px 18px;
+  font-weight: 650;
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.button--secondary {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.button--small {
+  white-space: nowrap;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.button--icon {
+  display: grid;
+  place-items: center;
+  padding: 6px 10px;
+}
+
+.button--icon .icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* While playing, everything fits on one screen: the board takes what
+   height is left after the header, program and controls. */
+.app--play {
+  height: 100dvh;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.stage {
+  container-type: size;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+}
+
+/* Board: a street seen from the side, as big as fits. */
+
+.board {
+  display: block;
+  width: min(100cqw, 640px, 100cqh * var(--ratio));
+  user-select: none;
+  -webkit-user-select: none;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.sky {
+  fill: var(--sky-noon);
+  transition: fill 0.5s ease-out;
+}
+
+.board--morning .sky {
+  fill: var(--sky-morning);
+}
+
+.board--evening .sky {
+  fill: var(--sky-evening);
+}
+
+.ground {
+  fill: var(--ground);
+}
+
+.cell {
+  fill: var(--lit);
+  transition: fill 0.5s ease-out;
+}
+
+.cell--dark {
+  fill: var(--dark);
+}
+
+.bush circle,
+.tree__crown {
+  fill: var(--leaf);
+  stroke: var(--leaf-dark);
+  stroke-width: 0.6;
+}
+
+.tree__trunk {
+  fill: var(--trunk);
+}
+
+.tower__wall {
+  fill: var(--wall);
+}
+
+.tower__roof {
+  fill: var(--roof);
+}
+
+.tower__window {
+  fill: var(--window);
+}
+
+.scroll__paper {
+  fill: var(--paper);
+}
+
+.scroll__rod {
+  fill: var(--rod);
+}
+
+.ninja {
+  transition-property: transform;
+  transition-timing-function: linear;
+}
+
+.ninja__suit {
+  fill: var(--suit);
+}
+
+.ninja__face {
+  fill: var(--skin);
+}
+
+.ninja__eye {
+  fill: var(--suit);
+}
+
+.ninja__shut {
+  stroke: var(--suit);
+  stroke-width: 0.5;
+  stroke-linecap: round;
+}
+
+.ninja__band {
+  fill: none;
+  stroke: var(--band);
+  stroke-width: 0.9;
+  stroke-linecap: round;
+}
+
+.ninja__shake,
+.sun__shake {
+  animation: shake 0.45s ease-in-out;
+}
+
+@keyframes shake {
+  20%,
+  60% {
+    transform: translateX(-1px);
+  }
+  40%,
+  80% {
+    transform: translateX(1px);
+  }
+}
+
+.column,
+.spot__hit {
+  fill: transparent;
+  cursor: pointer;
+}
+
+.spot__ring {
+  fill: none;
+  stroke: var(--sun);
+  stroke-width: 0.6;
+  stroke-dasharray: 1.2 1.2;
+  pointer-events: none;
+}
+
+.sun {
+  pointer-events: none;
+  transition: transform 0.5s ease-in-out;
+}
+
+.sun__disc {
+  fill: var(--sun);
+}
+
+.sun__ray {
+  stroke: var(--sun-ray);
+  stroke-width: 1;
+  stroke-linecap: round;
+}
+
+/* Solved */
+
+.solved {
+  text-align: center;
+  gap: 8px;
+  animation: pop 0.3s ease-out both;
+}
+
+.solved h2 {
+  font-size: 1.6rem;
+}
+
+.solved__actions {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.confetti {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sky,
+  .cell,
+  .ninja,
+  .sun {
+    transition: none !important;
+  }
+  .ninja__shake,
+  .sun__shake {
+    animation: none !important;
+  }
+  .solved {
+    animation: none !important;
+  }
+}
+
+/* New game and settings */
+
+.levels {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.level {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: 28px 12px 20px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--bg);
+  font-weight: 700;
+  font-size: 1.2rem;
+  transition: transform 0.1s;
+}
+
+.level:active {
+  transform: scale(0.97);
+}
+
+/* How hard the level is, as one to four filled dots. */
+.level__pips {
+  display: flex;
+  gap: 5px;
+}
+
+.pip {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--muted) 30%, transparent);
+}
+
+.pip--on {
+  background: var(--accent);
+}
+
+.stats {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.stats th,
+.stats td {
+  padding: 8px 4px;
+  text-align: right;
+  border-top: 1px solid var(--border);
+}
+
+.stats thead th {
+  border-top: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.stats tbody th {
+  text-align: left;
+  font-weight: 600;
+}
+
+.footer {
+  flex-wrap: wrap;
+  display: flex;
+  justify-content: center;
+  padding-top: 4px;
+  gap: 20px;
+}
+
+.footer a {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.footer__version {
+  flex-basis: 100%;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+/* Settings controls */
+
+.field {
+  display: grid;
+  gap: 10px;
+  font-weight: 600;
+}
+
+.field .muted {
+  display: block;
+  font-weight: 400;
+}
+
+.segmented {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  padding: 3px;
+  border-radius: 12px;
+  background: var(--bg);
+}
+
+.segmented button {
+  border: 0;
+  background: none;
+  padding: 9px 4px;
+  border-radius: 9px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.segmented button[aria-pressed='true'] {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+}
