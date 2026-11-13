@@ -180,7 +180,7 @@ function Samurai({ x, awake }: { x: number; awake: boolean }) {
           <>
             <circle className='samurai__eye' cx={-0.9} cy={-9} r={0.45} />
             <circle className='samurai__eye' cx={0.9} cy={-9} r={0.45} />
-            <text className='samurai__alert' x={-6} y={-12}>
+            <text className='samurai__alert' x={-8.5} y={-13}>
               !
             </text>
           </>
