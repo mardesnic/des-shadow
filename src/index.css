@@ -562,8 +562,22 @@ h2 {
 }
 
 .lantern__halo {
-  fill: var(--light);
-  opacity: 0.4;
+  opacity: 1;
+}
+
+.glow__in {
+  stop-color: var(--light);
+  stop-opacity: 0.75;
+}
+
+.glow__mid {
+  stop-color: var(--light);
+  stop-opacity: 0.35;
+}
+
+.glow__out {
+  stop-color: var(--light);
+  stop-opacity: 0;
 }
 
 .moon__disc {

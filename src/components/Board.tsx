@@ -563,6 +563,7 @@ export function Board({
   const cells = Array.from({ length: level.width * level.rows }, (_, c) => c);
   const gate = place(round, gateCell(level));
   const cobbles = useId();
+  const glow = useId();
 
   // The sun always goes round clockwise to its new side, a quarter at a
   // time.
@@ -613,6 +614,12 @@ export function Board({
             />
           ))}
         </pattern>
+        {/* A lantern's glow, bright in the middle and soft at the edge. */}
+        <radialGradient id={glow}>
+          <stop offset='0' className='glow__in' />
+          <stop offset='0.45' className='glow__mid' />
+          <stop offset='1' className='glow__out' />
+        </radialGradient>
       </defs>
       <rect className='garden' x={0} y={0} width={w} height={h} />
       {/* The street, a stone for each cell. */}
@@ -759,7 +766,13 @@ export function Board({
             const p = place(round, cell(level, t.x, t.y));
             return (
               <g key={i} transform={`translate(${p.cx} ${p.foot})`}>
-                <circle className='lantern__halo' cx={0} cy={-6.6} r={3.8} />
+                <circle
+                  className='lantern__halo'
+                  cx={0}
+                  cy={-6.6}
+                  r={6.5}
+                  style={{ fill: `url(#${glow})` }}
+                />
                 <rect
                   className='lantern__fire'
                   x={-1}
