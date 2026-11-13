@@ -301,31 +301,9 @@ function Shelter() {
   );
 }
 
-// A big round rock, a cell tall, with a lighter top where the light falls
-// and a little moss.
-function Rock() {
-  return (
-    <g className='rock'>
-      <path
-        className='rock__body'
-        d='M-4.4 0 Q-5 -3.6 -2.8 -5.6 Q-0.6 -7.4 2 -6.5 Q4.7 -5.4 4.6 -2.2 L4.4 0 Z'
-      />
-      <path
-        className='rock__top'
-        d='M-3.4 -4 Q-2.2 -5.9 0 -6.2 Q2.1 -6.3 3.5 -4.7 Q1 -3.8 -3.4 -4 Z'
-      />
-      <path
-        className='rock__moss'
-        d='M-4.3 0 Q-3.6 -1.6 -1.8 -1.2 Q-0.8 -0.4 -0.6 0 Z'
-      />
-    </g>
-  );
-}
-
 function ThingShape({ thing, night }: { thing: Thing; night: boolean }) {
   if (thing.kind === 'lantern') return <Lantern on={night} />;
   if (thing.kind === 'tower') return <Tower height={thing.height} />;
-  if (thing.kind === 'rock') return <Rock />;
   if (thing.kind === 'bamboo') return <Bamboo />;
   return <Tree />;
 }
