@@ -96,12 +96,16 @@ export default function App() {
   const [stuck, setStuck] = useState<{ x: number; at: number } | null>(null);
   // How long the cloud waits before it drifts: while the ninja walks.
   const [wait, setWait] = useState(0);
+  // Counts the rounds started, so each starts on a fresh board instead of
+  // the last one's things sliding to their new places.
+  const [game, setGame] = useState(0);
   const timers = useRef<number[]>([]);
   const later = (ms: number, fn: () => void) =>
     timers.current.push(window.setTimeout(fn, ms));
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
 
   const solved = isSolved(round);
+  const last = LEVELS.indexOf(round.level) === LEVELS.length - 1;
   const busy = out !== null;
 
   // The ninja walks out into the sun, the samurai wakes, and the ninja
@@ -207,6 +211,7 @@ export default function App() {
   };
 
   const start = (id: string) => {
+    setGame((g) => g + 1);
     timers.current.forEach(clearTimeout);
     timers.current = [];
     setSteps(0);
@@ -284,6 +289,7 @@ export default function App() {
         <>
           <div className='stage'>
             <Board
+              key={`${round.level.id}-${game}`}
               round={round}
               steps={steps}
               squint={squint}
@@ -303,14 +309,16 @@ export default function App() {
               className='card solved'
               style={{ animationDelay: `${steps * STEP_MS}ms` }}
             >
-              <h2>{t.solved}</h2>
+              <h2>{last ? t.finale : t.solved}</h2>
               <div className='solved__actions'>
-                <button
-                  className='button'
-                  onClick={() => start(nextLevel(round.level.id).id)}
-                >
-                  {t.next}
-                </button>
+                {!last && (
+                  <button
+                    className='button'
+                    onClick={() => start(nextLevel(round.level.id).id)}
+                  >
+                    {t.next}
+                  </button>
+                )}
                 <button
                   className='button button--secondary'
                   onClick={() => setView('levels')}
