@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta
+      name="description"
+      content="Free shadow puzzle for kids: move the sun so the little ninja can sneak through the shadows to the scroll. Works offline, no ads."
+    />
+    <meta
+      name="theme-color"
+      content="#f4f5f7"
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content="#121418"
+      media="(prefers-color-scheme: dark)"
+    />
+    <title>Shadow</title>
+    <script>
+      // If the game's script can't load (an offline copy saved half way
+      // through an update), drop this game's offline copy and load it
+      // fresh, once. Saved games are in localStorage and are kept.
+      addEventListener(
+        'error',
+        function (e) {
+          var el = e.target;
+          if (!el || el.tagName !== 'SCRIPT' || !('serviceWorker' in navigator))
+            return;
+          if (sessionStorage.getItem('shadow-reset')) return;
+          sessionStorage.setItem('shadow-reset', '1');
+          var base = location.origin + '/des-shadow/';
+          navigator.serviceWorker
+            .getRegistrations()
+            .then(function (rs) {
+              return Promise.all(
+                rs
+                  .filter(function (r) {
+                    return r.scope === base;
+                  })
+                  .map(function (r) {
+                    return r.unregister();
+                  })
+              );
+            })
+            .then(function () {
+              return caches.keys();
+            })
+            .then(function (keys) {
+              return Promise.all(
+                keys
+                  .filter(function (k) {
+                    return k.indexOf(base) !== -1;
+                  })
+                  .map(function (k) {
+                    return caches.delete(k);
+                  })
+              );
+            })
+            .then(function () {
+              location.reload();
+            });
+        },
+        true
+      );
+    </script>
+    <script type="module" crossorigin src="/des-shadow/assets/index-BRhIW9cw.js"></script>
+    <link rel="stylesheet" crossorigin href="/des-shadow/assets/index-DeE-t6lo.css">
+  <link rel="manifest" href="/des-shadow/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/des-shadow/registerSW.js"></script>
+<meta name="theme-color" content="#3b4f8c">
+<link rel="icon" href="/des-shadow/favicon.ico" sizes="48x48">
+<link rel="icon" href="/des-shadow/favicon.svg" sizes="any" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/des-shadow/shadow-apple-touch-icon-180x180.png"></head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
