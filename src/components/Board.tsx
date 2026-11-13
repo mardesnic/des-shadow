@@ -5,6 +5,8 @@ import {
   cell,
   dark,
   lit,
+  quarters,
+  QUARTER_MS,
   gateCell,
   xy,
   type Round,
@@ -495,14 +497,16 @@ export function Board({
   const cells = Array.from({ length: level.width * level.rows }, (_, c) => c);
   const gate = place(round, gateCell(level));
 
-  // The sun turns the short way round to its new side.
+  // The sun always goes round clockwise to its new side, a quarter at a
+  // time.
   const [angle, setAngle] = useState(ANGLE[round.sun]);
   const [was, setWas] = useState(round.sun);
+  const [turn, setTurn] = useState(1);
   if (was !== round.sun) {
+    const q = quarters(was, round.sun);
     setWas(round.sun);
-    setAngle(
-      (a) => a + ((((ANGLE[round.sun] - a + 540) % 360) + 360) % 360) - 180
-    );
+    setTurn(q);
+    setAngle((a) => a + q * 90);
   }
 
   const me = place(round, at);
@@ -697,6 +701,7 @@ export function Board({
         style={{
           transformOrigin: `${centre.x}px ${centre.y}px`,
           transform: `rotate(${angle}deg)`,
+          transitionDuration: `${turn * QUARTER_MS}ms`,
         }}
       >
         <g transform={`translate(${centre.x} ${centre.y - SUN_R})`}>

@@ -20,6 +20,14 @@ export const FALL: Record<Sun, [number, number]> = {
   west: [1, 0],
 };
 
+// How many quarters the sun goes round, always clockwise, from one side to
+// another: from the right to the left it goes by the moon.
+export const quarters = (from: Sun, to: Sun) =>
+  (SUNS.indexOf(to) - SUNS.indexOf(from) + SUNS.length) % SUNS.length;
+
+// How long the sun takes for each quarter.
+export const QUARTER_MS = 350;
+
 export type Kind = 'tower' | 'bamboo' | 'tree' | 'lantern';
 
 // Towers, bamboo and stone lanterns are in the way; the ninja walks under

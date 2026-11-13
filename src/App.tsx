@@ -17,6 +17,8 @@ import {
   newRound,
   nextLevel,
   runWay,
+  quarters,
+  QUARTER_MS,
   seen,
   tryWalk,
   type Round,
@@ -37,8 +39,6 @@ type View = 'play' | 'levels' | 'settings';
 const AWAKE_MS = 1300;
 // How long the ninja stands frozen in the sun before it runs back.
 const FROZEN_MS = 350;
-// How long the sun takes to go round, as in index.css.
-const SUN_MS = 500;
 
 // A saved round, with its level as the game has it now; a round saved by
 // an older version of the game starts again.
@@ -187,7 +187,7 @@ export default function App() {
     setStore({ round: { ...round, sun: s } });
     setStepMs(STEP_MS);
     setPos(round.ninja);
-    caught(round.ninja, SUN_MS);
+    caught(round.ninja, quarters(round.sun, s) * QUARTER_MS);
   };
 
   const start = (id: string) => {

@@ -8,6 +8,7 @@ import {
   moveSun,
   newRound,
   open,
+  quarters,
   solution,
   solve,
   tryWalk,
@@ -49,6 +50,14 @@ describe('shadows', () => {
     expect(sorted(dark(TOWN, 'east'))).toEqual(
       cells(c(1, 1), c(0, 1), c(0, 2), c(2, 2), c(1, 2))
     );
+  });
+});
+
+describe('the sun', () => {
+  it('always goes round clockwise, by the moon from right to left', () => {
+    expect(quarters('north', 'east')).toBe(1);
+    expect(quarters('east', 'west')).toBe(2);
+    expect(quarters('east', 'north')).toBe(3);
   });
 });
 
