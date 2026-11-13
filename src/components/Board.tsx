@@ -557,7 +557,7 @@ export function Board({
         return (
           <g key={c}>
             <rect
-              className='stone'
+              className={c === chestCell(level) ? 'stone stone--goal' : 'stone'}
               x={p.left + 0.35}
               y={p.top + 0.35}
               width={CELL - 0.7}
@@ -675,8 +675,8 @@ export function Board({
         <Shelter />
       </g>
 
-      {/* The chest; the ninja opens it from the cell next to it. */}
-      <g transform={`translate(${chest.cx} ${chest.foot})`}>
+      {/* The chest, just beyond the town, over the last cell. */}
+      <g transform={`translate(${chest.cx} ${chest.top - 0.4})`}>
         <Chest open={gone} />
       </g>
 

@@ -22,7 +22,7 @@ import {
 
 // A small town for the tests:
 //
-//   . . C        the treasure chest in the top right cell
+//   . . C        the last cell, top right, under the treasure chest
 //   . T .        a tower two cells tall in the middle
 //   B . r        bamboo on the left, a cherry tree on the right
 //   N . .        the ninja starts at the bottom left
@@ -91,11 +91,10 @@ describe('walking', () => {
 
   it('steps into the first sunny cell when the sun is in the way', () => {
     const r = { ...newRound(TOWN), ninja: c(2, 2) };
-    // A tap on the chest goes to the nearest cell next to it.
     expect(tryWalk(r, c(2, 0))).toEqual({
       path: [c(2, 1)],
       ok: false,
-      to: c(2, 1),
+      to: c(2, 0),
     });
     expect(tryWalk(r, c(1, 1))).toBeNull();
   });
@@ -124,11 +123,7 @@ describe('walking', () => {
     let r = walk(newRound(NIGHT), c(2, 2));
     r = moveSun(moveSun(r, 'east'), 'moon');
     expect(r.sun).toBe('moon');
-    const won = walk(r, c(2, 0));
-    // Next to the chest: the ninja can't go into it.
-    expect(won.ninja).toBe(c(2, 1));
-    expect(isSolved(won)).toBe(true);
-    expect(open(TOWN, c(2, 0))).toBe(false);
+    expect(isSolved(walk(r, c(2, 0)))).toBe(true);
   });
 });
 

@@ -61,7 +61,8 @@ export type Level = {
   // Where the ninja starts, as a cell: under a little shelter, so always in
   // the shade.
   start: number;
-  // The column of the treasure chest, in the top row.
+  // The column of the last cell, in the top row, with the treasure chest
+  // over it, beyond the town.
   chest: number;
   sun: Sun;
 };
@@ -138,7 +139,7 @@ export const LEVELS: Level[] = [
     ],
     start: 26,
     chest: 0,
-    sun: 'north',
+    sun: 'west',
   },
   {
     id: 'pagoda-5',
@@ -202,7 +203,6 @@ export const thingAt = (level: Level, c: number) =>
 
 // Whether the ninja can be on a cell at all, sun or not.
 export function open(level: Level, c: number) {
-  if (c === chestCell(level)) return false;
   const t = thingAt(level, c);
   return !t || !SOLID[t.kind];
 }
@@ -291,31 +291,19 @@ export const newRound = (level: Level = LEVELS[0]): Round => ({
   ninja: level.start,
 });
 
-// Won once the ninja stands next to the chest: it can't go into it.
-export const isSolved = (r: Round) =>
-  neighbours(r.level, chestCell(r.level)).includes(r.ninja);
+// Won once the ninja is on the last cell, under the chest.
+export const isSolved = (r: Round) => r.ninja === chestCell(r.level);
 
 // Where the ninja goes when the child taps a cell: the shortest way through
 // the shadow to it, or, when there is none, the shortest way round the
 // towers, up to the first sunny cell, where the ninja is seen and
 // runs back to the start. `path` ends at that sunny cell, and `to` is
-// where it was going: a tap on the chest goes to the nearest cell next to
-// it, one in the shade if there is a way. Null when there is nowhere to go.
+// where it was going. Null when there is nowhere to go.
 export function tryWalk(
   r: Round,
   to: number
 ): { path: number[]; ok: boolean; to: number } | null {
   const { level } = r;
-  if (to === chestCell(level)) {
-    if (isSolved(r)) return null;
-    const ways = neighbours(level, to)
-      .map((n) => tryWalk(r, n))
-      .filter((w) => w !== null)
-      .sort(
-        (a, b) => Number(b.ok) - Number(a.ok) || a.path.length - b.path.length
-      );
-    return ways[0] ?? null;
-  }
   if (to === r.ninja || !open(level, to)) return null;
   const shade = dark(level, r.sun);
   const safe = route(level, r.ninja, to, (c) => open(level, c) && shade.has(c));

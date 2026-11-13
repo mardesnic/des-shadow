@@ -34,6 +34,7 @@
   --stone: #d6d1c7;
   --cobble: #e2ded5;
   --chest: #a0652d;
+  --goal: #ecd9a0;
   --chest-dark: #6b3f17;
   --shadow: #282c46;
   --sun: #ffc61a;
@@ -108,6 +109,7 @@
     --stone: #8a857c;
     --cobble: #969188;
     --chest: #94602e;
+    --goal: #8f7c48;
     --chest-dark: #5a3414;
     --shadow: #080a14;
     --sun: #ffd43b;
@@ -965,6 +967,13 @@ h2 {
   background: var(--surface);
   color: var(--text);
   box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+}
+
+/* The last cell, under the treasure chest. */
+.stone--goal {
+  fill: var(--goal);
+  stroke: var(--gold);
+  stroke-width: 0.6;
 }
 
 /* The treasure chest. */
