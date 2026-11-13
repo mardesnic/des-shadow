@@ -373,40 +373,38 @@ function Ninja({ squint }: { squint: boolean }) {
 // The grand gate at the end of the street, which the ninja slips through:
 // red posts with gold bands, a dark curved roof with a gold ridge and a
 // little gold dragon at each end, and a gold plaque with a dragon on it.
-function Gate({ x }: { x: number }) {
+function Gate({ x, part }: { x: number; part: 'back' | 'front' }) {
   const l = x * CELL;
   const g = GROUND;
   // A curled gold dragon tail at one end of the roof; `dir` turns it.
   const dragon = (cx: number, dir: 1 | -1) =>
     `M${cx} ${g - 24.1} q${-0.6 * dir} -1.4 ${0.5 * dir} -2.2 q${1.1 * dir} -0.4 ${0.9 * dir} 0.7 q${-0.4 * dir} 0.4 ${-0.7 * dir} -0.1`;
+  // Each post: the left one stands behind the samurai, the right one in
+  // front of him, so he sits in the gateway.
+  const post = (px: number) => (
+    <g key={px}>
+      <rect className='gate__post' x={px} y={g - 21} width={2.2} height={21} />
+      <rect
+        className='gate__gold'
+        x={px - 0.3}
+        y={g - 1.6}
+        width={2.8}
+        height={1.6}
+        rx={0.3}
+      />
+      <rect
+        className='gate__gold'
+        x={px - 0.1}
+        y={g - 13}
+        width={2.4}
+        height={0.7}
+      />
+    </g>
+  );
+  if (part === 'front') return <g className='gate'>{post(l + 7.2)}</g>;
   return (
     <g className='gate'>
-      {[l + 0.6, l + 7.2].map((px) => (
-        <g key={px}>
-          <rect
-            className='gate__post'
-            x={px}
-            y={g - 21}
-            width={2.2}
-            height={21}
-          />
-          <rect
-            className='gate__gold'
-            x={px - 0.3}
-            y={g - 1.6}
-            width={2.8}
-            height={1.6}
-            rx={0.3}
-          />
-          <rect
-            className='gate__gold'
-            x={px - 0.1}
-            y={g - 13}
-            width={2.4}
-            height={0.7}
-          />
-        </g>
-      ))}
+      {post(l + 0.6)}
       {/* The lower beam, and the plaque hanging above it. */}
       <rect
         className='gate__post'
@@ -475,7 +473,7 @@ function Gate({ x }: { x: number }) {
 // waking him. When it bumps into the sun he wakes for a moment, looks
 // round, and nods off again.
 function Samurai({ x, awake }: { x: number; awake: boolean }) {
-  const cx = x * CELL + 5;
+  const cx = x * CELL + 4.4;
   return (
     // The shake goes on an inner group: a CSS animation would replace the
     // outer one's place on the board.
@@ -585,6 +583,7 @@ export function Board({
         <ThingShape key={thing.x} thing={thing} />
       ))}
 
+      <Gate x={level.gate} part='back' />
       <Samurai x={level.gate} awake={awake > 0} />
 
       <g
@@ -602,7 +601,7 @@ export function Board({
       </g>
 
       {/* The gate goes in front, so the ninja walks through it. */}
-      <Gate x={level.gate} />
+      <Gate x={level.gate} part='front' />
 
       {/* A tap anywhere on a cell, from the ground up, sends the ninja. */}
       {Array.from({ length: level.width }, (_, x) => (
