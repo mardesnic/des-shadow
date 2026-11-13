@@ -16,6 +16,7 @@ import {
   moveSun,
   newRound,
   nextLevel,
+  SUNS,
   tap,
   type Round,
   type Stats,
@@ -45,7 +46,12 @@ const ROLL_MS = 350;
 // before the worlds came in starts again.
 function load(saved: Round | undefined): Round {
   const level = saved?.level?.id ? levelById(saved.level.id) : undefined;
-  if (!level || !saved || saved.things?.length !== level.things.length)
+  if (
+    !level ||
+    !saved ||
+    saved.things?.length !== level.things.length ||
+    !SUNS.includes(saved.sun)
+  )
     return newRound(level ?? LEVELS[0]);
   return { ...saved, level };
 }
@@ -87,6 +93,7 @@ export default function App() {
   // back to where it was; null the rest of the time.
   const [out, setOut] = useState<number | null>(null);
   const [act, setAct] = useState<Act | null>(null);
+  const [stuck, setStuck] = useState<{ x: number; at: number } | null>(null);
   // How long the cloud waits before it drifts: while the ninja walks.
   const [wait, setWait] = useState(0);
   const timers = useRef<number[]>([]);
@@ -142,6 +149,13 @@ export default function App() {
     const move = tap(round, x);
     if (!move) return;
     const { next } = move;
+    if (move.type === 'stuck') {
+      const at = Date.now();
+      setAct({ type: 'push', dir: x > round.ninja ? 1 : -1, at });
+      setStuck({ x, at });
+      plop('no');
+      return;
+    }
     if (move.type !== 'walk') {
       // A push or a puff at the thing next to the ninja.
       setAct({
@@ -198,6 +212,7 @@ export default function App() {
     setSteps(0);
     setOut(null);
     setAct(null);
+    setStuck(null);
     setAwake(0);
     setSquint(0);
     setCelebrating(false);
@@ -275,6 +290,7 @@ export default function App() {
               awake={awake}
               out={out}
               act={act}
+              stuck={stuck}
               wait={wait}
               onCell={onCell}
               onSun={onSun}

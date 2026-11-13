@@ -17,18 +17,12 @@ const CELL = 10;
 const GROUND = 56;
 const HEIGHT = 70;
 
-// The sun goes round an arc, so from dawn to dusk it rises over the top at
-// noon instead of cutting straight across, and is low at dawn and dusk.
-// The arc's middle is below the board; the sun is turned round it.
-const ARC_R = 50;
-const NOON_Y = 8;
-const ANGLE: Record<Sun, number> = {
-  dawn: -40,
-  morning: -23,
-  noon: 0,
-  evening: 23,
-  dusk: 40,
-};
+// The sun goes round an arc, so from morning to evening it rises over the
+// top at noon instead of cutting straight across. The arc's middle is far
+// below the board; the sun is turned round it.
+const ARC_R = 80;
+const NOON_Y = 9;
+const ANGLE: Record<Sun, number> = { morning: -27.5, noon: 0, evening: 27.5 };
 
 function sunAt(sun: Sun, width: number) {
   const a = (ANGLE[sun] * Math.PI) / 180;
@@ -757,6 +751,7 @@ export function Board({
   awake,
   out,
   act,
+  stuck,
   wait,
   onCell,
   onSun,
@@ -771,6 +766,8 @@ export function Board({
   // Where the ninja stands out in the sun, before it runs back.
   out: number | null;
   act: Act | null;
+  // A cart that was pushed but can't roll, and when.
+  stuck: { x: number; at: number } | null;
   // How long the cloud waits before it drifts.
   wait: number;
   onCell: (x: number) => void;
@@ -864,8 +861,11 @@ export function Board({
           className={thing.kind === 'lantern' ? 'thing' : 'thing dim'}
           style={{ transform: `translateX(${thing.x * CELL}px)` }}
         >
-          {/* Bamboo that has grown is drawn anew, and springs up. */}
-          <g key={thing.height} className={thing.grow ? 'grown' : undefined}>
+          {/* A cart that can't roll gives a little jolt. */}
+          <g
+            key={stuck?.x === thing.x ? stuck.at : 0}
+            className={stuck?.x === thing.x ? 'jolt' : undefined}
+          >
             <ThingShape thing={{ ...thing, x: 0 }} />
           </g>
         </g>

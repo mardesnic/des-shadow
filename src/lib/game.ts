@@ -4,39 +4,26 @@
 // shadow: the child moves the sun to move the shadows, and walks the ninja
 // through them, past the sleeping samurai and out through the gate.
 //
-// Each world brings one new thing: bamboo that grows when the sun goes
-// over, a cart the ninja can push, a cloud that drifts a little with every
-// move, and the night, when only stone lanterns give light and the ninja
-// can blow them out.
+// Each world brings one new thing: a cart the ninja can push, a cloud that
+// drifts a little with every move, and the night, when only stone lanterns
+// give light and the ninja can blow them out.
+//
+// There is no low sun with longer shadows: more shadow never hurts, so the
+// child would always pick it, and only which way the shadows fall matters.
 
-export type Sun = 'dawn' | 'morning' | 'noon' | 'evening' | 'dusk';
-export const SUNS: readonly Sun[] = [
-  'dawn',
-  'morning',
-  'noon',
-  'evening',
-  'dusk',
-];
+export type Sun = 'morning' | 'noon' | 'evening';
+export const SUNS: readonly Sun[] = ['morning', 'noon', 'evening'];
 
-// Which way shadows fall, away from the sun, and how many times as long as
-// the thing is tall: twice when the sun is low, none at noon.
-export const FALL: Record<Sun, number> = {
-  dawn: 2,
-  morning: 1,
-  noon: 0,
-  evening: -1,
-  dusk: -2,
-};
+// Which way shadows fall, away from the sun; none at noon.
+export const FALL: Record<Sun, number> = { morning: 1, noon: 0, evening: -1 };
 
 export type Kind = 'bamboo' | 'tree' | 'tower' | 'cart' | 'lantern';
 
 export type Thing = {
   kind: Kind;
   x: number;
-  // How tall it is, in cells: its shadow is just as long, or twice.
+  // How tall it is, in cells: its shadow is just as long.
   height: number;
-  // Bamboo that grows a cell each time the sun moves, up to this tall.
-  grow?: number;
   // A stone lantern that is burning.
   lit?: boolean;
 };
@@ -45,14 +32,8 @@ export type Thing = {
 // forth between `min` and `max`. Its shadow is right under it.
 export type Cloud = { x: number; dir: 1 | -1 };
 
-export type World = 'town' | 'bamboo' | 'cart' | 'cloud' | 'night';
-export const WORLDS: readonly World[] = [
-  'town',
-  'bamboo',
-  'cart',
-  'cloud',
-  'night',
-];
+export type World = 'town' | 'cart' | 'cloud' | 'night';
+export const WORLDS: readonly World[] = ['town', 'cart', 'cloud', 'night'];
 
 export type Level = {
   id: string;
@@ -73,12 +54,12 @@ export type Round = {
   level: Level;
   sun: Sun;
   ninja: number;
-  // The things as they are now: carts pushed, bamboo grown, lanterns out.
+  // The things as they are now: carts pushed, lanterns out.
   things: Thing[];
   cloud?: Cloud;
 };
 
-const THREE: Sun[] = ['morning', 'noon', 'evening'];
+const THREE = [...SUNS];
 
 // The levels, made by hand and checked by the solver in the tests.
 export const LEVELS: Level[] = [
@@ -92,34 +73,6 @@ export const LEVELS: Level[] = [
       { kind: 'bamboo', x: 0, height: 1 },
       { kind: 'tree', x: 3, height: 2 },
       { kind: 'tower', x: 5, height: 3 },
-    ],
-    start: 0,
-    gate: 8,
-    sun: 'noon',
-    suns: THREE,
-  },
-  // Only the low sun gives the tree a shadow long enough.
-  {
-    id: 'town-2',
-    world: 'town',
-    width: 9,
-    things: [
-      { kind: 'bamboo', x: 0, height: 1 },
-      { kind: 'tree', x: 4, height: 2 },
-    ],
-    start: 0,
-    gate: 8,
-    sun: 'noon',
-    suns: [...SUNS],
-  },
-  // The bamboo has to grow tall before its shadow reaches both ways.
-  {
-    id: 'bamboo-1',
-    world: 'bamboo',
-    width: 9,
-    things: [
-      { kind: 'bamboo', x: 0, height: 1 },
-      { kind: 'bamboo', x: 4, height: 1, grow: 4 },
     ],
     start: 0,
     gate: 8,
@@ -273,7 +226,9 @@ export function hideFrom(r: Round, from: number): number {
 
 // After every move the cloud drifts a cell, turning round at the ends of
 // its way, and the ninja runs into the dark if it is left in the light.
+// Once through the gate, nothing moves any more.
 function settle(r: Round): Round {
+  if (isSolved(r)) return r;
   let { cloud } = r;
   const way = r.level.cloud;
   if (cloud && way) {
@@ -291,13 +246,10 @@ export function walk(r: Round, to: number): Round {
   return w?.ok ? settle({ ...r, ninja: to }) : r;
 }
 
-// The sun moves, growing bamboo grows a cell, and the shadows move with it.
+// The sun moves, and the shadows move with it.
 export function moveSun(r: Round, sun: Sun): Round {
   if (sun === r.sun || !r.level.suns.includes(sun)) return r;
-  const things = r.things.map((t) =>
-    t.grow && t.height < t.grow ? { ...t, height: t.height + 1 } : t
-  );
-  return settle({ ...r, sun, things });
+  return settle({ ...r, sun });
 }
 
 // Where a cart at `x` would roll to if the ninja pushed it, or null if it
@@ -332,15 +284,19 @@ export function blow(r: Round, x: number): Round {
 }
 
 // What a tap on a cell does: pushes the cart there or blows out the
-// lantern there if the ninja can, and otherwise walks the ninja to it.
+// lantern there if the ninja can, and otherwise walks the ninja to it. A
+// cart right next to the ninja that can't roll only gives a little jolt.
 export type Move =
   | { type: 'push'; to: number; next: Round }
+  | { type: 'stuck'; next: Round }
   | { type: 'blow'; next: Round }
   | { type: 'walk'; path: number[]; ok: boolean; next: Round };
 
 export function tap(r: Round, x: number): Move | null {
   const to = pushTo(r, x);
   if (to !== null) return { type: 'push', to, next: push(r, x) };
+  const cart = r.things.some((t) => t.x === x && t.kind === 'cart');
+  if (cart && Math.abs(x - r.ninja) === 1) return { type: 'stuck', next: r };
   if (canBlow(r, x)) return { type: 'blow', next: blow(r, x) };
   const w = tryWalk(r, x);
   if (!w) return null;

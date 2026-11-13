@@ -9,8 +9,6 @@
   --sky-morning: #c9e2f7;
   --sky-noon: #bfe3ff;
   --sky-evening: #d3def4;
-  --sky-dawn: #dfe2f0;
-  --sky-dusk: #e3dcee;
   --sky-night: #27305e;
   --moon: #f8f4e3;
   --star: #f8f4e3;
@@ -74,8 +72,6 @@
     --sky-morning: #2a3e58;
     --sky-noon: #26405c;
     --sky-evening: #2e3b5a;
-    --sky-dawn: #33395a;
-    --sky-dusk: #383656;
     --sky-night: #121733;
     --moon: #e9e4cc;
     --star: #d9d4bc;
@@ -302,14 +298,6 @@ h2 {
   fill: var(--sky-evening);
 }
 
-.board--dawn .sky {
-  fill: var(--sky-dawn);
-}
-
-.board--dusk .sky {
-  fill: var(--sky-dusk);
-}
-
 /* Night: a dark sky, and the street dim but for the lanterns' light. */
 .board--night .sky,
 .moon__cut {
@@ -348,16 +336,17 @@ h2 {
   transition: transform 0.35s ease-out;
 }
 
-/* Bamboo that has just grown springs up from the ground. */
-.grown {
-  transform-box: fill-box;
-  transform-origin: 50% 100%;
-  animation: grow 0.5s ease-out;
+/* A cart that can't roll: a little jolt, and it stays. */
+.jolt {
+  animation: jolt 0.3s ease-in-out;
 }
 
-@keyframes grow {
-  from {
-    transform: scaleY(0.85);
+@keyframes jolt {
+  25% {
+    transform: translateX(0.8px);
+  }
+  75% {
+    transform: translateX(-0.8px);
   }
 }
 
@@ -797,7 +786,7 @@ h2 {
     transition: none !important;
   }
   .samurai--awake,
-  .grown,
+  .jolt,
   .ninja__act--push,
   .ninja__act--push-left,
   .zzz text {

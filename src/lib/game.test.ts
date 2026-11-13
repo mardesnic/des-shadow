@@ -37,12 +37,6 @@ describe('shadows', () => {
   it('fall left in the evening and stop at the edge', () => {
     expect(sorted(dark(at(r, 'evening')))).toEqual([0, 1, 2, 3, 4, 5]);
   });
-
-  it('are twice as long when the sun is low', () => {
-    const t = round('town-2');
-    expect(sorted(dark(at(t, 'dawn')))).toEqual([0, 1, 2, 4, 5, 6, 7, 8]);
-    expect(sorted(dark(at(t, 'dusk')))).toEqual([0, 1, 2, 3, 4]);
-  });
 });
 
 describe('walking', () => {
@@ -79,14 +73,6 @@ describe('walking', () => {
 });
 
 describe('the new things', () => {
-  it('bamboo grows each time the sun moves, up to its height', () => {
-    let r = round('bamboo-1');
-    for (let i = 0; i < 5; i++)
-      r = moveSun(r, r.sun === 'morning' ? 'evening' : 'morning');
-    expect(r.things[1].height).toBe(4);
-    expect(r.things[0].height).toBe(1);
-  });
-
   it('a cart rolls a cell away from the ninja', () => {
     let r = { ...round('cart-1'), ninja: 4 };
     expect(pushTo(r, 5)).toBe(6);
@@ -98,6 +84,13 @@ describe('the new things', () => {
       pushTo({ ...r, ninja: 6, things: [{ ...r.things[2], x: 7 }] }, 7)
     ).toBeNull();
     expect(tap({ ...r, ninja: 5 }, 6)?.type).toBe('push');
+    // Against the tree it only gives a jolt.
+    expect(
+      tap(
+        { ...r, ninja: 5, things: [r.things[1], { ...r.things[2], x: 4 }] },
+        4
+      )?.type
+    ).toBe('stuck');
   });
 
   it('the cloud drifts a cell with every move and turns at the end', () => {
@@ -108,6 +101,15 @@ describe('the new things', () => {
       xs.push(r.cloud!.x);
     }
     expect(xs).toEqual([4, 5, 6, 5, 4]);
+  });
+
+  it('the cloud stays put once the ninja is through the gate', () => {
+    let r = moveSun(round('cloud-1'), 'morning');
+    r = walk(r, 5);
+    const x = r.cloud!.x;
+    r = walk(r, 8);
+    expect(isSolved(r)).toBe(true);
+    expect(r.cloud!.x).toBe(x);
     expect(dark(r).has(4) && dark(r).has(5)).toBe(true);
   });
 

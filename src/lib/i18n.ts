@@ -21,7 +21,6 @@ const en = {
   level: (n: number) => `Level ${n}`,
   worlds: {
     town: 'Town',
-    bamboo: 'Bamboo',
     cart: 'Cart',
     cloud: 'Cloud',
     night: 'Night',
@@ -30,11 +29,9 @@ const en = {
   settings: 'Settings',
   close: 'Close',
   suns: {
-    dawn: 'Dawn',
     morning: 'Morning',
     noon: 'Noon',
     evening: 'Evening',
-    dusk: 'Dusk',
   } as Record<Sun, string>,
   ground: 'Go here',
   push: 'Push the cart',
@@ -63,7 +60,6 @@ const hr: Strings = {
   level: (n: number) => `Razina ${n}`,
   worlds: {
     town: 'Grad',
-    bamboo: 'Bambus',
     cart: 'Kolica',
     cloud: 'Oblak',
     night: 'Noć',
@@ -72,11 +68,9 @@ const hr: Strings = {
   settings: 'Postavke',
   close: 'Zatvori',
   suns: {
-    dawn: 'Zora',
     morning: 'Jutro',
     noon: 'Podne',
     evening: 'Večer',
-    dusk: 'Sumrak',
   },
   ground: 'Idi ovamo',
   push: 'Gurni kolica',
