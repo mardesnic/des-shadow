@@ -772,6 +772,31 @@ h2 {
   color: var(--muted);
 }
 
+.sun-icon__disc {
+  fill: var(--sun);
+}
+
+.sun-icon__ray {
+  stroke: var(--sun-ray);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.sun-icon__moon {
+  fill: var(--moon);
+  stroke: var(--muted);
+  stroke-width: 1;
+}
+
+.tool--sun {
+  width: 72px;
+}
+
+.tool--sun .icon {
+  width: 30px;
+  height: 30px;
+}
+
 .tool:disabled {
   opacity: 0.4;
 }

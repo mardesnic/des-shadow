@@ -1,8 +1,8 @@
 # Shadow
 
-A free shadow puzzle for young kids that works offline. A little ninja wants to get to the golden cell under a treasure chest at the edge of a little town, but it may only walk in the shadows. Tap or swipe the sun to move it on to the next side of the town, always round clockwise: every pagoda, bamboo clump and cherry tree casts a shadow away from it, as long as the thing is tall. In towns with stone lanterns the moon is at the bottom: then it is night, dark everywhere but round the lanterns, which light up. The pagodas and bamboo are in the way, so the ninja has to find a way round them, through the shadows, moving the sun as it goes.
+A free shadow puzzle for young kids that works offline. A little ninja wants to get to the golden cell under a treasure chest at the edge of a little town, but it may only walk in the shadows. Tap the sun button, or the sun itself, to move it on to the next side of the town, always round clockwise: every pagoda, bamboo clump and cherry tree casts a shadow away from it, as long as the thing is tall. In towns with stone lanterns the moon is at the bottom: then it is night, dark everywhere but round the lanterns, which light up. The pagodas and bamboo are in the way, so the ninja has to find a way round them, through the shadows, moving the sun as it goes.
 
-Made for ages 5 and up. There is no timer and no way to lose: nothing moves until you tap, and when the ninja steps into the light, it only ducks and runs back to the start, under a little shelter where it is always shady, to try again.
+Made for ages 5 and up. There is no timer and no way to lose: nothing moves until you tap, the ninja won't walk out into the sun, and if the sun moves onto it, it only ducks and runs back to the start, under a little shelter where it is always shady, to try again.
 
 ## Demo
 

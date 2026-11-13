@@ -26,6 +26,7 @@ const en = {
     night: 'Night',
   } as Record<World, string>,
   clear: 'Start over',
+  moveSun: 'Move the sun',
   settings: 'Settings',
   close: 'Close',
   suns: {
@@ -65,6 +66,7 @@ const hr: Strings = {
     night: 'Noć',
   },
   clear: 'Ispočetka',
+  moveSun: 'Pomakni sunce',
   settings: 'Postavke',
   close: 'Zatvori',
   suns: {

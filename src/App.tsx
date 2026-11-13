@@ -12,6 +12,7 @@ import {
   initialStats,
   initialStore,
   isSolved,
+  nextSun,
   levelById,
   moveSun,
   newRound,
@@ -35,6 +36,8 @@ import { useWakeLock } from './lib/use-wake-lock';
 type View = 'play' | 'levels' | 'settings';
 
 // How long the ninja stands frozen in the sun before it runs back.
+// How long the ninja shakes its head at a way out in the sun.
+const SHAKE_MS = 450;
 const FROZEN_MS = 350;
 
 // A saved round, with its level as the game has it now; a round saved by
@@ -50,6 +53,33 @@ function load(saved: Round | undefined): Round {
   )
     return newRound(level ?? LEVELS[0]);
   return { ...saved, level };
+}
+
+// The button that moves the sun on: a little sun, or the moon when night
+// comes next.
+function SunIcon({ moon }: { moon: boolean }) {
+  return (
+    <svg className='icon' viewBox='-12 -12 24 24' aria-hidden='true'>
+      {moon ? (
+        <path
+          className='sun-icon__moon'
+          d='M0 -8 A8 8 0 1 0 0 8 A10.4 10.4 0 0 1 0 -8 Z'
+        />
+      ) : (
+        <>
+          {Array.from({ length: 8 }, (_, i) => (
+            <path
+              key={i}
+              className='sun-icon__ray'
+              d='M0 -8 L0 -10.5'
+              transform={`rotate(${i * 45})`}
+            />
+          ))}
+          <circle className='sun-icon__disc' r={5.6} />
+        </>
+      )}
+    </svg>
+  );
 }
 
 export default function App() {
@@ -148,8 +178,11 @@ export default function App() {
     const { path, ok, to } = w;
     const from = round.ninja;
     if (!ok) {
-      // Out into the sun, and seen.
-      caught(path[path.length - 1], along(from, path, STEP_MS), round.sun);
+      // No way there through the shade: the ninja won't go out into the
+      // sun, and only shakes its head.
+      plop('no');
+      setSquint(Date.now());
+      later(SHAKE_MS, () => setSquint(0));
       return;
     }
     setPos(from);
@@ -278,6 +311,14 @@ export default function App() {
             <span className='bar__level'>
               {t.level(LEVELS.indexOf(round.level) + 1)}
             </span>
+            <button
+              className='tool tool--sun'
+              onClick={() => onSun(nextSun(round.level, round.sun))}
+              disabled={busy || solved}
+              aria-label={t.moveSun}
+            >
+              <SunIcon moon={nextSun(round.level, round.sun) === 'moon'} />
+            </button>
             <button
               className='tool'
               onClick={() => start(round.level.id)}
