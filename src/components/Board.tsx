@@ -8,7 +8,7 @@ import {
   open,
   quarters,
   QUARTER_MS,
-  gateCell,
+  chestCell,
   xy,
   nextSun,
   sunsOf,
@@ -24,11 +24,11 @@ export const STEP_MS = 220;
 
 // The town seen from above, a bit from the front: each cell is 10 wide and
 // 8 deep, and things stand up from it. Round the town is a garden, wide
-// enough for the sun on each side and the gate at the top.
+// enough for the sun on each side.
 const CELL = 10;
 const ROW = 8;
 const SIDE = 18;
-const TOP = 23;
+const TOP = 17;
 const BOTTOM = 18;
 
 // The sun goes round the town on a circle, so it moves from side to side
@@ -355,165 +355,48 @@ function Ninja({ squint }: { squint: boolean }) {
   );
 }
 
-// The grand gate at the end of the street, which the ninja slips through:
-// red posts with gold bands, a dark curved roof with a gold ridge and a
-// little gold dragon at each end, and a gold plaque with a dragon on it.
-function Gate() {
-  const l = 0;
-  const g = 0;
-  // A curled gold dragon tail at one end of the roof; `dir` turns it.
-  const dragon = (cx: number, dir: 1 | -1) =>
-    `M${cx} ${g - 24.1} q${-0.6 * dir} -1.4 ${0.5 * dir} -2.2 q${1.1 * dir} -0.4 ${0.9 * dir} 0.7 q${-0.4 * dir} 0.4 ${-0.7 * dir} -0.1`;
-  const post = (px: number) => (
-    <g key={px}>
-      <rect className='gate__post' x={px} y={g - 21} width={2.2} height={21} />
-      <rect
-        className='gate__gold'
-        x={px - 0.3}
-        y={g - 1.6}
-        width={2.8}
-        height={1.6}
-        rx={0.3}
-      />
-      <rect
-        className='gate__gold'
-        x={px - 0.1}
-        y={g - 13}
-        width={2.4}
-        height={0.7}
-      />
-    </g>
-  );
+// The treasure chest the ninja is after: a little wooden chest with gold
+// bands and a lock; at the end its lid flies open on the gold inside.
+function Chest({ open }: { open: boolean }) {
   return (
-    <g className='gate'>
-      {post(l + 0.6)}
-      {post(l + 7.2)}
-      {/* The lower beam, and the plaque hanging above it. */}
+    <g className={open ? 'chest chest--open' : 'chest'}>
+      {open && (
+        <>
+          {/* The lid, thrown back, and the gold shining out. */}
+          <path
+            className='chest__lid'
+            d='M-4.4 -4.4 L-4 -6.6 L4 -6.6 L4.4 -4.4 Z'
+          />
+          <ellipse className='chest__glow' cx={0} cy={-4.8} rx={4.2} ry={1.3} />
+          <circle className='chest__coin' cx={-1.8} cy={-4.6} r={1} />
+          <circle className='chest__coin' cx={0.3} cy={-5} r={1} />
+          <circle className='chest__coin' cx={2.2} cy={-4.5} r={1} />
+        </>
+      )}
       <rect
-        className='gate__post'
-        x={l - 0.8}
-        y={g - 16.5}
-        width={11.6}
-        height={1.4}
-      />
-      <rect
-        className='gate__gold'
-        x={l + 3.1}
-        y={g - 20.9}
-        width={3.8}
+        className='chest__body'
+        x={-4.4}
+        y={-4.6}
+        width={8.8}
         height={4.6}
+        rx={0.6}
+      />
+      <rect className='chest__band' x={-3.4} y={-4.6} width={1} height={4.6} />
+      <rect className='chest__band' x={2.4} y={-4.6} width={1} height={4.6} />
+      {!open && (
+        <path
+          className='chest__lid'
+          d='M-4.4 -4.4 L-4.4 -5.6 Q0 -8.4 4.4 -5.6 L4.4 -4.4 Z'
+        />
+      )}
+      <rect
+        className='chest__lock'
+        x={-1}
+        y={-5.2}
+        width={2}
+        height={2.2}
         rx={0.4}
       />
-      <rect
-        className='gate__plaque'
-        x={l + 3.6}
-        y={g - 20.4}
-        width={2.8}
-        height={3.6}
-        rx={0.2}
-      />
-      <path
-        className='gate__dragon'
-        d={`M${l + 4.1} ${g - 17.4} q0.4 -1.2 1 -0.6 q0.6 0.6 0.9 -0.6 q0.2 -0.9 -0.4 -1 q-0.5 0 -0.4 0.5`}
-      />
-      <circle className='gate__eye' cx={l + 5.5} cy={g - 19.4} r={0.25} />
-      {/* The top beam and the roof over it. */}
-      <rect
-        className='gate__post'
-        x={l - 0.8}
-        y={g - 21.6}
-        width={11.6}
-        height={1.5}
-      />
-      <path
-        className='gate__roof'
-        d={`M${l - 2.2} ${g - 22.6} Q${l + 0.4} ${g - 21.9} ${l + 1.6} ${g - 24.1} L${l + 8.4} ${g - 24.1} Q${l + 9.6} ${g - 21.9} ${l + 12.2} ${g - 22.6} L${l + 11} ${g - 21.4} L${l - 1} ${g - 21.4} Z`}
-      />
-      <rect
-        className='gate__gold'
-        x={l + 1.6}
-        y={g - 24.5}
-        width={6.8}
-        height={0.6}
-        rx={0.3}
-      />
-      {[l + 1.5, l + 3.5, l + 5, l + 6.5, l + 8.5].map((cx) => (
-        <circle
-          key={cx}
-          className='gate__gold'
-          cx={cx}
-          cy={g - 20.85}
-          r={0.3}
-        />
-      ))}
-      <path className='gate__tail' d={dragon(l + 1.8, -1)} />
-      <path className='gate__tail' d={dragon(l + 8.2, 1)} />
-    </g>
-  );
-}
-
-// The samurai dozing in the gate. The ninja has to sneak past without
-// waking him. When it bumps into the sun he wakes for a moment, looks
-// round, and nods off again.
-function Samurai({ awake }: { awake: boolean }) {
-  return (
-    // The shake goes on an inner group: a CSS animation would replace the
-    // outer one's place on the board.
-    <g>
-      <g className={awake ? 'samurai--awake' : undefined}>
-        {/* The same body as the ninja's, in a blue robe, with a helmet
-            and a big moustache. */}
-        <rect
-          className='samurai__robe'
-          x={-3}
-          y={-5.5}
-          width={6}
-          height={5.5}
-          rx={2}
-        />
-        <circle className='samurai__face' cx={0} cy={-7.8} r={2.8} />
-        <path className='samurai__helmet' d='M-3.6 -8.8 Q0 -14.4 3.6 -8.8 Z' />
-        {/* The helmet's wide brim, wider than the head. */}
-        <rect
-          className='samurai__helmet'
-          x={-4.6}
-          y={-9.4}
-          width={9.2}
-          height={1}
-          rx={0.5}
-        />
-        <path
-          className='samurai__moustache'
-          d='M0 -6.3 q-0.9 -0.6 -1.8 0 q-0.6 0.5 -1.3 -0.1 q0.6 1.1 1.6 0.7 q0.9 -0.3 1.5 -0.6 q0.6 0.3 1.5 0.6 q1 0.4 1.6 -0.7 q-0.7 0.6 -1.3 0.1 q-0.9 -0.6 -1.8 0 Z'
-        />
-        {awake ? (
-          <>
-            <circle className='samurai__eye' cx={-1} cy={-7.5} r={0.45} />
-            <circle className='samurai__eye' cx={1} cy={-7.5} r={0.45} />
-            <text className='samurai__alert' x={-9.5} y={-13}>
-              !
-            </text>
-          </>
-        ) : (
-          <>
-            <path
-              className='samurai__shut'
-              d='M-1.6 -7.6 q0.6 0.5 1.2 0 M0.4 -7.6 q0.6 0.5 1.2 0'
-            />
-            <g className='zzz'>
-              <text x={-7.5} y={-13}>
-                z
-              </text>
-              <text x={-9.5} y={-16}>
-                z
-              </text>
-              <text x={-12} y={-19.5}>
-                Z
-              </text>
-            </g>
-          </>
-        )}
-      </g>
     </g>
   );
 }
@@ -524,7 +407,6 @@ export function Board({
   stepMs,
   gone,
   squint,
-  awake,
   onCell,
   onSun,
   t,
@@ -534,11 +416,10 @@ export function Board({
   at: number;
   // How long each step it takes now.
   stepMs: number;
-  // Through the gate and gone.
+  // At the chest, the round won.
   gone: boolean;
-  // Set while the ninja screws its eyes shut, and while the samurai is up.
+  // Set while the ninja screws its eyes shut.
   squint: number;
-  awake: number;
   onCell: (c: number) => void;
   onSun: (s: Sun) => void;
   t: Strings;
@@ -552,7 +433,7 @@ export function Board({
   };
   const SUN_R = sunR(level);
   const cells = Array.from({ length: level.width * level.rows }, (_, c) => c);
-  const gate = place(round, gateCell(level));
+  const chest = place(round, chestCell(level));
   const cobbles = useId();
   // Where a finger went down on the sun, and whether its swipe moved it.
   const drag = useRef<{ x: number; y: number; done: boolean } | null>(null);
@@ -595,8 +476,8 @@ export function Board({
   const night = shown === 'moon';
 
   const me = place(round, at);
-  // Out through the gate, the ninja stands in it, and hops for joy.
-  const ninjaY = gone ? gate.top + 0.4 : me.foot;
+  // At the chest, the ninja stands behind it, and hops for joy.
+  const ninjaY = gone ? me.foot - 5.6 : me.foot;
 
   // Things further back are drawn first, so the ones in front stand over
   // them.
@@ -652,7 +533,7 @@ export function Board({
       {cells.map((c) => {
         const p = place(round, c);
         // Where a wall stands, a raised block of stone, so it is plain the
-        // ninja can't go there; the cell under the gate is red, the goal.
+        // ninja can't go there.
         if (!open(level, c))
           return (
             <g key={c}>
@@ -674,27 +555,24 @@ export function Board({
               />
             </g>
           );
-        const goal = c === gateCell(level);
         return (
           <g key={c}>
             <rect
-              className={goal ? 'stone stone--goal' : 'stone'}
+              className='stone'
               x={p.left + 0.35}
               y={p.top + 0.35}
               width={CELL - 0.7}
               height={ROW - 0.7}
               rx={1}
             />
-            {!goal && (
-              <rect
-                x={p.left + 0.35}
-                y={p.top + 0.35}
-                width={CELL - 0.7}
-                height={ROW - 0.7}
-                rx={1}
-                fill={`url(#${cobbles})`}
-              />
-            )}
+            <rect
+              x={p.left + 0.35}
+              y={p.top + 0.35}
+              width={CELL - 0.7}
+              height={ROW - 0.7}
+              rx={1}
+              fill={`url(#${cobbles})`}
+            />
           </g>
         );
       })}
@@ -729,21 +607,6 @@ export function Board({
           </g>
         );
       })}
-
-      {/* The gate over the top of the street, with the samurai dozing
-          beside it. */}
-      {/* As wide as the cell, its posts on the cell's edges; a bit
-          squat, to fit over the town. */}
-      <g transform={`translate(${gate.left} ${gate.top + 0.6}) scale(1 0.78)`}>
-        <Gate />
-      </g>
-      {/* The samurai dozes beside the gate, on the side away from the
-          middle, out of the way of the sun at the top. */}
-      <g
-        transform={`translate(${level.gate > (level.width - 1) / 2 ? gate.left + CELL + 0.6 : gate.left - 5} ${gate.top + 0.5}) scale(0.62)`}
-      >
-        <Samurai awake={awake > 0} />
-      </g>
 
       {things.map((thing, i) => {
         const p = place(round, thing.y * level.width + thing.x);
@@ -837,6 +700,11 @@ export function Board({
         </g>
       </g>
 
+      {/* The chest, in front of the ninja, which ends up behind it. */}
+      <g transform={`translate(${chest.cx} ${chest.foot})`}>
+        <Chest open={gone} />
+      </g>
+
       {/* A tap on a cell sends the ninja there. */}
       {cells.map((c) => {
         const p = place(round, c);
@@ -850,7 +718,7 @@ export function Board({
             height={ROW}
             onClick={() => onCell(c)}
           >
-            <title>{c === gateCell(level) ? t.gate : t.ground}</title>
+            <title>{c === chestCell(level) ? t.chest : t.ground}</title>
           </rect>
         );
       })}

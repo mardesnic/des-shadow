@@ -34,8 +34,6 @@ import { useWakeLock } from './lib/use-wake-lock';
 
 type View = 'play' | 'levels' | 'settings';
 
-// How long the samurai stays awake when the ninja steps into the sun.
-const AWAKE_MS = 1300;
 // How long the ninja stands frozen in the sun before it runs back.
 const FROZEN_MS = 350;
 
@@ -89,8 +87,7 @@ export default function App() {
   const [pos, setPos] = useState<number | null>(null);
   const [stepMs, setStepMs] = useState(STEP_MS);
   const [squint, setSquint] = useState(0);
-  const [awake, setAwake] = useState(0);
-  // How long the Well done card waits: until the ninja is through the gate.
+  // How long the Well done card waits: until the ninja is at the chest.
   const [cardWait, setCardWait] = useState(0);
   // Counts the rounds started, so each starts on a fresh board.
   const [game, setGame] = useState(0);
@@ -121,15 +118,12 @@ export default function App() {
     return at + path.length * ms;
   };
 
-  // Seen: the samurai wakes, the ninja ducks and runs back, fast, along
-  // `back` to where it is safe.
-  // Seen at `from`: the samurai wakes, and the ninja ducks and runs, fast,
+  // Seen at `from`, out in the light: the ninja ducks and runs, fast,
   // all the way back to the start, under the shelter. The sun stays.
   const caught = (from: number, at: number, sun: Sun) => {
     const { level } = round;
     later(at, () => {
       plop('no');
-      setAwake(Date.now());
       setSquint(Date.now());
     });
     later(at + FROZEN_MS, () =>
@@ -145,7 +139,6 @@ export default function App() {
       setPos(null);
       setSquint(0);
     });
-    later(Math.max(home, at + AWAKE_MS), () => setAwake(0));
   };
 
   const onCell = (c: number) => {
@@ -164,7 +157,7 @@ export default function App() {
     const there = along(from, path, STEP_MS);
     later(there, () => setPos(null));
     if (isSolved({ ...round, ninja: c })) {
-      // On through the gate, then the cheer.
+      // On to the chest, then the cheer.
       const through = there + 2 * STEP_MS;
       setCardWait(through);
       setStats({
@@ -184,7 +177,7 @@ export default function App() {
     const k = seenAfter(round, s);
     if (k === null) return setStore({ round: moveSun(round, s) });
     // Left out in the light: the sun goes round, and where it first lights
-    // the ninja on the way the samurai sees it.
+    // the ninja, it is seen.
     setStore({ round: { ...round, sun: s } });
     setStepMs(STEP_MS);
     setPos(round.ninja);
@@ -196,7 +189,6 @@ export default function App() {
     timers.current = [];
     setGame((g) => g + 1);
     setPos(null);
-    setAwake(0);
     setSquint(0);
     setCardWait(0);
     setCelebrating(false);
@@ -274,7 +266,6 @@ export default function App() {
               stepMs={stepMs}
               gone={solved && pos === null}
               squint={squint}
-              awake={awake}
               onCell={onCell}
               onSun={onSun}
               t={t}

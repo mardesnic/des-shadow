@@ -3,7 +3,7 @@
 // shadow on the street away from it, as many cells long as the thing is
 // tall. The little ninja may only stand and walk in the shadow: the child
 // moves the sun to move the shadows, and walks the ninja through them, round
-// the towers and bamboo, past the sleeping samurai and out through the gate.
+// the towers and bamboo, to the treasure chest.
 //
 // At the bottom there is the moon instead of a sun: then it is night, dark
 // everywhere but round the stone lanterns, which light up.
@@ -61,9 +61,8 @@ export type Level = {
   // Where the ninja starts, as a cell: under a little shelter, so always in
   // the shade.
   start: number;
-  // The column of the gate, over the top row; the ninja leaves through it
-  // from the top row's cell under it.
-  gate: number;
+  // The column of the treasure chest, in the top row.
+  chest: number;
   sun: Sun;
 };
 
@@ -95,7 +94,7 @@ export const LEVELS: Level[] = [
       { kind: 'tree', x: 0, y: 3, height: 2 },
     ],
     start: 16,
-    gate: 0,
+    chest: 0,
     sun: 'north',
   },
   {
@@ -109,7 +108,7 @@ export const LEVELS: Level[] = [
       { kind: 'tower', x: 2, y: 2, height: 3 },
     ],
     start: 18,
-    gate: 0,
+    chest: 0,
     sun: 'north',
   },
   {
@@ -123,7 +122,7 @@ export const LEVELS: Level[] = [
       { kind: 'tower', x: 2, y: 2, height: 3 },
     ],
     start: 26,
-    gate: 4,
+    chest: 4,
     sun: 'north',
   },
   {
@@ -138,7 +137,7 @@ export const LEVELS: Level[] = [
       { kind: 'tower', x: 0, y: 4, height: 3 },
     ],
     start: 26,
-    gate: 0,
+    chest: 0,
     sun: 'west',
   },
   {
@@ -154,7 +153,7 @@ export const LEVELS: Level[] = [
       { kind: 'tower', x: 3, y: 4, height: 2 },
     ],
     start: 29,
-    gate: 0,
+    chest: 0,
     sun: 'east',
   },
   {
@@ -176,7 +175,7 @@ export const LEVELS: Level[] = [
       { kind: 'tree', x: 2, y: 7, height: 2 },
     ],
     start: 42,
-    gate: 5,
+    chest: 5,
     sun: 'moon',
   },
 ];
@@ -189,7 +188,7 @@ export function nextLevel(id: string): Level {
   return LEVELS[(at + 1) % LEVELS.length];
 }
 
-export const gateCell = (level: Level) => cell(level, level.gate, 0);
+export const chestCell = (level: Level) => cell(level, level.chest, 0);
 
 // Where the sun can be: the moon only comes out where there are lanterns,
 // or the night would hide the ninja everywhere.
@@ -291,11 +290,11 @@ export const newRound = (level: Level = LEVELS[0]): Round => ({
   ninja: level.start,
 });
 
-export const isSolved = (r: Round) => r.ninja === gateCell(r.level);
+export const isSolved = (r: Round) => r.ninja === chestCell(r.level);
 
 // Where the ninja goes when the child taps a cell: the shortest way through
 // the shadow to it, or, when there is none, the shortest way round the
-// towers, up to the first sunny cell, where the samurai wakes and the ninja
+// towers, up to the first sunny cell, where the ninja is seen and
 // runs back to the start. `path` ends at that sunny cell. Null when the
 // cell can't be got to at all.
 export function tryWalk(
@@ -329,7 +328,7 @@ export function nextSun(level: Level, sun: Sun): Sun {
   return suns[(suns.indexOf(sun) + 1) % suns.length];
 }
 
-// Whether the samurai sees the ninja as the sun goes round to a new side:
+// Whether the ninja is seen, out in the light, as the sun goes round to a new side:
 // after how many quarters, or null if never. Every side the sun goes by on
 // the way counts, not only the one it stops at; only where there is no
 // moon, the sun going by the bottom lights nothing.
@@ -344,7 +343,7 @@ export function seenAfter(r: Round, to: Sun): number | null {
 }
 
 // The sun moves. If on the way it leaves the ninja in the light, the
-// samurai wakes and the ninja runs back to the start, under the shelter.
+// ninja is seen and runs back to the start, under the shelter.
 export function moveSun(r: Round, sun: Sun): Round {
   if (sun !== nextSun(r.level, r.sun)) return r;
   return {
@@ -366,7 +365,7 @@ function moves(r: Round): Round[] {
 
 const key = (r: Round) => `${r.sun}:${r.ninja}`;
 
-// The fewest taps (sun moves and walks) to the gate, and which, or null if
+// The fewest taps (sun moves and walks) to the chest, and which, or null if
 // there is no way: every level is checked with it.
 export function solution(level: Level): Round[] | null {
   const start = newRound(level);

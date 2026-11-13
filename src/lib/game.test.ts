@@ -22,7 +22,7 @@ import {
 
 // A small town for the tests:
 //
-//   . . G        the gate over the top right cell
+//   . . C        the treasure chest in the top right cell
 //   . T .        a tower two cells tall in the middle
 //   B . r        bamboo on the left, a cherry tree on the right
 //   N . .        the ninja starts at the bottom left
@@ -37,7 +37,7 @@ const TOWN: Level = {
     { kind: 'tree', x: 2, y: 2, height: 2 },
   ],
   start: 9,
-  gate: 2,
+  chest: 2,
   sun: 'north',
 };
 // The same town with a stone lantern in the top left, so the moon comes out.
@@ -111,7 +111,7 @@ describe('walking', () => {
     );
   });
 
-  it('is solved at the gate', () => {
+  it('is solved at the chest', () => {
     let r = walk(newRound(NIGHT), c(2, 2));
     r = moveSun(moveSun(r, 'east'), 'moon');
     expect(r.sun).toBe('moon');
