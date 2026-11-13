@@ -5,6 +5,7 @@ import {
   cell,
   dark,
   lit,
+  open,
   quarters,
   QUARTER_MS,
   gateCell,
@@ -536,10 +537,33 @@ export function Board({
       />
       {cells.map((c) => {
         const p = place(round, c);
+        // Where a wall stands, a raised block of stone, so it is plain the
+        // ninja can't go there; the cell under the gate is red, the goal.
+        if (!open(level, c))
+          return (
+            <g key={c}>
+              <rect
+                className='block__side'
+                x={p.left + 0.2}
+                y={p.top + 0.2}
+                width={CELL - 0.4}
+                height={ROW - 0.4}
+                rx={1}
+              />
+              <rect
+                className='block__top'
+                x={p.left + 0.2}
+                y={p.top + 0.2}
+                width={CELL - 0.4}
+                height={ROW - 2}
+                rx={1}
+              />
+            </g>
+          );
         return (
           <rect
             key={c}
-            className='stone'
+            className={c === gateCell(level) ? 'stone stone--goal' : 'stone'}
             x={p.left + 0.35}
             y={p.top + 0.35}
             width={CELL - 0.7}
@@ -559,20 +583,23 @@ export function Board({
             key={s}
             className={s === round.sun ? 'shadows' : 'shadows shadows--off'}
           >
-            {[...shade].map((c) => {
-              const p = place(round, c);
-              return (
-                <rect
-                  key={c}
-                  className='shadow'
-                  x={p.left - 0.1}
-                  y={p.top - 0.1}
-                  width={CELL + 0.2}
-                  height={ROW + 0.2}
-                  rx={1.2}
-                />
-              );
-            })}
+            {/* Only on the street: a wall is never somewhere to hide. */}
+            {[...shade]
+              .filter((c) => open(level, c))
+              .map((c) => {
+                const p = place(round, c);
+                return (
+                  <rect
+                    key={c}
+                    className='shadow'
+                    x={p.left - 0.1}
+                    y={p.top - 0.1}
+                    width={CELL + 0.2}
+                    height={ROW + 0.2}
+                    rx={1.2}
+                  />
+                );
+              })}
           </g>
         );
       })}
@@ -606,20 +633,22 @@ export function Board({
         height={h}
       />
       <g className={night ? 'lights' : 'lights lights--off'}>
-        {[...lit(level)].map((c) => {
-          const p = place(round, c);
-          return (
-            <rect
-              key={c}
-              className='light'
-              x={p.left + 0.4}
-              y={p.top + 0.4}
-              width={CELL - 0.8}
-              height={ROW - 0.8}
-              rx={1.2}
-            />
-          );
-        })}
+        {[...lit(level)]
+          .filter((c) => open(level, c))
+          .map((c) => {
+            const p = place(round, c);
+            return (
+              <rect
+                key={c}
+                className='light'
+                x={p.left + 0.4}
+                y={p.top + 0.4}
+                width={CELL - 0.8}
+                height={ROW - 0.8}
+                rx={1.2}
+              />
+            );
+          })}
         {/* The lanterns' fires, bright over the dark. */}
         {level.things
           .filter((t) => t.kind === 'lantern')

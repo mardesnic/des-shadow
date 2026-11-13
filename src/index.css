@@ -21,6 +21,9 @@
   --cloud: #ffffff;
   --ground: #7d766b;
   --garden: #a9cf8a;
+  --goal: #e8645a;
+  --block-top: #9c9488;
+  --block-side: #6f685e;
   --night: #141a3c;
   --moon: #f8f4e3;
   --lantern: #9a9ea6;
@@ -91,6 +94,9 @@
     --cloud: #aeb6c6;
     --ground: #34312c;
     --garden: #2c3f2a;
+    --goal: #c2453f;
+    --block-top: #4c4740;
+    --block-side: #2e2b27;
     --night: #070a1c;
     --moon: #e9e4cc;
     --lantern: #7a7e86;
@@ -556,6 +562,18 @@ h2 {
 
 .spot__ring--moon {
   stroke: var(--moon);
+}
+
+.stone--goal {
+  fill: var(--goal);
+}
+
+.block__top {
+  fill: var(--block-top);
+}
+
+.block__side {
+  fill: var(--block-side);
 }
 
 .tower__base {
