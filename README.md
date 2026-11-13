@@ -1,10 +1,8 @@
 # Shadow
 
-A free shadow puzzle for young kids that works offline. A little ninja wants to sneak past a sleeping samurai and out through the gate at the end of the street, but it may only walk in the shadows. Tap a spot in the sky to move the sun: in the morning the shadows of the trees and towers fall one way, in the evening the other, and at noon they hide right under. Move the sun so the shadows join up, and walk the ninja through them.
+A free shadow puzzle for young kids that works offline. A little ninja wants to sneak past a sleeping samurai and out through the gate of a little town, but it may only walk in the shadows. Tap a side of the town to move the sun there: every pagoda, bamboo clump and cherry tree casts a shadow away from it, as long as the thing is tall. The pagodas and bamboo are in the way, so the ninja has to find a way round them, through the shadows, moving the sun as it goes.
 
-Each world brings something new: a hay cart the ninja can push, a cloud that drifts a little with every move, and the night, when only stone lanterns give light and the ninja blows them out.
-
-Made for ages 5 and up. There is no timer and no way to lose: nothing moves until you tap, and when the ninja steps into the light, the samurai only wakes for a moment and the ninja runs back into the shadow.
+Made for ages 5 and up. There is no timer and no way to lose: nothing moves until you tap, and when the ninja steps into the sun, the samurai only wakes for a moment and the ninja runs back into the shadow.
 
 ## Demo
 
@@ -14,9 +12,9 @@ On your phone, open it and choose **Add to Home Screen** (Safari) or **Install a
 
 ## Features
 
-- Shadows as long as the thing that casts them, falling away from the sun
-- Four worlds: the town, a cart to push, a drifting cloud, and the night
-- Every level is checked by a solver: it can be solved, and you can never get stuck
+- The sun on any of the four sides, and shadows as long as the thing that casts them
+- Tap where the ninja should go and it finds its own way through the shadow
+- Every level is checked by a solver, so every level can be solved
 - A count of puzzles solved
 - Picks up where you left off after a reload
 - Keeps the screen on while you play

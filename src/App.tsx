@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { Board, STEP_MS, type Act } from './components/Board';
+import { Board, STEP_MS } from './components/Board';
 import { Confetti } from './components/Confetti';
 import { HomeLink } from './components/HomeLink';
 import { Icon } from './components/Icon';
@@ -8,16 +8,16 @@ import { Levels } from './components/Levels';
 import { SettingsView } from './components/Menu';
 import {
   LEVELS,
+  SUNS,
   initialStats,
   initialStore,
-  isFresh,
   isSolved,
   levelById,
   moveSun,
   newRound,
   nextLevel,
-  SUNS,
-  tap,
+  runWay,
+  tryWalk,
   type Round,
   type Stats,
   type Store,
@@ -36,21 +36,19 @@ type View = 'play' | 'levels' | 'settings';
 const AWAKE_MS = 1300;
 // How long the ninja stands frozen in the sun before it runs back.
 const FROZEN_MS = 350;
-// How long the sun takes to go over the sky, and the cloud to drift, as in
-// index.css.
+// How long the sun takes to go round, as in index.css.
 const SUN_MS = 500;
-// How long a pushed cart takes to roll a cell, as in index.css.
-const ROLL_MS = 350;
 
-// A saved round, with its level as the game has it now; a round saved
-// before the worlds came in starts again.
+// A saved round, with its level as the game has it now; a round saved by
+// an older version of the game starts again.
 function load(saved: Round | undefined): Round {
   const level = saved?.level?.id ? levelById(saved.level.id) : undefined;
   if (
     !level ||
     !saved ||
-    saved.things?.length !== level.things.length ||
-    !SUNS.includes(saved.sun)
+    saved.level.rows !== level.rows ||
+    !SUNS.includes(saved.sun) ||
+    !(saved.ninja >= 0 && saved.ninja < level.width * level.rows)
   )
     return newRound(level ?? LEVELS[0]);
   return { ...saved, level };
@@ -86,18 +84,15 @@ export default function App() {
   const plop = usePlop(sound);
   const [celebrating, setCelebrating] = useState(false);
 
-  const [steps, setSteps] = useState(0);
+  // Where the ninja is shown while it walks or runs, cell by cell; null
+  // when it stands where the round has it.
+  const [pos, setPos] = useState<number | null>(null);
+  const [stepMs, setStepMs] = useState(STEP_MS);
   const [squint, setSquint] = useState(0);
   const [awake, setAwake] = useState(0);
-  // Where the ninja is shown while it is out in the sun, before it runs
-  // back to where it was; null the rest of the time.
-  const [out, setOut] = useState<number | null>(null);
-  const [act, setAct] = useState<Act | null>(null);
-  const [stuck, setStuck] = useState<{ x: number; at: number } | null>(null);
-  // How long the cloud waits before it drifts: while the ninja walks.
-  const [wait, setWait] = useState(0);
-  // Counts the rounds started, so each starts on a fresh board instead of
-  // the last one's things sliding to their new places.
+  // How long the Well done card waits: until the ninja is through the gate.
+  const [cardWait, setCardWait] = useState(0);
+  // Counts the rounds started, so each starts on a fresh board.
   const [game, setGame] = useState(0);
   const timers = useRef<number[]>([]);
   const later = (ms: number, fn: () => void) =>
@@ -106,93 +101,68 @@ export default function App() {
 
   const solved = isSolved(round);
   const last = LEVELS.indexOf(round.level) === LEVELS.length - 1;
-  const busy = out !== null;
+  const busy = pos !== null;
+  const fresh =
+    round.sun === round.level.sun && round.ninja === round.level.start;
 
-  // The ninja walks out into the sun, the samurai wakes, and the ninja
-  // runs back, faster, to where it was.
-  const intoTheSun = (path: number[]) => {
-    const there = path.length * STEP_MS;
-    const back = there / 2;
-    setSteps(path.length);
-    setOut(path[path.length - 1]);
-    path.forEach((_, i) => later(i * STEP_MS, () => plop('step')));
-    later(there, () => {
-      plop('no');
-      setAwake(Date.now());
-      setSquint(Date.now());
+  // Shows the ninja going along `path` from `from`, a cell every `ms`,
+  // starting at `at`; returns when it gets there.
+  const along = (from: number, path: number[], ms: number, at = 0) => {
+    later(at, () => {
+      setStepMs(ms);
+      setPos(from);
     });
-    later(there + FROZEN_MS, () => {
-      setSteps(path.length / 2);
-      setOut(null);
-    });
-    later(there + FROZEN_MS + back, () => setSquint(0));
-    later(there + AWAKE_MS, () => setAwake(0));
+    path.forEach((c, i) =>
+      later(at + i * ms, () => {
+        setPos(c);
+        if (ms === STEP_MS) plop('step');
+      })
+    );
+    return at + path.length * ms;
   };
 
-  // Left out in the light at `from`: once the sun, the cloud or the cart
-  // has moved (at `at`), the samurai wakes and the ninja runs back into the
-  // dark at `to`.
-  const runBack = (from: number, to: number, at: number) => {
-    const cells = Math.abs(to - from);
-    setOut(from);
+  // Seen: the samurai wakes, the ninja ducks and runs back, fast, along
+  // `back` to where it is safe.
+  const caught = (from: number, back: number[], at: number) => {
     later(at, () => {
       plop('no');
       setAwake(Date.now());
       setSquint(Date.now());
     });
-    later(at + FROZEN_MS, () => {
-      setSteps(cells / 2);
-      setOut(null);
+    const home = along(from, back, STEP_MS / 2, at + FROZEN_MS);
+    later(home, () => {
+      setPos(null);
+      setSquint(0);
     });
-    later(at + FROZEN_MS + (cells / 2) * STEP_MS, () => setSquint(0));
     later(at + AWAKE_MS, () => setAwake(0));
   };
 
-  const onCell = (x: number) => {
+  const onCell = (c: number) => {
     if (solved || busy) return;
-    const move = tap(round, x);
-    if (!move) return;
-    const { next } = move;
-    if (move.type === 'stuck') {
-      const at = Date.now();
-      setAct({ type: 'push', dir: x > round.ninja ? 1 : -1, at });
-      setStuck({ x, at });
-      plop('no');
+    const w = tryWalk(round, c);
+    if (!w) return;
+    const { path, ok } = w;
+    const from = round.ninja;
+    if (!ok) {
+      // Out into the sun, and back the same way.
+      const there = along(from, path, STEP_MS);
+      const back = [...path.slice(0, -1).reverse(), from];
+      caught(path[path.length - 1], back, there);
       return;
     }
-    if (move.type !== 'walk') {
-      // A push or a puff at the thing next to the ninja.
-      setAct({
-        type: move.type,
-        dir: x > round.ninja ? 1 : -1,
-        at: Date.now(),
-      });
-      plop(move.type === 'push' ? 'step' : 'sun');
-      setWait(0);
-      setStore({ round: next });
-      if (next.ninja !== round.ninja) runBack(round.ninja, next.ninja, ROLL_MS);
-      return;
-    }
-    const { path, ok, to } = move;
-    if (!ok) return intoTheSun(path);
-    const win = isSolved(next);
-    // At the gate the ninja walks on through it, a step and a half more.
-    const walking = win ? path.length + 1.5 : path.length;
-    setSteps(walking);
-    setWait(walking * STEP_MS);
-    setStore({ round: next });
-    path.forEach((_, i) => later(i * STEP_MS, () => plop('step')));
-    // The cloud drifted off after the walk and left the ninja in the sun.
-    if (next.ninja !== to) {
-      setOut(to);
-      later(walking * STEP_MS, () => runBack(to, next.ninja, SUN_MS));
-    }
-    if (win) {
+    setPos(from);
+    setStore({ round: { ...round, ninja: c } });
+    const there = along(from, path, STEP_MS);
+    later(there, () => setPos(null));
+    if (isSolved({ ...round, ninja: c })) {
+      // On through the gate, then the cheer.
+      const through = there + 2 * STEP_MS;
+      setCardWait(through);
       setStats({
         solved: stats.solved + 1,
         won: won.includes(round.level.id) ? won : [...won, round.level.id],
       });
-      later(walking * STEP_MS, () => {
+      later(through, () => {
         setCelebrating(true);
         cheer();
       });
@@ -202,24 +172,24 @@ export default function App() {
   const onSun = (s: Sun) => {
     if (solved || busy || s === round.sun) return;
     plop('sun');
-    setWait(0);
     const next = moveSun(round, s);
     setStore({ round: next });
-    // Left out in the sun: the ninja stays put while the sun goes over,
-    // the samurai wakes, and the ninja runs back into the shadow.
-    if (next.ninja !== round.ninja) runBack(round.ninja, next.ninja, SUN_MS);
+    if (next.ninja === round.ninja) return;
+    // Left out in the sun: the ninja stays put while the sun goes round,
+    // then the samurai wakes and it runs into the shadow.
+    setStepMs(STEP_MS);
+    setPos(round.ninja);
+    caught(round.ninja, runWay(round.level, round.ninja, next.ninja), SUN_MS);
   };
 
   const start = (id: string) => {
-    setGame((g) => g + 1);
     timers.current.forEach(clearTimeout);
     timers.current = [];
-    setSteps(0);
-    setOut(null);
-    setAct(null);
-    setStuck(null);
+    setGame((g) => g + 1);
+    setPos(null);
     setAwake(0);
     setSquint(0);
+    setCardWait(0);
     setCelebrating(false);
     setStore({ round: newRound(levelById(id) ?? LEVELS[0]) });
     if (view !== 'play') setView('play');
@@ -291,13 +261,11 @@ export default function App() {
             <Board
               key={`${round.level.id}-${game}`}
               round={round}
-              steps={steps}
+              at={pos ?? round.ninja}
+              stepMs={stepMs}
+              gone={solved && pos === null}
               squint={squint}
               awake={awake}
-              out={out}
-              act={act}
-              stuck={stuck}
-              wait={wait}
               onCell={onCell}
               onSun={onSun}
               t={t}
@@ -307,7 +275,7 @@ export default function App() {
           {solved ? (
             <section
               className='card solved'
-              style={{ animationDelay: `${steps * STEP_MS}ms` }}
+              style={{ animationDelay: `${cardWait}ms` }}
             >
               <h2>{last ? t.finale : t.solved}</h2>
               <div className='solved__actions'>
@@ -335,7 +303,7 @@ export default function App() {
               <button
                 className='tool'
                 onClick={() => start(round.level.id)}
-                disabled={isFresh(round) || busy}
+                disabled={fresh || busy}
                 aria-label={t.clear}
               >
                 <Icon name='clear' />

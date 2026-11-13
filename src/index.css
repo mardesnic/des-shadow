@@ -20,6 +20,8 @@
   --light: #ffd66b;
   --cloud: #ffffff;
   --ground: #7d766b;
+  --garden: #a9cf8a;
+  --garden-dark: #8dbb6c;
   --block: #8f887c;
   --joint: #9e978b;
   --stone: #d6d1c7;
@@ -83,6 +85,8 @@
     --light: #f5c451;
     --cloud: #aeb6c6;
     --ground: #34312c;
+    --garden: #2c3f2a;
+    --garden-dark: #243523;
     --block: #403c36;
     --joint: #4a4640;
     --stone: #8a857c;
@@ -479,8 +483,31 @@ h2 {
   fill: var(--joint);
 }
 
+.garden {
+  fill: var(--garden);
+}
+
+/* Each side's shadows fade into the next, as the sun goes round. */
 .shadows {
-  opacity: 0.68;
+  opacity: 0.62;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.shadows--off {
+  opacity: 0;
+}
+
+.tower__base {
+  fill: var(--roof);
+}
+
+.bamboo__ground {
+  fill: var(--garden-dark);
+}
+
+/* Through the gate, the ninja fades away. */
+.ninja--gone {
+  opacity: 0;
 }
 
 /* Strong enough to beat each thing's own colours. */
@@ -652,7 +679,7 @@ h2 {
 }
 
 .ninja {
-  transition-property: transform;
+  transition-property: transform, opacity;
   transition-timing-function: linear;
 }
 

@@ -2,139 +2,99 @@ import { describe, expect, it } from 'vitest';
 
 import {
   LEVELS,
-  blow,
+  cell,
   dark,
-  deadEnds,
   hideFrom,
   isSolved,
-  levelById,
   moveSun,
   newRound,
-  push,
-  pushTo,
+  open,
+  solution,
   solve,
-  tap,
   tryWalk,
   walk,
-  type Round,
+  type Level,
 } from './game';
 
+// A small town for the tests:
+//
+//   . . G        the gate over the top right cell
+//   . T .        a tower two cells tall in the middle
+//   B . r        bamboo on the left, a cherry tree on the right
+//   N . .        the ninja starts at the bottom left
+const TOWN: Level = {
+  id: 'test',
+  world: 'town',
+  width: 3,
+  rows: 4,
+  things: [
+    { kind: 'tower', x: 1, y: 1, height: 2 },
+    { kind: 'bamboo', x: 0, y: 2, height: 1 },
+    { kind: 'tree', x: 2, y: 2, height: 2 },
+  ],
+  start: 9,
+  gate: 2,
+  sun: 'north',
+};
+const c = (x: number, y: number) => cell(TOWN, x, y);
+const cells = (...xs: number[]) => xs.sort((a, b) => a - b);
 const sorted = (s: Set<number>) => [...s].sort((a, b) => a - b);
-const round = (id: string) => newRound(levelById(id)!);
-const at = (r: Round, sun: Round['sun']) => ({ ...r, sun });
 
 describe('shadows', () => {
-  const r = round('town-1');
-
-  it('are only under things at noon', () => {
-    expect(sorted(dark(r))).toEqual([0, 3, 5]);
-  });
-
-  it('fall right in the morning, as long as each thing is tall', () => {
-    expect(sorted(dark(at(r, 'morning')))).toEqual([0, 1, 3, 4, 5, 6, 7, 8]);
-  });
-
-  it('fall left in the evening and stop at the edge', () => {
-    expect(sorted(dark(at(r, 'evening')))).toEqual([0, 1, 2, 3, 4, 5]);
+  it('fall away from the sun, as long as each thing is tall', () => {
+    // Sun at the top: shadows fall down.
+    expect(sorted(dark(TOWN, 'north'))).toEqual(
+      cells(c(1, 1), c(1, 2), c(1, 3), c(0, 2), c(0, 3), c(2, 2), c(2, 3))
+    );
+    // Sun on the right: shadows fall left, and stop at the edge.
+    expect(sorted(dark(TOWN, 'east'))).toEqual(
+      cells(c(1, 1), c(0, 1), c(0, 2), c(2, 2), c(1, 2))
+    );
   });
 });
 
 describe('walking', () => {
-  it('goes only through shadow', () => {
-    const r = round('town-1');
-    expect(walk(r, 3)).toBe(r);
-    expect(walk(moveSun(r, 'evening'), 5).ninja).toBe(5);
+  it('cannot go into a tower or bamboo, but can go under a tree', () => {
+    expect(open(TOWN, c(1, 1))).toBe(false);
+    expect(open(TOWN, c(0, 2))).toBe(false);
+    expect(open(TOWN, c(2, 2))).toBe(true);
+  });
+
+  it('goes round the walls, through the shadow', () => {
+    const r = newRound(TOWN);
+    // Sun at the top: the bottom row is all in shadow.
+    expect(tryWalk(r, c(2, 3))).toEqual({ path: [c(1, 3), c(2, 3)], ok: true });
+    expect(walk(r, c(2, 2)).ninja).toBe(c(2, 2));
   });
 
   it('steps into the first sunny cell when the sun is in the way', () => {
-    const r = round('town-1');
-    expect(tryWalk(r, 4)).toEqual({ path: [1], ok: false });
-    expect(tryWalk(moveSun(r, 'evening'), 4)).toEqual({
-      path: [1, 2, 3, 4],
-      ok: true,
-    });
-    expect(tryWalk(r, 0)).toBeNull();
+    const r = { ...newRound(TOWN), ninja: c(2, 2) };
+    expect(tryWalk(r, c(2, 0))).toEqual({ path: [c(2, 1)], ok: false });
+    expect(tryWalk(r, c(1, 1))).toBeNull();
   });
 
-  it('runs back into the shadow when the sun leaves it in the open', () => {
-    const r = { ...round('town-1'), sun: 'morning' as const, ninja: 4 };
-    expect(moveSun(r, 'noon').ninja).toBe(3);
-    expect(moveSun(r, 'evening').ninja).toBe(4);
-    expect(hideFrom({ ...r, sun: 'noon' }, 1)).toBe(0);
+  it('runs into the nearest shadow when the sun leaves it in the open', () => {
+    const r = { ...newRound(TOWN), ninja: c(1, 3) };
+    expect(moveSun(r, 'east').ninja).toBe(c(1, 2));
+    expect(hideFrom(TOWN, 'north', c(1, 3))).toBe(c(1, 3));
   });
 
   it('is solved at the gate', () => {
-    let r = moveSun(round('town-1'), 'evening');
-    r = walk(r, 5);
-    r = moveSun(r, 'morning');
-    r = walk(r, 8);
-    expect(isSolved(r)).toBe(true);
-  });
-});
-
-describe('the new things', () => {
-  it('a cart rolls a cell away from the ninja', () => {
-    let r = { ...round('cart-1'), ninja: 3 };
-    expect(pushTo(r, 4)).toBe(5);
-    expect(pushTo({ ...r, ninja: 2 }, 4)).toBeNull();
-    r = push(r, 4);
-    expect(r.things[2].x).toBe(5);
-    // Not into the bamboo: it only gives a jolt.
-    r = push({ ...r, ninja: 4 }, 5);
-    expect(r.things[2].x).toBe(6);
-    expect(tap({ ...r, ninja: 5 }, 6)?.type).toBe('stuck');
-    // Not into the gate either.
-    expect(
-      pushTo({ ...r, ninja: 6, things: [{ ...r.things[2], x: 7 }] }, 7)
-    ).toBeNull();
-  });
-
-  it('the ninja walks up to a cart, never onto it', () => {
-    const r = moveSun(round('cart-1'), 'evening');
-    const move = tap(r, 4);
-    expect(move?.type === 'walk' && move.to).toBe(3);
-    expect(move?.next.ninja).toBe(3);
-  });
-
-  it('the cloud drifts a cell with every move and turns at the end', () => {
-    let r = round('cloud-1');
-    const xs = [];
-    for (let i = 0; i < 5; i++) {
-      r = moveSun(r, r.sun === 'morning' ? 'evening' : 'morning');
-      xs.push(r.cloud!.x);
-    }
-    expect(xs).toEqual([4, 5, 6, 5, 4]);
-  });
-
-  it('the cloud stays put once the ninja is through the gate', () => {
-    let r = moveSun(round('cloud-1'), 'morning');
-    r = walk(r, 5);
-    const x = r.cloud!.x;
-    r = walk(r, 8);
-    expect(isSolved(r)).toBe(true);
-    expect(r.cloud!.x).toBe(x);
-    expect(dark(r).has(4) && dark(r).has(5)).toBe(true);
-  });
-
-  it('at night only the lanterns light the street, and blow out', () => {
-    let r = round('night-1');
-    expect(sorted(dark(r))).toEqual([0, 1, 8]);
-    expect(tap(r, 3)?.type).toBe('walk');
-    r = walk(r, 1);
-    expect(tap(r, 3)?.type).toBe('blow');
-    r = blow(r, 3);
-    expect(sorted(dark(r))).toEqual([0, 1, 2, 3, 4, 8]);
+    let r = walk(newRound(TOWN), c(2, 2));
+    r = moveSun(r, 'south');
+    expect(isSolved(walk(r, c(2, 0)))).toBe(true);
   });
 });
 
 describe('every level', () => {
   for (const level of LEVELS)
-    it(`${level.id} can be solved, and never gets stuck`, () => {
-      expect(solve(level)).toBeGreaterThan(1);
-      expect(deadEnds(level)).toBe(0);
+    it(`${level.id} can be solved, and the ninja starts in shadow`, () => {
+      expect(solve(level)).toBeGreaterThan(3);
+      expect(dark(level, level.sun).has(level.start)).toBe(true);
     });
 
-  it('the first takes four taps', () => {
-    expect(solve(LEVELS[0])).toBe(4);
+  it('the first needs the sun on every side', () => {
+    const suns = new Set(solution(LEVELS[0])!.map((r) => r.sun));
+    expect(suns.size).toBe(4);
   });
 });
