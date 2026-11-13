@@ -38,6 +38,63 @@ function reach(sun: Sun) {
   return 0.001;
 }
 
+// The blobs of a cherry tree's crown: where each is, from the left and from
+// the top of the tree, and how big.
+const CROWN = [
+  [5, 4.6, 4.4],
+  [2, 6.2, 3.4],
+  [8, 6.2, 3.4],
+  [0.2, 8.8, 2.6],
+  [9.8, 8.8, 2.6],
+  [3.4, 9.4, 3],
+  [6.6, 9.4, 3],
+  [5, 7.2, 3.6],
+];
+
+// An old town's street: paving stones on top, in two staggered rows per
+// cell, and big blocks of stone under them.
+function Paving({ width }: { width: number }) {
+  const stones: [number, number, number][] = [];
+  for (let c = 0; c < width; c++) {
+    stones.push([c * CELL, GROUND + 0.5, CELL]);
+    stones.push([c * CELL - CELL / 2, GROUND + SURFACE / 2 + 0.2, CELL]);
+  }
+  stones.push([width * CELL - CELL / 2, GROUND + SURFACE / 2 + 0.2, CELL]);
+  return (
+    <g>
+      <rect
+        className='surface'
+        x={0}
+        y={GROUND}
+        width={width * CELL}
+        height={SURFACE}
+      />
+      {stones.map(([sx, sy, sw], i) => (
+        <rect
+          key={i}
+          className='stone'
+          x={sx + 0.35}
+          y={sy}
+          width={sw - 0.7}
+          height={SURFACE / 2 - 0.9}
+          rx={0.9}
+        />
+      ))}
+      {Array.from({ length: Math.ceil(width / 2) + 1 }, (_, i) => (
+        <rect
+          key={i}
+          className='block'
+          x={i * CELL * 2 - CELL + 0.4}
+          y={GROUND + SURFACE + 0.6}
+          width={CELL * 2 - 0.8}
+          height={HEIGHT - GROUND - SURFACE - 1.2}
+          rx={0.8}
+        />
+      ))}
+    </g>
+  );
+}
+
 // How much narrower a shadow is across the ground than the thing is wide,
 // as if the top of the ground were seen from a little above.
 const FLAT = 0.6;
@@ -72,7 +129,7 @@ function Shadow({ thing, sun }: { thing: Thing; sun: Sun }) {
           cx={base}
           cy={mid}
           rx={CELL / 2}
-          ry={(CELL / 2) * FLAT * (thing.kind === 'bush' ? 1 : 0.7)}
+          ry={(CELL / 2) * FLAT * (thing.kind === 'bamboo' ? 1 : 0.7)}
         />
       )}
       <g
@@ -95,39 +152,117 @@ function Shadow({ thing, sun }: { thing: Thing; sun: Sun }) {
 function ThingShape({ thing, flat }: { thing: Thing; flat?: boolean }) {
   const x = thing.x * CELL;
   const top = GROUND - thing.height * CELL;
-  if (thing.kind === 'bush')
+  // A clump of bamboo: green stalks with a ring at each joint, and a few
+  // thin leaves. Nothing reaches above its height.
+  if (thing.kind === 'bamboo') {
+    const stalks = [
+      [2, top + 1.5],
+      [5, top],
+      [8, top + 2.5],
+    ];
     return (
-      <g className='bush'>
-        <circle cx={x + 3} cy={GROUND - 3} r={3.5} />
-        <circle cx={x + 7} cy={GROUND - 3} r={3.5} />
-        <circle cx={x + 5} cy={GROUND - 6} r={3.8} />
+      <g className='bamboo'>
+        {/* Its shadow is the whole clump, not three thin lines. */}
+        {flat && (
+          <rect
+            x={x + 1}
+            y={top + 1}
+            width={8}
+            height={GROUND - top - 1}
+            rx={2}
+          />
+        )}
+        {stalks.map(([sx, sy], i) => (
+          <g key={i}>
+            <rect
+              className='bamboo__stalk'
+              x={x + sx - 0.7}
+              y={sy}
+              width={1.4}
+              height={GROUND - sy}
+              rx={0.5}
+            />
+            {!flat &&
+              [3, 6].map((d) => (
+                <rect
+                  key={d}
+                  className='bamboo__joint'
+                  x={x + sx - 0.85}
+                  y={sy + d}
+                  width={1.7}
+                  height={0.45}
+                />
+              ))}
+          </g>
+        ))}
+        {[
+          `M${x + 2} ${top + 4} q-2 -0.6 -2.8 0.6 q1.6 0.4 2.8 -0.6`,
+          `M${x + 5} ${top + 2.5} q2 -0.8 3 0.2 q-1.6 0.6 -3 -0.2`,
+          `M${x + 5} ${top + 5.5} q-2 -0.4 -2.6 0.8 q1.4 0.2 2.6 -0.8`,
+          `M${x + 8} ${top + 5} q2 -0.6 2.6 0.6 q-1.4 0.3 -2.6 -0.6`,
+        ].map((d, i) => (
+          <path key={i} className='bamboo__leaf' d={d} />
+        ))}
       </g>
     );
+  }
   // A cherry tree in bloom: a dark trunk and a cloud of pink blossom.
   if (thing.kind === 'tree')
     return (
       <g className='tree'>
-        <path
-          className='tree__trunk'
-          d={`M${x + 4} ${GROUND} L${x + 4.4} ${top + 9} L${x + 3} ${top + 6.5} L${x + 4.9} ${top + 8} L${x + 5.6} ${top + 6} L${x + 5.7} ${top + 9} L${x + 6} ${GROUND} Z`}
-        />
-        <circle className='tree__crown' cx={x + 5} cy={top + 5} r={4} />
-        <circle className='tree__crown' cx={x + 2} cy={top + 7} r={3} />
-        <circle className='tree__crown' cx={x + 8} cy={top + 7} r={3} />
-        {!flat && (
-          <>
-            <circle className='tree__petal' cx={x + 3.5} cy={top + 4} r={0.7} />
-            <circle className='tree__petal' cx={x + 7} cy={top + 5} r={0.7} />
-            <circle className='tree__petal' cx={x + 5} cy={top + 7.5} r={0.7} />
-            <circle className='tree__petal' cx={x + 1.5} cy={top + 8} r={0.6} />
-            <circle
-              className='tree__petal'
-              cx={x + 8.6}
-              cy={top + 8.2}
-              r={0.6}
-            />
-          </>
+        {/* The shadow's trunk is wider, as it would look from the sun. */}
+        {flat ? (
+          <rect
+            x={x + 2}
+            y={top + 6}
+            width={6}
+            height={GROUND - top - 6}
+            rx={1}
+          />
+        ) : (
+          <path
+            className='tree__trunk'
+            d={`M${x + 2.8} ${GROUND} Q${x + 3.6} ${GROUND - 2} ${x + 3.5} ${top + 9} L${x + 2} ${top + 6.5} L${x + 4.6} ${top + 7.6} L${x + 5.2} ${top + 6} L${x + 6.2} ${top + 7.8} L${x + 6.5} ${top + 9} Q${x + 6.4} ${GROUND - 2} ${x + 7.2} ${GROUND} Z`}
+          />
         )}
+        {/* A full crown, from blobs that overlap; none above the top of
+            the tree, so its shadow is as long as the tree is tall. First a
+            slightly bigger blob in the edge colour under each, so only the
+            outline of the whole crown shows, not every blob. */}
+        {(['edge', 'crown'] as const).map((part) =>
+          CROWN.map(([cx, cy, r], i) => (
+            <circle
+              key={`${part}${i}`}
+              className={`tree__${part}`}
+              cx={x + cx}
+              cy={top + cy}
+              r={part === 'edge' ? r + 0.5 : r}
+            />
+          ))
+        )}
+        {!flat &&
+          [
+            [3.4, 3.4],
+            [6.6, 2.6],
+            [5, 5.4],
+            [1.4, 6.4],
+            [8.6, 5.8],
+            [2.8, 8.6],
+            [7.4, 8],
+            [0.4, 9.4],
+            [9.8, 9.8],
+            [5.2, 10.4],
+            [4, 7.4],
+            [6.4, 7],
+          ].map(([cx, cy], i) => (
+            <circle
+              key={i}
+              className='tree__petal'
+              cx={x + cx}
+              cy={top + cy}
+              r={i % 3 ? 0.55 : 0.75}
+            />
+          ))}
       </g>
     );
   // A narrow pagoda: white walls between red posts, and a dark roof with
@@ -364,7 +499,7 @@ export function Board({
     >
       <rect className='sky' x={0} y={0} width={w} height={GROUND} />
 
-      {/* The ground, its sunny top, and the shadows lying on it. */}
+      {/* The stone ground, and the shadows lying on it. */}
       <rect
         className='ground'
         x={0}
@@ -372,7 +507,7 @@ export function Board({
         width={w}
         height={HEIGHT - GROUND}
       />
-      <rect className='surface' x={0} y={GROUND} width={w} height={SURFACE} />
+      <Paving width={level.width} />
       {/* One see-through layer, so two shadows on top of each other are
           no darker than one. */}
       <g className='shadows'>

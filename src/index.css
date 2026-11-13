@@ -9,8 +9,10 @@
   --sky-morning: #c9e2f7;
   --sky-noon: #bfe3ff;
   --sky-evening: #d3def4;
-  --ground: #b8915a;
-  --sand: #f2d58c;
+  --ground: #7d766b;
+  --block: #8f887c;
+  --joint: #9e978b;
+  --stone: #d6d1c7;
   --shadow: #282c46;
   --sun: #ffc61a;
   --sun-ray: #ffa94d;
@@ -61,8 +63,10 @@
     --sky-morning: #2a3e58;
     --sky-noon: #26405c;
     --sky-evening: #2e3b5a;
-    --ground: #5e4a2d;
-    --sand: #b3974a;
+    --ground: #34312c;
+    --block: #403c36;
+    --joint: #4a4640;
+    --stone: #8a857c;
     --shadow: #080a14;
     --sun: #ffd43b;
     --sun-ray: #f59f00;
@@ -280,12 +284,20 @@ h2 {
   fill: var(--ground);
 }
 
+.block {
+  fill: var(--block);
+}
+
+.stone {
+  fill: var(--stone);
+}
+
 .surface {
-  fill: var(--sand);
+  fill: var(--joint);
 }
 
 .shadows {
-  opacity: 0.55;
+  opacity: 0.68;
 }
 
 /* Strong enough to beat each thing's own colours. */
@@ -300,16 +312,21 @@ h2 {
   transition: transform 0.5s ease-in-out;
 }
 
-.bush circle {
+.bamboo__stalk {
   fill: var(--leaf);
-  stroke: var(--leaf-dark);
-  stroke-width: 0.6;
+}
+
+.bamboo__joint,
+.bamboo__leaf {
+  fill: var(--leaf-dark);
 }
 
 .tree__crown {
   fill: var(--blossom);
-  stroke: var(--blossom-edge);
-  stroke-width: 0.5;
+}
+
+.tree__edge {
+  fill: var(--blossom-edge);
 }
 
 .tree__petal {

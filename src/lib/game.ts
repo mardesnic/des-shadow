@@ -8,7 +8,7 @@ export type Sun = 'morning' | 'noon' | 'evening';
 export const SUNS: readonly Sun[] = ['morning', 'noon', 'evening'];
 
 export type Thing = {
-  kind: 'bush' | 'tree' | 'tower';
+  kind: 'bamboo' | 'tree' | 'tower';
   x: number;
   // How tall it is, in cells; its shadow is just as long.
   height: number;
@@ -35,7 +35,7 @@ export type Round = {
 export const FIRST: Level = {
   width: 9,
   things: [
-    { kind: 'bush', x: 0, height: 1 },
+    { kind: 'bamboo', x: 0, height: 1 },
     { kind: 'tree', x: 3, height: 2 },
     { kind: 'tower', x: 5, height: 3 },
   ],
