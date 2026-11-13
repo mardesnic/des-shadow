@@ -8,11 +8,11 @@ import {
   isSolved,
   moveSun,
   newRound,
+  nextSun,
   open,
   SUNS,
   quarters,
   solution,
-  seenAfter,
   solve,
   sunsOf,
   tryWalk,
@@ -98,9 +98,6 @@ describe('walking', () => {
       sun: 'east',
       ninja: TOWN.start,
     });
-    // The sun at the right, on the way to the moon, lights it too.
-    expect(seenAfter(r, 'moon')).toBe(1);
-    expect(moveSun(r, 'moon').ninja).toBe(TOWN.start);
     // In the tree's shadow it stays hidden from the right into the night.
     const hid = { ...r, sun: 'east' as const, ninja: c(1, 2) };
     expect(moveSun(hid, 'moon')).toEqual({ ...hid, sun: 'moon' });
@@ -116,8 +113,19 @@ describe('walking', () => {
 
   it('is solved at the gate', () => {
     let r = walk(newRound(NIGHT), c(2, 2));
-    r = moveSun(r, 'moon');
+    r = moveSun(moveSun(r, 'east'), 'moon');
+    expect(r.sun).toBe('moon');
     expect(isSolved(walk(r, c(2, 0)))).toBe(true);
+  });
+});
+
+describe('the sun', () => {
+  it('goes on one step at a time, clockwise, past the bottom with no moon', () => {
+    expect(nextSun(NIGHT, 'east')).toBe('moon');
+    expect(nextSun(TOWN, 'east')).toBe('west');
+    expect(nextSun(TOWN, 'west')).toBe('north');
+    const r = newRound(TOWN);
+    expect(moveSun(r, 'west')).toBe(r);
   });
 });
 

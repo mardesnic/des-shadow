@@ -96,7 +96,7 @@ export const LEVELS: Level[] = [
     ],
     start: 16,
     gate: 0,
-    sun: 'west',
+    sun: 'north',
   },
   {
     id: 'pagoda-2',
@@ -104,12 +104,12 @@ export const LEVELS: Level[] = [
     width: 4,
     rows: 5,
     things: [
-      { kind: 'tower', x: 0, y: 0, height: 3 },
-      { kind: 'tree', x: 1, y: 1, height: 1 },
-      { kind: 'tower', x: 1, y: 2, height: 2 },
+      { kind: 'tower', x: 3, y: 0, height: 3 },
+      { kind: 'tree', x: 3, y: 1, height: 2 },
+      { kind: 'tower', x: 2, y: 2, height: 3 },
     ],
     start: 18,
-    gate: 3,
+    gate: 0,
     sun: 'north',
   },
   {
@@ -124,7 +124,7 @@ export const LEVELS: Level[] = [
     ],
     start: 26,
     gate: 4,
-    sun: 'east',
+    sun: 'north',
   },
   {
     id: 'pagoda-4',
@@ -155,7 +155,7 @@ export const LEVELS: Level[] = [
     ],
     start: 29,
     gate: 0,
-    sun: 'north',
+    sun: 'east',
   },
   {
     id: 'town-1',
@@ -177,7 +177,7 @@ export const LEVELS: Level[] = [
     ],
     start: 42,
     gate: 5,
-    sun: 'east',
+    sun: 'moon',
   },
 ];
 
@@ -322,6 +322,13 @@ export function walk(r: Round, to: number): Round {
 export const runWay = (level: Level, from: number, to: number) =>
   route(level, from, to, (c) => open(level, c)) ?? [to];
 
+// The only side the sun can go to next: one step on, clockwise, past the
+// bottom where there is no moon.
+export function nextSun(level: Level, sun: Sun): Sun {
+  const suns = sunsOf(level);
+  return suns[(suns.indexOf(sun) + 1) % suns.length];
+}
+
 // Whether the samurai sees the ninja as the sun goes round to a new side:
 // after how many quarters, or null if never. Every side the sun goes by on
 // the way counts, not only the one it stops at; only where there is no
@@ -339,7 +346,7 @@ export function seenAfter(r: Round, to: Sun): number | null {
 // The sun moves. If on the way it leaves the ninja in the light, the
 // samurai wakes and the ninja runs back to the start, under the shelter.
 export function moveSun(r: Round, sun: Sun): Round {
-  if (sun === r.sun || !sunsOf(r.level).includes(sun)) return r;
+  if (sun !== nextSun(r.level, r.sun)) return r;
   return {
     ...r,
     sun,
@@ -351,7 +358,7 @@ export function moveSun(r: Round, sun: Sun): Round {
 function moves(r: Round): Round[] {
   const { level } = r;
   const all = [
-    ...sunsOf(level).map((s) => moveSun(r, s)),
+    moveSun(r, nextSun(level, r.sun)),
     ...Array.from({ length: level.width * level.rows }, (_, c) => walk(r, c)),
   ];
   return all.filter((o) => o !== r);

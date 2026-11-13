@@ -578,10 +578,6 @@ h2 {
   fill: var(--moon);
 }
 
-.spot__ring--moon {
-  stroke: var(--moon);
-}
-
 .stone--goal {
   fill: var(--gate);
   stroke: var(--gold);
@@ -815,23 +811,34 @@ h2 {
   transform: scale(1.08, 0.72);
 }
 
-.column,
-.spot__hit {
+.column {
   fill: transparent;
   cursor: pointer;
-}
-
-.spot__ring {
-  fill: none;
-  stroke: var(--sun);
-  stroke-width: 0.6;
-  stroke-dasharray: 1.2 1.2;
-  pointer-events: none;
 }
 
 .sun {
   pointer-events: none;
   transition: transform 0.5s ease-in-out;
+}
+
+.sun__tap {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.sun__hit {
+  fill: transparent;
+}
+
+/* The arrow round the sun, the way it goes when tapped. */
+.hint {
+  fill: none;
+  stroke: var(--sun-ray);
+  stroke-width: 0.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+  opacity: 0.85;
 }
 
 .sun__disc {

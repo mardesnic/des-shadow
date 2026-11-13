@@ -10,6 +10,7 @@ import {
   QUARTER_MS,
   gateCell,
   xy,
+  nextSun,
   sunsOf,
   type Level,
   type Round,
@@ -26,9 +27,9 @@ export const STEP_MS = 220;
 // enough for the sun on each side and the gate at the top.
 const CELL = 10;
 const ROW = 8;
-const SIDE = 16;
+const SIDE = 18;
 const TOP = 23;
-const BOTTOM = 14;
+const BOTTOM = 18;
 
 // The sun goes round the town on a circle, so it moves from side to side
 // over the corners instead of cutting across; just outside the town.
@@ -65,6 +66,23 @@ function byMoon(from: Sun, to: Sun): number | null {
     if (SUNS[(SUNS.indexOf(from) + k) % SUNS.length] === 'moon') return k;
   return null;
 }
+
+// A little arrow round the far side of the sun, the way it goes when
+// tapped: clockwise. Drawn with the sun at the top, it turns with it.
+const HINT = (() => {
+  const r = 10.5;
+  const at = (deg: number, rr = r) => {
+    const a = (deg * Math.PI) / 180;
+    return `${(rr * Math.sin(a)).toFixed(2)} ${(-rr * Math.cos(a)).toFixed(2)}`;
+  };
+  return [
+    `M${at(-55)}`,
+    `A${r} ${r} 0 0 1 ${at(55)}`,
+    `M${at(40, r + 2.2)}`,
+    `L${at(55)}`,
+    `L${at(40, r - 2.2)}`,
+  ].join(' ');
+})();
 
 function place(round: Round, c: number) {
   const [x, y] = xy(round.level, c);
@@ -842,28 +860,6 @@ export function Board({
         );
       })}
 
-      {/* The four sides the sun can be on, and the sun, turned round. */}
-      {sunsOf(level).map((s) => {
-        const a = (ANGLE[s] * Math.PI) / 180;
-        const sx = centre.x + SUN_R * Math.sin(a);
-        const sy = centre.y - SUN_R * Math.cos(a);
-        return (
-          <g key={s} className='spot' onClick={() => onSun(s)}>
-            <circle className='spot__hit' cx={sx} cy={sy} r={8} />
-            {s !== round.sun && (
-              <circle
-                className={
-                  s === 'moon' ? 'spot__ring spot__ring--moon' : 'spot__ring'
-                }
-                cx={sx}
-                cy={sy}
-                r={4.5}
-              />
-            )}
-            <title>{t.suns[s]}</title>
-          </g>
-        );
-      })}
       <g
         className='sun'
         style={{
@@ -872,7 +868,14 @@ export function Board({
           transitionDuration: `${turn * QUARTER_MS}ms`,
         }}
       >
-        <g transform={`translate(${centre.x} ${centre.y - SUN_R})`}>
+        <g
+          transform={`translate(${centre.x} ${centre.y - SUN_R})`}
+          className='sun__tap'
+          onClick={() => onSun(nextSun(level, round.sun))}
+        >
+          <circle className='sun__hit' r={11} />
+          <path className='hint' d={HINT} />
+          <title>{t.suns[nextSun(level, round.sun)]}</title>
           {Array.from({ length: 8 }, (_, i) => (
             <path
               key={i}
