@@ -38,8 +38,6 @@ type View = 'play' | 'levels' | 'settings';
 // How long the ninja stands frozen in the sun before it runs back.
 // How long the ninja shakes its head at a way out in the sun.
 const SHAKE_MS = 450;
-// A try-out: with ?top in the address the town is seen straight from above.
-const TOP_VIEW = new URLSearchParams(location.search).has('top');
 const FROZEN_MS = 350;
 
 // A saved round, with its level as the game has it now; a round saved by
@@ -300,7 +298,6 @@ export default function App() {
               stepMs={stepMs}
               gone={solved && pos === null}
               squint={squint}
-              top={TOP_VIEW}
               onCell={onCell}
               t={t}
             />
