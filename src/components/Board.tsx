@@ -32,8 +32,8 @@ const BOTTOM = 12;
 
 // The sun goes round the town on a circle, so it moves from side to side
 // over the corners instead of cutting across; just outside the town.
-const sunR = (level: Level) =>
-  Math.max(level.width * CELL, level.rows * ROW) / 2 + 6;
+const sunR = (level: Level, row: number) =>
+  Math.max(level.width * CELL, level.rows * row) / 2 + 6;
 const ANGLE: Record<Sun, number> = {
   north: 0,
   east: 90,
@@ -64,13 +64,6 @@ function byMoon(from: Sun, to: Sun): number | null {
   for (let k = 1; k <= q; k++)
     if (SUNS[(SUNS.indexOf(from) + k) % SUNS.length] === 'moon') return k;
   return null;
-}
-
-function place(round: Round, c: number) {
-  const [x, y] = xy(round.level, c);
-  const left = SIDE + x * CELL;
-  const top = TOP + y * ROW;
-  return { left, top, cx: left + CELL / 2, foot: top + ROW - 1.5 };
 }
 
 // A pagoda seen from the front and a little above: a white wall between red
@@ -313,6 +306,211 @@ function Shelter() {
   );
 }
 
+// The same things seen straight from above, each in the middle of its
+// cell: a pagoda as its roofs one inside the other, a floor each, the spire
+// in the middle.
+function TopTower({ height }: { height: number }) {
+  return (
+    <g className='tower'>
+      <rect
+        className='tower__base'
+        x={-4.6}
+        y={-4.6}
+        width={9.2}
+        height={9.2}
+        rx={1}
+      />
+      {Array.from({ length: height }, (_, i) => {
+        const s = 8.4 - i * 2.4;
+        return (
+          <g key={i}>
+            <rect
+              className='tower__post'
+              x={-s / 2}
+              y={-s / 2}
+              width={s}
+              height={s}
+              rx={1}
+            />
+            <rect
+              className='tower__roof'
+              x={-s / 2 + 0.5}
+              y={-s / 2 + 0.5}
+              width={s - 1}
+              height={s - 1}
+              rx={0.8}
+            />
+          </g>
+        );
+      })}
+      <circle className='tower__spire-ball' r={0.9} />
+    </g>
+  );
+}
+
+function TopBamboo() {
+  const stalks = [
+    [-2.6, -2.4],
+    [0.2, -3],
+    [2.8, -1.8],
+    [-3, 0.6],
+    [-0.6, 0],
+    [2, 1],
+    [-1.8, 2.8],
+    [1, 3],
+  ];
+  return (
+    <g className='bamboo'>
+      <circle className='bamboo__ground' r={4.6} />
+      {stalks.map(([x, y], i) => (
+        <g key={i}>
+          <path
+            className='bamboo__leaf'
+            d={`M${x} ${y} q${i % 2 ? 2 : -2} -0.8 ${i % 2 ? 2.4 : -2.4} 0.6 q${i % 2 ? -1.2 : 1.2} 0.2 ${i % 2 ? -2.4 : 2.4} -0.6`}
+          />
+          <circle className='bamboo__stalk' cx={x} cy={y} r={0.95} />
+          <circle className='bamboo__joint' cx={x} cy={y} r={0.4} />
+        </g>
+      ))}
+    </g>
+  );
+}
+
+const TOP_CROWN = [
+  [0, 0, 2.6],
+  [-2.3, -1.6, 2],
+  [2.3, -1.6, 2],
+  [-2.2, 1.8, 2],
+  [2.2, 1.8, 2],
+  [0, -2.8, 1.8],
+  [0, 2.9, 1.8],
+];
+
+function TopTree() {
+  return (
+    <g className='tree'>
+      {(['edge', 'crown'] as const).map((part) =>
+        TOP_CROWN.map(([cx, cy, r], i) => (
+          <circle
+            key={`${part}${i}`}
+            className={`tree__${part}`}
+            cx={cx}
+            cy={cy}
+            r={part === 'edge' ? r + 0.45 : r}
+          />
+        ))
+      )}
+      {[
+        [-1.2, -0.8],
+        [1.4, 0.6],
+        [-2.6, 1.6],
+        [2.6, -1.8],
+        [0.2, 2.4],
+        [0, -2.6],
+      ].map(([cx, cy], i) => (
+        <circle
+          key={i}
+          className='tree__petal'
+          cx={cx}
+          cy={cy}
+          r={i % 3 ? 0.45 : 0.6}
+        />
+      ))}
+    </g>
+  );
+}
+
+function TopLantern() {
+  return (
+    <g className='lantern'>
+      <rect
+        className='lantern__stone'
+        x={-3}
+        y={-3}
+        width={6}
+        height={6}
+        rx={1.2}
+      />
+      <rect
+        className='lantern__window'
+        x={-1.6}
+        y={-1.6}
+        width={3.2}
+        height={3.2}
+        rx={0.6}
+      />
+      <circle className='lantern__stone' r={0.9} />
+    </g>
+  );
+}
+
+// The shelter from above: its four red posts and the edge of its roof, so
+// the ninja under it still shows.
+function TopShelter() {
+  return (
+    <g className='shelter'>
+      <rect
+        className='shelter__eave'
+        x={-4.3}
+        y={-4.3}
+        width={8.6}
+        height={8.6}
+        rx={1}
+      />
+      {[
+        [-4.3, -4.3],
+        [3.1, -4.3],
+        [-4.3, 3.1],
+        [3.1, 3.1],
+      ].map(([x, y], i) => (
+        <rect
+          key={i}
+          className='tower__post'
+          x={x}
+          y={y}
+          width={1.2}
+          height={1.2}
+          rx={0.2}
+        />
+      ))}
+    </g>
+  );
+}
+
+// The ninja from above: shoulders, the round head on them, and the band of
+// face with its eyes looking down the town.
+function TopNinja({ squint }: { squint: boolean }) {
+  return (
+    <g>
+      <ellipse className='ninja__suit' cx={0} cy={0.8} rx={3.9} ry={2.6} />
+      <circle className='ninja__suit' cx={0} cy={-0.4} r={2.9} />
+      <rect
+        className='ninja__face'
+        x={-2.4}
+        y={0}
+        width={4.8}
+        height={1.7}
+        rx={0.85}
+      />
+      {squint ? (
+        <path className='ninja__shut' d='M-1.4 0.85 l1 0 M0.4 0.85 l1 0' />
+      ) : (
+        <>
+          <circle className='ninja__eye' cx={-0.9} cy={0.85} r={0.45} />
+          <circle className='ninja__eye' cx={0.9} cy={0.85} r={0.45} />
+        </>
+      )}
+    </g>
+  );
+}
+
+function TopShape({ thing }: { thing: Thing }) {
+  if (thing.kind === 'lantern') return <TopLantern />;
+  if (thing.kind === 'tower') return <TopTower height={thing.height} />;
+  if (thing.kind === 'bamboo') return <TopBamboo />;
+  return <TopTree />;
+}
+
 function ThingShape({ thing, night }: { thing: Thing; night: boolean }) {
   if (thing.kind === 'lantern') return <Lantern on={night} />;
   if (thing.kind === 'tower') return <Tower height={thing.height} />;
@@ -408,6 +606,7 @@ export function Board({
   squint,
   onCell,
   t,
+  top = false,
 }: {
   round: Round;
   // The cell the ninja is shown on, as it walks.
@@ -420,17 +619,39 @@ export function Board({
   squint: number;
   onCell: (c: number) => void;
   t: Strings;
+  // Seen straight from above, every cell square, instead of a bit from the
+  // front.
+  top?: boolean;
 }) {
   const { level } = round;
-  const w = SIDE * 2 + level.width * CELL;
-  const h = TOP + BOTTOM + level.rows * ROW;
-  const centre = {
-    x: SIDE + (level.width * CELL) / 2,
-    y: TOP + (level.rows * ROW) / 2,
+  const row = top ? CELL : ROW;
+  // From above the town is deeper, so the sun goes round wider: the garden
+  // on each side grows to keep it in sight.
+  const side = Math.max(SIDE, sunR(level, row) - (level.width * CELL) / 2 + 7);
+  // Where a cell is: its left, its top, its middle, and the spot low in it
+  // that things and the ninja stand on (from above, its middle).
+  const place = (c: number) => {
+    const [x, y] = xy(level, c);
+    const left = side + x * CELL;
+    const top_ = TOP + y * row;
+    const cy = top_ + row / 2;
+    return {
+      left,
+      top: top_,
+      cx: left + CELL / 2,
+      cy,
+      foot: top ? cy : top_ + ROW - 1.5,
+    };
   };
-  const SUN_R = sunR(level);
+  const w = side * 2 + level.width * CELL;
+  const h = TOP + BOTTOM + level.rows * row;
+  const centre = {
+    x: side + (level.width * CELL) / 2,
+    y: TOP + (level.rows * row) / 2,
+  };
+  const SUN_R = sunR(level, row);
   const cells = Array.from({ length: level.width * level.rows }, (_, c) => c);
-  const chest = place(round, chestCell(level));
+  const chest = place(chestCell(level));
   const cobbles = useId();
   const glow = useId();
 
@@ -487,7 +708,7 @@ export function Board({
   }, [from, moonOut, round.sun, turn]);
   const night = shown === 'moon';
 
-  const me = place(round, at);
+  const me = place(at);
   const ninjaY = me.foot;
 
   // Things further back are drawn first, so the ones in front stand over
@@ -495,8 +716,8 @@ export function Board({
   const things = [...level.things].sort((a, b) => a.y - b.y || a.x - b.x);
   // The things in front of the ninja, nearer the bottom, stand over it: a
   // tower in front hides all of the ninja behind it but its head.
-  const row = Math.floor(at / level.width);
-  const front = things.filter((thing) => thing.y > row);
+  const ninjaRow = Math.floor(at / level.width);
+  const front = top ? [] : things.filter((thing) => thing.y > ninjaRow);
   const hide = useId();
 
   return (
@@ -519,7 +740,7 @@ export function Board({
           <rect x={0} y={0} width={w} height={h} fill='#fff' />
           <g className='cut'>
             {front.map((thing, i) => {
-              const p = place(round, thing.y * level.width + thing.x);
+              const p = place(thing.y * level.width + thing.x);
               return (
                 <g key={i} transform={`translate(${p.cx} ${p.foot})`}>
                   <ThingShape thing={thing} night={false} />
@@ -532,19 +753,19 @@ export function Board({
         <pattern
           id={cobbles}
           patternUnits='userSpaceOnUse'
-          x={SIDE}
+          x={side}
           y={TOP}
           width={CELL}
-          height={ROW}
+          height={row}
         >
           {COBBLES.map(([x, y, w, h], i) => (
             <rect
               key={i}
               className='cobble'
               x={x}
-              y={y}
+              y={(y * row) / ROW}
               width={w}
-              height={h}
+              height={(h * row) / ROW}
               rx={0.8}
             />
           ))}
@@ -560,14 +781,14 @@ export function Board({
       {/* The street, a stone for each cell. */}
       <rect
         className='surface'
-        x={SIDE - 0.6}
+        x={side - 0.6}
         y={TOP - 0.6}
         width={level.width * CELL + 1.2}
-        height={level.rows * ROW + 1.2}
+        height={level.rows * row + 1.2}
         rx={1.5}
       />
       {cells.map((c) => {
-        const p = place(round, c);
+        const p = place(c);
         // Where a wall stands, a raised block of stone, so it is plain the
         // ninja can't go there.
         if (!open(level, c))
@@ -578,7 +799,7 @@ export function Board({
                 x={p.left + 0.2}
                 y={p.top + 0.2}
                 width={CELL - 0.4}
-                height={ROW - 0.4}
+                height={row - 0.4}
                 rx={1}
               />
               <rect
@@ -586,7 +807,7 @@ export function Board({
                 x={p.left + 0.2}
                 y={p.top + 0.2}
                 width={CELL - 0.4}
-                height={ROW - 2}
+                height={row - 2}
                 rx={1}
               />
             </g>
@@ -598,14 +819,14 @@ export function Board({
               x={p.left + 0.35}
               y={p.top + 0.35}
               width={CELL - 0.7}
-              height={ROW - 0.7}
+              height={row - 0.7}
               rx={1}
             />
             <rect
               x={p.left + 0.35}
               y={p.top + 0.35}
               width={CELL - 0.7}
-              height={ROW - 0.7}
+              height={row - 0.7}
               rx={1}
               fill={`url(#${cobbles})`}
             />
@@ -627,7 +848,7 @@ export function Board({
             {[...shade]
               .filter((c) => open(level, c))
               .map((c) => {
-                const p = place(round, c);
+                const p = place(c);
                 return (
                   <rect
                     key={c}
@@ -635,7 +856,7 @@ export function Board({
                     x={p.left - 0.1}
                     y={p.top - 0.1}
                     width={CELL + 0.2}
-                    height={ROW + 0.2}
+                    height={row + 0.2}
                     rx={1.2}
                   />
                 );
@@ -645,10 +866,14 @@ export function Board({
       })}
 
       {things.map((thing, i) => {
-        const p = place(round, thing.y * level.width + thing.x);
+        const p = place(thing.y * level.width + thing.x);
         return (
           <g key={i} transform={`translate(${p.cx} ${p.foot})`}>
-            <ThingShape thing={thing} night={night} />
+            {top ? (
+              <TopShape thing={thing} />
+            ) : (
+              <ThingShape thing={thing} night={night} />
+            )}
           </g>
         );
       })}
@@ -665,7 +890,7 @@ export function Board({
         {[...lit(level)]
           .filter((c) => open(level, c))
           .map((c) => {
-            const p = place(round, c);
+            const p = place(c);
             return (
               <rect
                 key={c}
@@ -673,7 +898,7 @@ export function Board({
                 x={p.left + 0.4}
                 y={p.top + 0.4}
                 width={CELL - 0.8}
-                height={ROW - 0.8}
+                height={row - 0.8}
                 rx={1.2}
               />
             );
@@ -682,22 +907,22 @@ export function Board({
         {level.things
           .filter((t) => t.kind === 'lantern')
           .map((t, i) => {
-            const p = place(round, cell(level, t.x, t.y));
+            const p = place(cell(level, t.x, t.y));
             return (
               <g key={i} transform={`translate(${p.cx} ${p.foot})`}>
                 <circle
                   className='lantern__halo'
                   cx={0}
-                  cy={-6.6}
+                  cy={top ? 0 : -6.6}
                   r={6.5}
                   style={{ fill: `url(#${glow})` }}
                 />
                 <rect
                   className='lantern__fire'
-                  x={-1}
-                  y={-7.8}
-                  width={2}
-                  height={1.9}
+                  x={top ? -1.6 : -1}
+                  y={top ? -1.6 : -7.8}
+                  width={top ? 3.2 : 2}
+                  height={top ? 3.2 : 1.9}
                   rx={0.3}
                 />
               </g>
@@ -707,9 +932,9 @@ export function Board({
 
       {/* The shelter over the start, always in the shade. */}
       <g
-        transform={`translate(${place(round, level.start).cx} ${place(round, level.start).foot})`}
+        transform={`translate(${place(level.start).cx} ${place(level.start).foot})`}
       >
-        <Shelter />
+        {top ? <TopShelter /> : <Shelter />}
       </g>
 
       {/* The chest, just beyond the town, over the last cell. */}
@@ -726,7 +951,7 @@ export function Board({
             transitionDuration: `${gone ? stepMs * 2 : stepMs}ms`,
           }}
         >
-          <g transform='scale(0.8) translate(-5 0)'>
+          <g transform={top ? 'translate(0 0)' : 'scale(0.8) translate(-5 0)'}>
             <g
               className={
                 gone
@@ -737,7 +962,11 @@ export function Board({
               }
               style={gone ? { animationDelay: `${stepMs * 2}ms` } : undefined}
             >
-              <Ninja squint={squint > 0} />
+              {top ? (
+                <TopNinja squint={squint > 0} />
+              ) : (
+                <Ninja squint={squint > 0} />
+              )}
             </g>
           </g>
         </g>
@@ -745,7 +974,7 @@ export function Board({
 
       {/* A tap on a cell sends the ninja there. */}
       {cells.map((c) => {
-        const p = place(round, c);
+        const p = place(c);
         return (
           <rect
             key={c}
@@ -753,7 +982,7 @@ export function Board({
             x={p.left}
             y={p.top}
             width={CELL}
-            height={ROW}
+            height={row}
             onClick={() => onCell(c)}
           >
             <title>{c === chestCell(level) ? t.chest : t.ground}</title>

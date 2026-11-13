@@ -594,6 +594,13 @@ h2 {
   fill: var(--roof);
 }
 
+/* The shelter's roof from above, open in the middle. */
+.shelter__eave {
+  fill: none;
+  stroke: var(--roof);
+  stroke-width: 1.2;
+}
+
 .bamboo__ground {
   fill: var(--garden-dark);
 }
