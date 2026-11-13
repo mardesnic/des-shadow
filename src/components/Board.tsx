@@ -476,8 +476,7 @@ export function Board({
   const night = shown === 'moon';
 
   const me = place(round, at);
-  // At the chest, the ninja stands behind it, and hops for joy.
-  const ninjaY = gone ? me.foot - 5.6 : me.foot;
+  const ninjaY = me.foot;
 
   // Things further back are drawn first, so the ones in front stand over
   // them.
@@ -676,6 +675,11 @@ export function Board({
         <Shelter />
       </g>
 
+      {/* The chest; the ninja opens it from the cell next to it. */}
+      <g transform={`translate(${chest.cx} ${chest.foot})`}>
+        <Chest open={gone} />
+      </g>
+
       {/* The ninja, always on top, so it is never lost behind a tower. */}
       <g
         className='ninja'
@@ -698,11 +702,6 @@ export function Board({
             <Ninja squint={squint > 0} />
           </g>
         </g>
-      </g>
-
-      {/* The chest, in front of the ninja, which ends up behind it. */}
-      <g transform={`translate(${chest.cx} ${chest.foot})`}>
-        <Chest open={gone} />
       </g>
 
       {/* A tap on a cell sends the ninja there. */}

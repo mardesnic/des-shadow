@@ -145,7 +145,7 @@ export default function App() {
     if (solved || busy) return;
     const w = tryWalk(round, c);
     if (!w) return;
-    const { path, ok } = w;
+    const { path, ok, to } = w;
     const from = round.ninja;
     if (!ok) {
       // Out into the sun, and seen.
@@ -153,11 +153,11 @@ export default function App() {
       return;
     }
     setPos(from);
-    setStore({ round: { ...round, ninja: c } });
+    setStore({ round: { ...round, ninja: to } });
     const there = along(from, path, STEP_MS);
     later(there, () => setPos(null));
-    if (isSolved({ ...round, ninja: c })) {
-      // On to the chest, then the cheer.
+    if (isSolved({ ...round, ninja: to })) {
+      // Up to the chest, which opens, then the cheer.
       const through = there + 2 * STEP_MS;
       setCardWait(through);
       setStats({
