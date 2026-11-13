@@ -489,20 +489,29 @@ function Samurai({ x, awake }: { x: number; awake: boolean }) {
           height={5.5}
           rx={2}
         />
-        <circle className='samurai__face' cx={0} cy={-8} r={3.2} />
-        <path className='samurai__helmet' d='M-3.6 -8.4 Q0 -13.6 3.6 -8.4 Z' />
+        <circle className='samurai__face' cx={0} cy={-7.8} r={2.8} />
+        <path className='samurai__helmet' d='M-3.6 -8.8 Q0 -14.4 3.6 -8.8 Z' />
+        {/* The helmet's wide brim, wider than the head. */}
+        <rect
+          className='samurai__helmet'
+          x={-4.6}
+          y={-9.4}
+          width={9.2}
+          height={1}
+          rx={0.5}
+        />
         <path
           className='samurai__horns'
-          d='M-1.6 -11.6 L-3.4 -14 M1.6 -11.6 L3.4 -14'
+          d='M-1.6 -12.4 L-3.4 -14.8 M1.6 -12.4 L3.4 -14.8'
         />
         <path
           className='samurai__moustache'
-          d='M0 -7 q-0.9 -0.6 -1.8 0 q-0.6 0.5 -1.3 -0.1 q0.6 1.1 1.6 0.7 q0.9 -0.3 1.5 -0.6 q0.6 0.3 1.5 0.6 q1 0.4 1.6 -0.7 q-0.7 0.6 -1.3 0.1 q-0.9 -0.6 -1.8 0 Z'
+          d='M0 -6.3 q-0.9 -0.6 -1.8 0 q-0.6 0.5 -1.3 -0.1 q0.6 1.1 1.6 0.7 q0.9 -0.3 1.5 -0.6 q0.6 0.3 1.5 0.6 q1 0.4 1.6 -0.7 q-0.7 0.6 -1.3 0.1 q-0.9 -0.6 -1.8 0 Z'
         />
         {awake ? (
           <>
-            <circle className='samurai__eye' cx={-1} cy={-8.3} r={0.45} />
-            <circle className='samurai__eye' cx={1} cy={-8.3} r={0.45} />
+            <circle className='samurai__eye' cx={-1} cy={-7.5} r={0.45} />
+            <circle className='samurai__eye' cx={1} cy={-7.5} r={0.45} />
             <text className='samurai__alert' x={-9.5} y={-13}>
               !
             </text>
@@ -511,7 +520,7 @@ function Samurai({ x, awake }: { x: number; awake: boolean }) {
           <>
             <path
               className='samurai__shut'
-              d='M-1.6 -8.3 q0.6 0.5 1.2 0 M0.4 -8.3 q0.6 0.5 1.2 0'
+              d='M-1.6 -7.6 q0.6 0.5 1.2 0 M0.4 -7.6 q0.6 0.5 1.2 0'
             />
             <g className='zzz'>
               <text x={-7.5} y={-13}>
