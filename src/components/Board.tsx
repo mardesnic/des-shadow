@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 
 import {
   SUNS,
@@ -66,23 +66,6 @@ function byMoon(from: Sun, to: Sun): number | null {
     if (SUNS[(SUNS.indexOf(from) + k) % SUNS.length] === 'moon') return k;
   return null;
 }
-
-// A little arrow round the far side of the sun, the way it goes when
-// tapped: clockwise. Drawn with the sun at the top, it turns with it.
-const HINT = (() => {
-  const r = 10.5;
-  const at = (deg: number, rr = r) => {
-    const a = (deg * Math.PI) / 180;
-    return `${(rr * Math.sin(a)).toFixed(2)} ${(-rr * Math.cos(a)).toFixed(2)}`;
-  };
-  return [
-    `M${at(-55)}`,
-    `A${r} ${r} 0 0 1 ${at(55)}`,
-    `M${at(40, r + 2.2)}`,
-    `L${at(55)}`,
-    `L${at(40, r - 2.2)}`,
-  ].join(' ');
-})();
 
 function place(round: Round, c: number) {
   const [x, y] = xy(round.level, c);
@@ -571,6 +554,8 @@ export function Board({
   const cells = Array.from({ length: level.width * level.rows }, (_, c) => c);
   const gate = place(round, gateCell(level));
   const cobbles = useId();
+  // Where a finger went down on the sun, and whether its swipe moved it.
+  const drag = useRef<{ x: number; y: number; done: boolean } | null>(null);
   const glow = useId();
 
   // The sun always goes round clockwise to its new side, a quarter at a
@@ -871,10 +856,25 @@ export function Board({
         <g
           transform={`translate(${centre.x} ${centre.y - SUN_R})`}
           className='sun__tap'
-          onClick={() => onSun(nextSun(level, round.sun))}
+          onPointerDown={(e) => {
+            drag.current = { x: e.clientX, y: e.clientY, done: false };
+          }}
+          onPointerMove={(e) => {
+            // A swipe pushes the sun on, as soon as the finger has moved.
+            const d = drag.current;
+            if (!d || d.done) return;
+            if (Math.hypot(e.clientX - d.x, e.clientY - d.y) > 12) {
+              d.done = true;
+              onSun(nextSun(level, round.sun));
+            }
+          }}
+          onClick={() => {
+            // A tap pushes it on too, unless a swipe already did.
+            if (!drag.current?.done) onSun(nextSun(level, round.sun));
+            drag.current = null;
+          }}
         >
           <circle className='sun__hit' r={11} />
-          <path className='hint' d={HINT} />
           <title>{t.suns[nextSun(level, round.sun)]}</title>
           {Array.from({ length: 8 }, (_, i) => (
             <path

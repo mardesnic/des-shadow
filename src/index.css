@@ -824,21 +824,11 @@ h2 {
 .sun__tap {
   pointer-events: auto;
   cursor: pointer;
+  touch-action: none;
 }
 
 .sun__hit {
   fill: transparent;
-}
-
-/* The arrow round the sun, the way it goes when tapped. */
-.hint {
-  fill: none;
-  stroke: var(--sun-ray);
-  stroke-width: 0.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  pointer-events: none;
-  opacity: 0.85;
 }
 
 .sun__disc {
