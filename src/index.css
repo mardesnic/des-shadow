@@ -10,7 +10,7 @@
   --sky-noon: #bfe3ff;
   --sky-evening: #d3def4;
   --ground: #b8915a;
-  --surface: #f2d58c;
+  --sand: #f2d58c;
   --shadow: #282c46;
   --sun: #ffc61a;
   --sun-ray: #ffa94d;
@@ -57,7 +57,7 @@
     --sky-noon: #26405c;
     --sky-evening: #2e3b5a;
     --ground: #5e4a2d;
-    --surface: #b3974a;
+    --sand: #b3974a;
     --shadow: #080a14;
     --sun: #ffd43b;
     --sun-ray: #f59f00;
@@ -271,15 +271,18 @@ h2 {
 }
 
 .surface {
-  fill: var(--surface);
+  fill: var(--sand);
 }
 
 .shadows {
   opacity: 0.55;
 }
 
-.shadow {
+/* Strong enough to beat each thing's own colours. */
+.shadows .shadow,
+.shadows .shadow__shape * {
   fill: var(--shadow);
+  stroke: none;
 }
 
 /* As long as the sun takes to go over the sky. */
@@ -351,8 +354,15 @@ h2 {
   font-weight: 800;
 }
 
+/* Woken up, he gives a little start: a small hop, twice. */
 .samurai--awake {
-  animation: shake 0.45s ease-in-out;
+  animation: hop 0.3s ease-out 2;
+}
+
+@keyframes hop {
+  50% {
+    transform: translateY(-0.8px);
+  }
 }
 
 /* Each z rises and fades, one after the other, over and over. */
@@ -413,20 +423,15 @@ h2 {
   stroke-linecap: round;
 }
 
-.ninja__shake,
-.sun__shake {
-  animation: shake 0.45s ease-in-out;
+/* Seen, the ninja ducks down low and runs back like that. */
+.ninja__pose {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  transition: transform 0.12s ease-out;
 }
 
-@keyframes shake {
-  20%,
-  60% {
-    transform: translateX(-1px);
-  }
-  40%,
-  80% {
-    transform: translateX(1px);
-  }
+.ninja--crouch {
+  transform: scale(1.08, 0.72);
 }
 
 .column,
@@ -499,8 +504,6 @@ h2 {
   .sun {
     transition: none !important;
   }
-  .ninja__shake,
-  .sun__shake,
   .samurai--awake,
   .zzz text {
     animation: none !important;

@@ -6,7 +6,6 @@ import { HomeLink } from './components/HomeLink';
 import { Icon } from './components/Icon';
 import { SettingsView } from './components/Menu';
 import {
-  canMoveSun,
   initialStats,
   initialStore,
   isSolved,
@@ -30,6 +29,8 @@ type View = 'play' | 'settings';
 const AWAKE_MS = 1300;
 // How long the ninja stands frozen in the sun before it runs back.
 const FROZEN_MS = 350;
+// How long the sun takes to go over the sky, as in index.css.
+const SUN_MS = 500;
 
 export default function App() {
   // Keys are prefixed: other apps on the same GitHub Pages origin share
@@ -64,7 +65,6 @@ export default function App() {
   const [steps, setSteps] = useState(0);
   const [squint, setSquint] = useState(0);
   const [awake, setAwake] = useState(0);
-  const [sunWobble, setSunWobble] = useState(0);
   // Where the ninja is shown while it is out in the sun, before it runs
   // back to where it was; null the rest of the time.
   const [out, setOut] = useState<number | null>(null);
@@ -121,16 +121,25 @@ export default function App() {
 
   const onSun = (s: Sun) => {
     if (solved || busy || s === round.sun) return;
-    // The sun won't go where it would leave the ninja out in the open.
-    if (!canMoveSun(round, s)) {
-      plop('no');
-      setSunWobble(Date.now());
-      setSquint(Date.now());
-      later(700, () => setSquint(0));
-      return;
-    }
     plop('sun');
-    setStore({ round: moveSun(round, s) });
+    const next = moveSun(round, s);
+    setStore({ round: next });
+    if (next.ninja === round.ninja) return;
+    // Left out in the sun: the ninja stays put while the sun goes over,
+    // the samurai wakes, and the ninja runs back into the shadow.
+    const cells = Math.abs(next.ninja - round.ninja);
+    setOut(round.ninja);
+    later(SUN_MS, () => {
+      plop('no');
+      setAwake(Date.now());
+      setSquint(Date.now());
+    });
+    later(SUN_MS + FROZEN_MS, () => {
+      setSteps(cells / 2);
+      setOut(null);
+    });
+    later(SUN_MS + FROZEN_MS + (cells / 2) * STEP_MS, () => setSquint(0));
+    later(SUN_MS + AWAKE_MS, () => setAwake(0));
   };
 
   const again = () => {
@@ -200,7 +209,6 @@ export default function App() {
               squint={squint}
               awake={awake}
               out={out}
-              sunWobble={sunWobble}
               onCell={onCell}
               onSun={onSun}
               t={t}

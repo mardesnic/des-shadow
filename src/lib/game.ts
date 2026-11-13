@@ -106,12 +106,25 @@ export function walk(r: Round, to: number): Round {
   return pathTo(r, to) ? { ...r, ninja: to } : r;
 }
 
-// The sun can't move if it would leave the ninja standing in the sun.
-export const canMoveSun = (r: Round, sun: Sun) =>
-  sun !== r.sun && shade(r.level, sun).has(r.ninja);
+// Where the ninja runs to when the sun leaves it out in the open: back the
+// way it came, to the nearest shadow towards the start, or, if there is
+// none that way, to the nearest one the other way. A thing's own cell is
+// always dark, so there is one somewhere.
+export function hideFrom(level: Level, sun: Sun, from: number): number {
+  const dark = shade(level, sun);
+  if (dark.has(from)) return from;
+  const back = level.start < level.gate ? -1 : 1;
+  for (const dir of [back, -back])
+    for (let x = from + dir; x >= 0 && x < level.width; x += dir)
+      if (dark.has(x)) return x;
+  return from;
+}
 
+// The sun always moves; if that leaves the ninja in the sun, the samurai
+// wakes and the ninja runs back into the shadow.
 export function moveSun(r: Round, sun: Sun): Round {
-  return canMoveSun(r, sun) ? { ...r, sun } : r;
+  if (sun === r.sun) return r;
+  return { ...r, sun, ninja: hideFrom(r.level, sun, r.ninja) };
 }
 
 // The fewest taps (sun moves and walks) to the gate, or null if there is

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   FIRST,
-  canMoveSun,
+  hideFrom,
   isSolved,
   moveSun,
   newRound,
@@ -49,11 +49,15 @@ describe('walking', () => {
     expect(tryWalk(r, 0)).toBeNull();
   });
 
-  it('keeps the sun from leaving the ninja in the sun', () => {
-    const r = { ...newRound(), sun: 'morning' as const, ninja: 1 };
-    expect(canMoveSun(r, 'noon')).toBe(false);
-    expect(moveSun(r, 'noon')).toBe(r);
-    expect(canMoveSun(r, 'evening')).toBe(true);
+  it('runs back into the shadow when the sun leaves it in the open', () => {
+    const r = { ...newRound(), sun: 'morning' as const, ninja: 4 };
+    expect(moveSun(r, 'noon').ninja).toBe(3);
+    expect(moveSun(r, 'evening').ninja).toBe(4);
+    expect(hideFrom(FIRST, 'noon', 1)).toBe(0);
+    // Nothing that way: the other way, then.
+    expect(hideFrom({ ...FIRST, things: [FIRST.things[2]] }, 'noon', 2)).toBe(
+      5
+    );
   });
 
   it('is solved at the gate', () => {

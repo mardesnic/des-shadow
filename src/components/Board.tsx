@@ -31,72 +31,68 @@ const SURFACE = 7;
 // away from the sun in the morning and evening, and at noon just under the
 // thing. Moving the sun from one side to the other, it shrinks to nothing
 // and grows out the other way, as a real shadow does.
-function reach(thing: Thing, sun: Sun) {
-  const full = thing.height * CELL + CELL / 2;
+function reach(sun: Sun) {
   if (sun === 'morning') return 1;
   if (sun === 'evening') return -1;
-  return CELL / 2 / full;
+  // At noon only the dark patch right under the thing is left.
+  return 0.001;
 }
 
-// A thing's shadow, lying flat on the ground: drawn reaching right from the
-// middle of the thing, then stretched or turned round for the sun. A tree's
-// has its round top at the far end.
+// How much narrower a shadow is across the ground than the thing is wide,
+// as if the top of the ground were seen from a little above.
+const FLAT = 0.6;
+
+// A thing's shadow: the thing itself, laid flat on the ground away from the
+// sun, so a tower's has its roofs and a tree's its round top. Drawn reaching
+// right, then stretched or turned round for the sun. It reaches a little
+// past the last dark cell, so that cell looks covered.
 function Shadow({ thing, sun }: { thing: Thing; sun: Sun }) {
   const base = thing.x * CELL + CELL / 2;
-  const full = thing.height * CELL + CELL / 2;
-  const top = GROUND + 1;
   const mid = GROUND + SURFACE / 2;
-  const end = base + full;
+  const tall = thing.height * CELL;
+  const along = (tall + CELL / 2) / tall;
+  // Height above the ground becomes distance along it, and side to side
+  // becomes across it.
+  const lay = `matrix(0 ${FLAT} ${-along} 0 ${base + GROUND * along} ${mid - base * FLAT})`;
   return (
     <g>
-      {/* Right under the thing it is always dark. */}
-      <ellipse
-        className='shadow'
-        cx={base}
-        cy={mid}
-        rx={CELL / 2}
-        ry={SURFACE / 2 - 0.8}
-      />
+      {/* Right under the thing it is always dark, in its shape. */}
+      {thing.kind === 'tower' ? (
+        <rect
+          className='shadow'
+          x={thing.x * CELL + 0.5}
+          y={mid - (CELL / 2) * FLAT}
+          width={CELL - 1}
+          height={CELL * FLAT}
+          rx={0.8}
+        />
+      ) : (
+        <ellipse
+          className='shadow'
+          cx={base}
+          cy={mid}
+          rx={CELL / 2}
+          ry={(CELL / 2) * FLAT * (thing.kind === 'bush' ? 1 : 0.7)}
+        />
+      )}
       <g
         className='shadow__cast'
         style={{
           transformOrigin: `${base}px ${mid}px`,
-          transform: `scaleX(${reach(thing, sun)})`,
+          transform: `scaleX(${reach(sun)})`,
         }}
       >
-        {thing.kind === 'tree' ? (
-          <>
-            <rect
-              className='shadow'
-              x={base}
-              y={mid - 0.9}
-              width={full - CELL}
-              height={1.8}
-            />
-            <ellipse
-              className='shadow'
-              cx={end - CELL / 2 - 0.5}
-              cy={mid}
-              rx={CELL / 2 + 0.5}
-              ry={SURFACE / 2 - 0.6}
-            />
-          </>
-        ) : (
-          <rect
-            className='shadow'
-            x={base}
-            y={top + 0.6}
-            width={full}
-            height={SURFACE - 3.2}
-            rx={1.6}
-          />
-        )}
+        <g className='shadow__shape' transform={lay}>
+          <ThingShape thing={thing} flat />
+        </g>
       </g>
     </g>
   );
 }
 
-function ThingShape({ thing }: { thing: Thing }) {
+// `flat` is for its shadow: there a tower's sloping roofs would look like
+// arrows, so they are drawn as plain eaves.
+function ThingShape({ thing, flat }: { thing: Thing; flat?: boolean }) {
   const x = thing.x * CELL;
   const top = GROUND - thing.height * CELL;
   if (thing.kind === 'bush')
@@ -136,7 +132,11 @@ function ThingShape({ thing }: { thing: Thing }) {
           <g key={i}>
             <path
               className='tower__roof'
-              d={`M${x - 0.5} ${y + 4} L${x + 5} ${y} L${x + 10.5} ${y + 4} Z`}
+              d={
+                flat
+                  ? `M${x - 0.5} ${y + 1.5} H${x + 10.5} V${y + 4} H${x - 0.5} Z`
+                  : `M${x - 0.5} ${y + 4} L${x + 2.5} ${y + 1} L${x + 7.5} ${y + 1} L${x + 10.5} ${y + 4} Z`
+              }
             />
             <rect
               className='tower__window'
@@ -286,7 +286,6 @@ export function Board({
   squint,
   awake,
   out,
-  sunWobble,
   onCell,
   onSun,
   t,
@@ -299,7 +298,6 @@ export function Board({
   awake: number;
   // Where the ninja stands out in the sun, before it runs back.
   out: number | null;
-  sunWobble: number;
   onCell: (x: number) => void;
   onSun: (s: Sun) => void;
   t: Strings;
@@ -352,7 +350,7 @@ export function Board({
         }}
       >
         <g transform={`translate(0 ${GROUND})`}>
-          <g key={squint} className={squint ? 'ninja__shake' : undefined}>
+          <g className={squint ? 'ninja__pose ninja--crouch' : 'ninja__pose'}>
             <Ninja squint={squint > 0} />
           </g>
         </g>
@@ -397,7 +395,7 @@ export function Board({
         }}
       >
         <g transform={`translate(${centre.x} ${NOON_Y})`}>
-          <g key={sunWobble} className={sunWobble ? 'sun__shake' : undefined}>
+          <g>
             {Array.from({ length: 8 }, (_, i) => (
               <path
                 key={i}
