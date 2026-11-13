@@ -728,16 +728,6 @@ h2 {
   transition: transform 0.5s ease-in-out;
 }
 
-.sun__tap {
-  pointer-events: auto;
-  cursor: pointer;
-  touch-action: none;
-}
-
-.sun__hit {
-  fill: transparent;
-}
-
 .sun__disc {
   fill: var(--sun);
 }
@@ -785,7 +775,16 @@ h2 {
 .sun-icon__moon {
   fill: var(--moon);
   stroke: var(--muted);
-  stroke-width: 1;
+  stroke-width: 0.8;
+}
+
+.sun-icon__crater {
+  fill: var(--muted);
+  opacity: 0.35;
+}
+
+.sun-icon__star {
+  fill: var(--sun);
 }
 
 .tool--sun {

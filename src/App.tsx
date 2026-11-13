@@ -57,27 +57,26 @@ function load(saved: Round | undefined): Round {
 
 // The button that moves the sun on: a little sun, or the moon when night
 // comes next.
-function SunIcon({ moon }: { moon: boolean }) {
+// The button that moves the time on: half the sun, half the moon.
+function SunIcon() {
   return (
     <svg className='icon' viewBox='-12 -12 24 24' aria-hidden='true'>
-      {moon ? (
+      {[180, 225, 270, 315, 360].map((a) => (
         <path
-          className='sun-icon__moon'
-          d='M0 -8 A8 8 0 1 0 0 8 A10.4 10.4 0 0 1 0 -8 Z'
+          key={a}
+          className='sun-icon__ray'
+          d='M0 -8.4 L0 -10.8'
+          transform={`rotate(${a})`}
         />
-      ) : (
-        <>
-          {Array.from({ length: 8 }, (_, i) => (
-            <path
-              key={i}
-              className='sun-icon__ray'
-              d='M0 -8 L0 -10.5'
-              transform={`rotate(${i * 45})`}
-            />
-          ))}
-          <circle className='sun-icon__disc' r={5.6} />
-        </>
-      )}
+      ))}
+      <path className='sun-icon__disc' d='M0 -6 A6 6 0 0 0 0 6 Z' />
+      <path className='sun-icon__moon' d='M0 -6 A6 6 0 0 1 0 6 Z' />
+      <circle className='sun-icon__crater' cx={2.6} cy={-1.8} r={1.1} />
+      <circle className='sun-icon__crater' cx={2.2} cy={2.4} r={0.8} />
+      <path
+        className='sun-icon__star'
+        d='M8.6 -9.4 l0.6 1.4 1.4 0.6 -1.4 0.6 -0.6 1.4 -0.6 -1.4 -1.4 -0.6 1.4 -0.6 Z'
+      />
     </svg>
   );
 }
@@ -300,7 +299,6 @@ export default function App() {
               gone={solved && pos === null}
               squint={squint}
               onCell={onCell}
-              onSun={onSun}
               t={t}
             />
           </div>
@@ -317,7 +315,7 @@ export default function App() {
               disabled={busy || solved}
               aria-label={t.moveSun}
             >
-              <SunIcon moon={nextSun(round.level, round.sun) === 'moon'} />
+              <SunIcon />
             </button>
             <button
               className='tool'

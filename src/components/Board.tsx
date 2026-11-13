@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 
 import {
   SUNS,
@@ -10,7 +10,6 @@ import {
   QUARTER_MS,
   chestCell,
   xy,
-  nextSun,
   sunsOf,
   type Level,
   type Round,
@@ -27,14 +26,14 @@ export const STEP_MS = 220;
 // enough for the sun on each side.
 const CELL = 10;
 const ROW = 8;
-const SIDE = 18;
-const TOP = 17;
-const BOTTOM = 18;
+const SIDE = 13;
+const TOP = 13;
+const BOTTOM = 12;
 
 // The sun goes round the town on a circle, so it moves from side to side
 // over the corners instead of cutting across; just outside the town.
 const sunR = (level: Level) =>
-  Math.max(level.width * CELL, level.rows * ROW) / 2 + 9;
+  Math.max(level.width * CELL, level.rows * ROW) / 2 + 6;
 const ANGLE: Record<Sun, number> = {
   north: 0,
   east: 90,
@@ -408,7 +407,6 @@ export function Board({
   gone,
   squint,
   onCell,
-  onSun,
   t,
 }: {
   round: Round;
@@ -421,7 +419,6 @@ export function Board({
   // Set while the ninja screws its eyes shut.
   squint: number;
   onCell: (c: number) => void;
-  onSun: (s: Sun) => void;
   t: Strings;
 }) {
   const { level } = round;
@@ -435,8 +432,6 @@ export function Board({
   const cells = Array.from({ length: level.width * level.rows }, (_, c) => c);
   const chest = place(round, chestCell(level));
   const cobbles = useId();
-  // Where a finger went down on the sun, and whether its swipe moved it.
-  const drag = useRef<{ x: number; y: number; done: boolean } | null>(null);
   const glow = useId();
 
   // The sun always goes round clockwise to its new side, a quarter at a
@@ -452,13 +447,18 @@ export function Board({
   const moonOut = sunsOf(level).includes('moon');
   const [from, setFrom] = useState(round.sun);
   const [shown, setShown] = useState(round.sun);
+  // The moon itself shows only once the sun gets to the bottom, and the
+  // sun again as soon as it leaves; the town goes dark or light on the way.
+  const [moonUp, setMoonUp] = useState(round.sun === 'moon');
   if (was !== round.sun) {
     const q = quarters(was, round.sun);
+    const k = moonOut ? byMoon(was, round.sun) : null;
     setWas(round.sun);
     setFrom(was);
     setTurn(q);
     setAngle((a) => a + q * 90);
-    if (!moonOut || byMoon(was, round.sun) === null) setShown(round.sun);
+    if (k === null || k === q) setShown(round.sun);
+    if (round.sun !== 'moon') setMoonUp(false);
   }
   useEffect(() => {
     const k = byMoon(from, round.sun);
@@ -466,10 +466,22 @@ export function Board({
     const q = quarters(from, round.sun);
     const ids =
       k === q
-        ? [setTimeout(() => setShown('moon'), q * QUARTER_MS)]
+        ? [setTimeout(() => setMoonUp(true), q * QUARTER_MS)]
         : [
-            setTimeout(() => setShown('moon'), (k - 0.75) * QUARTER_MS),
-            setTimeout(() => setShown(round.sun), (k + 0.75) * QUARTER_MS),
+            setTimeout(
+              () => {
+                setShown('moon');
+                setMoonUp(true);
+              },
+              (k - 0.75) * QUARTER_MS
+            ),
+            setTimeout(
+              () => {
+                setShown(round.sun);
+                setMoonUp(false);
+              },
+              (k + 0.75) * QUARTER_MS
+            ),
           ];
     return () => ids.forEach(clearTimeout);
   }, [from, moonOut, round.sun, turn]);
@@ -730,45 +742,23 @@ export function Board({
           transitionDuration: `${turn * QUARTER_MS}ms`,
         }}
       >
-        <g
-          transform={`translate(${centre.x} ${centre.y - SUN_R})`}
-          className='sun__tap'
-          onPointerDown={(e) => {
-            drag.current = { x: e.clientX, y: e.clientY, done: false };
-          }}
-          onPointerMove={(e) => {
-            // A swipe pushes the sun on, as soon as the finger has moved.
-            const d = drag.current;
-            if (!d || d.done) return;
-            if (Math.hypot(e.clientX - d.x, e.clientY - d.y) > 12) {
-              d.done = true;
-              onSun(nextSun(level, round.sun));
-            }
-          }}
-          onClick={() => {
-            // A tap pushes it on too, unless a swipe already did.
-            if (!drag.current?.done) onSun(nextSun(level, round.sun));
-            drag.current = null;
-          }}
-        >
-          <circle className='sun__hit' r={11} />
-          <title>{t.suns[nextSun(level, round.sun)]}</title>
-          {/* Smaller than the hit round it, to keep out of the way. */}
-          <g transform='scale(0.72)'>
+        <g transform={`translate(${centre.x} ${centre.y - SUN_R})`}>
+          {/* Small, to keep out of the way. */}
+          <g transform='scale(0.55)'>
             {Array.from({ length: 8 }, (_, i) => (
               <path
                 key={i}
-                className={night ? 'sun__ray sun--off' : 'sun__ray'}
+                className={moonUp ? 'sun__ray sun--off' : 'sun__ray'}
                 d='M0 -6 L0 -7.8'
                 transform={`rotate(${i * 45})`}
               />
             ))}
             <circle
-              className={night ? 'sun__disc sun--off' : 'sun__disc'}
+              className={moonUp ? 'sun__disc sun--off' : 'sun__disc'}
               r={4.6}
             />
             {/* At the bottom the sun turns into the moon. */}
-            <g className={night ? 'moon' : 'moon moon--off'}>
+            <g className={moonUp ? 'moon' : 'moon moon--off'}>
               <path
                 className='moon__disc'
                 d='M0 -4.6 A4.6 4.6 0 1 0 0 4.6 A6 6 0 0 1 0 -4.6 Z'
