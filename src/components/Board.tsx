@@ -25,7 +25,7 @@ export const STEP_MS = 220;
 const CELL = 10;
 const ROW = 8;
 const SIDE = 16;
-const TOP = 20;
+const TOP = 23;
 const BOTTOM = 14;
 
 // The sun goes round the town on a circle, so it moves from side to side
@@ -254,6 +254,24 @@ function Lantern({ on }: { on: boolean }) {
         d='M-3.3 -8.2 Q0 -9 3.3 -8.2 L1.6 -10.4 L-1.6 -10.4 Z'
       />
       <circle className='lantern__stone' cx={0} cy={-11} r={0.7} />
+    </g>
+  );
+}
+
+// A big paper parasol, red with thin spokes, over the start.
+function Parasol() {
+  return (
+    <g className='parasol'>
+      <path className='parasol__pole' d='M0 0 V-13' />
+      <path
+        className='parasol__top'
+        d='M-6.4 -11 Q-5 -15.6 0 -16.2 Q5 -15.6 6.4 -11 Q3.2 -12 0 -11.6 Q-3.2 -12 -6.4 -11 Z'
+      />
+      <path
+        className='parasol__spokes'
+        d='M0 -16.2 L-4.6 -11.4 M0 -16.2 L-1.6 -11.6 M0 -16.2 L1.6 -11.6 M0 -16.2 L4.6 -11.4'
+      />
+      <circle className='parasol__knob' cx={0} cy={-16.4} r={0.6} />
     </g>
   );
 }
@@ -606,11 +624,13 @@ export function Board({
 
       {/* The gate over the top of the street, with the samurai dozing
           beside it. */}
-      <g transform={`translate(${gate.left} ${gate.top + 0.5}) scale(0.72)`}>
+      {/* As wide as the cell, its posts on the cell's edges; a bit
+          squat, to fit over the town. */}
+      <g transform={`translate(${gate.left} ${gate.top + 0.6}) scale(1 0.78)`}>
         <Gate />
       </g>
       <g
-        transform={`translate(${gate.left - 3.5} ${gate.top + 0.5}) scale(0.62)`}
+        transform={`translate(${gate.left - 5} ${gate.top + 0.5}) scale(0.62)`}
       >
         <Samurai awake={awake > 0} />
       </g>
@@ -668,6 +688,13 @@ export function Board({
               </g>
             );
           })}
+      </g>
+
+      {/* The big red parasol over the start, always in the shade. */}
+      <g
+        transform={`translate(${place(round, level.start).cx} ${place(round, level.start).foot})`}
+      >
+        <Parasol />
       </g>
 
       {/* The ninja, always on top, so it is never lost behind a tower. */}

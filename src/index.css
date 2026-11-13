@@ -21,7 +21,6 @@
   --cloud: #ffffff;
   --ground: #7d766b;
   --garden: #a9cf8a;
-  --goal: #e8645a;
   --block-top: #9c9488;
   --block-side: #6f685e;
   --night: #141a3c;
@@ -94,7 +93,6 @@
     --cloud: #aeb6c6;
     --ground: #34312c;
     --garden: #2c3f2a;
-    --goal: #c2453f;
     --block-top: #4c4740;
     --block-side: #2e2b27;
     --night: #070a1c;
@@ -565,7 +563,9 @@ h2 {
 }
 
 .stone--goal {
-  fill: var(--goal);
+  fill: var(--gate);
+  stroke: var(--gold);
+  stroke-width: 0.5;
 }
 
 .block__top {
@@ -574,6 +574,26 @@ h2 {
 
 .block__side {
   fill: var(--block-side);
+}
+
+.parasol__top {
+  fill: var(--post);
+}
+
+.parasol__pole {
+  stroke: var(--trunk);
+  stroke-width: 0.6;
+}
+
+.parasol__spokes {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 0.3;
+  opacity: 0.8;
+}
+
+.parasol__knob {
+  fill: var(--gold);
 }
 
 .tower__base {

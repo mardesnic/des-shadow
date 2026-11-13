@@ -8,6 +8,7 @@ import {
   moveSun,
   newRound,
   open,
+  SUNS,
   quarters,
   solution,
   solve,
@@ -46,9 +47,10 @@ describe('shadows', () => {
     expect(sorted(dark(TOWN, 'north'))).toEqual(
       cells(c(1, 1), c(1, 2), c(1, 3), c(0, 2), c(0, 3), c(2, 2), c(2, 3))
     );
-    // Sun on the right: shadows fall left, and stop at the edge.
+    // Sun on the right: shadows fall left, and stop at the edge; and the
+    // start is always in the shade.
     expect(sorted(dark(TOWN, 'east'))).toEqual(
-      cells(c(1, 1), c(0, 1), c(0, 2), c(2, 2), c(1, 2))
+      cells(c(1, 1), c(0, 1), c(0, 2), c(2, 2), c(1, 2), c(0, 3))
     );
   });
 });
@@ -83,7 +85,11 @@ describe('walking', () => {
 
   it('goes back to the start when the sun leaves it in the open', () => {
     const r = { ...newRound(TOWN), ninja: c(1, 3) };
-    expect(moveSun(r, 'east')).toEqual(newRound(TOWN));
+    expect(moveSun(r, 'east')).toEqual({
+      ...r,
+      sun: 'east',
+      ninja: TOWN.start,
+    });
     expect(moveSun(r, 'moon')).toEqual({ ...r, sun: 'moon' });
   });
 
@@ -103,6 +109,13 @@ describe('walking', () => {
     let r = walk(newRound(TOWN), c(2, 2));
     r = moveSun(r, 'moon');
     expect(isSolved(walk(r, c(2, 0)))).toBe(true);
+  });
+});
+
+describe('the start', () => {
+  it('is in the shade wherever the sun or the moon is', () => {
+    for (const level of [TOWN, ...LEVELS])
+      for (const s of SUNS) expect(dark(level, s).has(level.start)).toBe(true);
   });
 });
 

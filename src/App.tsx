@@ -124,17 +124,18 @@ export default function App() {
 
   // Seen: the samurai wakes, the ninja ducks and runs back, fast, along
   // `back` to where it is safe.
-  // Seen at `from`: the samurai wakes, the ninja ducks and runs, fast, all
-  // the way back to the start, and the sun goes back to where it was at
-  // first.
-  const caught = (from: number, at: number) => {
+  // Seen at `from`: the samurai wakes, and the ninja ducks and runs, fast,
+  // all the way back to the start, under the parasol. The sun stays.
+  const caught = (from: number, at: number, sun: Sun) => {
     const { level } = round;
     later(at, () => {
       plop('no');
       setAwake(Date.now());
       setSquint(Date.now());
     });
-    later(at + FROZEN_MS, () => setStore({ round: newRound(level) }));
+    later(at + FROZEN_MS, () =>
+      setStore({ round: { ...round, sun, ninja: level.start } })
+    );
     const home = along(
       from,
       runWay(level, from, level.start),
@@ -156,7 +157,7 @@ export default function App() {
     const from = round.ninja;
     if (!ok) {
       // Out into the sun, and seen.
-      caught(path[path.length - 1], along(from, path, STEP_MS));
+      caught(path[path.length - 1], along(from, path, STEP_MS), round.sun);
       return;
     }
     setPos(from);
@@ -187,7 +188,7 @@ export default function App() {
     setStore({ round: { ...round, sun: s } });
     setStepMs(STEP_MS);
     setPos(round.ninja);
-    caught(round.ninja, quarters(round.sun, s) * QUARTER_MS);
+    caught(round.ninja, quarters(round.sun, s) * QUARTER_MS, s);
   };
 
   const start = (id: string) => {
