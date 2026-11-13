@@ -29,7 +29,7 @@ import {
 //   N . .        the ninja starts at the bottom left
 const TOWN: Level = {
   id: 'test',
-  world: 'pagoda',
+  world: 'night',
   width: 3,
   rows: 4,
   things: [
@@ -178,15 +178,16 @@ describe('every level', () => {
     }
   });
 
-  it('by night needs walks both by the sun and by the moon', () => {
-    for (const level of LEVELS.filter((l) => l.world === 'night')) {
+  it('needs a walk by the moon, and in longer ones by a sun too', () => {
+    for (const level of LEVELS) {
       const way = solution(level)!;
       const walks = new Set(
         way
           .filter((r, i) => r.ninja !== (way[i - 1]?.ninja ?? level.start))
           .map((r) => r.sun)
       );
-      expect(walks.has('moon') && walks.size).toBeGreaterThanOrEqual(2);
+      expect(walks.has('moon')).toBe(true);
+      if (way.length > 3) expect(walks.size).toBeGreaterThanOrEqual(2);
     }
   });
 });

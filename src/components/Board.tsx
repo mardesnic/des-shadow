@@ -305,7 +305,8 @@ function Ninja({ squint }: { squint: boolean }) {
 }
 
 // The treasure chest the ninja is after: a little wooden chest with gold
-// bands and a lock; at the end its lid flies open on the gold inside.
+// bands and a lock; at the end its lid flies open on the gold and gems
+// inside.
 function Chest({ open }: { open: boolean }) {
   return (
     <g className={open ? 'chest chest--open' : 'chest'}>
@@ -317,9 +318,23 @@ function Chest({ open }: { open: boolean }) {
             d='M-4.4 -4.4 L-4 -6.6 L4 -6.6 L4.4 -4.4 Z'
           />
           <ellipse className='chest__glow' cx={0} cy={-4.8} rx={4.2} ry={1.3} />
-          <circle className='chest__coin' cx={-1.8} cy={-4.6} r={1} />
-          <circle className='chest__coin' cx={0.3} cy={-5} r={1} />
-          <circle className='chest__coin' cx={2.2} cy={-4.5} r={1} />
+          <circle className='chest__coin' cx={-2.6} cy={-4.6} r={1} />
+          <circle className='chest__coin' cx={2.7} cy={-4.6} r={1} />
+          {/* And the gems on top: a ruby, a sapphire and an emerald. */}
+          {(
+            [
+              ['ruby', -2.1, -6.4],
+              ['emerald', 2.1, -6.4],
+              ['sapphire', 0, -7.3],
+            ] as const
+          ).map(([gem, x, y]) => (
+            <g key={gem} transform={`translate(${x} ${y}) scale(1.35)`}>
+              <g className={`gem gem--${gem}`}>
+                <path d='M-1.3 -0.6 L-0.7 -1.3 L0.7 -1.3 L1.3 -0.6 L0 1.1 Z' />
+                <path className='gem__shine' d='M-0.6 -1 L0 -1 L-0.5 -0.5 Z' />
+              </g>
+            </g>
+          ))}
         </>
       )}
       <rect

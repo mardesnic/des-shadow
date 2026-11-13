@@ -1,9 +1,10 @@
 // A little town seen from above, a bit from the front. The sun stands on
 // one of the four sides, and every tower and bamboo clump casts a shadow
 // on the street away from it, as many cells long as the thing is tall: one
-// for bamboo, two or three for a pagoda, by its floors. The little ninja may only stand and walk in the shadow: the child
-// moves the sun to move the shadows, and walks the ninja through them, round
-// the towers and bamboo, to the treasure chest.
+// for bamboo, two or three for a pagoda, by its floors. The little ninja
+// may only stand and walk in the shadow: the child moves the sun to move
+// the shadows, and walks the ninja through them, round the towers and
+// bamboo, to the treasure chest.
 //
 // At the bottom there is the moon instead of a sun: then it is night, dark
 // everywhere but round the stone lanterns, which light up.
@@ -45,10 +46,10 @@ export type Thing = {
   height: number;
 };
 
-// The worlds, each shown by a picture: first the pagodas, with only the
-// sun; then the night, with the moon and the lanterns.
-export type World = 'pagoda' | 'night';
-export const WORLDS: readonly World[] = ['pagoda', 'night'];
+// The worlds, each shown by a picture. For now there is one, the night in
+// town, with the moon and the lanterns.
+export type World = 'night';
+export const WORLDS: readonly World[] = ['night'];
 
 export type Level = {
   id: string;
@@ -80,113 +81,61 @@ export type Round = {
 };
 
 // The levels, picked from towns found by scripts/find-levels.ts, and
-// checked by the solver in the tests.
+// checked by the solver in the tests. All by night, with lanterns. Their
+// ids are kept from earlier lists, in order, so saved games keep how far
+// they got.
 export const LEVELS: Level[] = [
   {
     id: 'pagoda-1',
-    world: 'pagoda',
+    world: 'night',
     width: 4,
     rows: 5,
     things: [
-      { kind: 'tower', x: 2, y: 0, height: 3 },
-      { kind: 'tower', x: 3, y: 0, height: 3 },
-      { kind: 'tower', x: 3, y: 1, height: 2 },
-      { kind: 'bamboo', x: 2, y: 2, height: 1 },
-      { kind: 'tower', x: 3, y: 2, height: 2 },
-      { kind: 'tower', x: 2, y: 3, height: 2 },
+      { kind: 'tower', x: 3, y: 0, height: 2 },
+      { kind: 'lantern', x: 3, y: 1, height: 1 },
+      { kind: 'tower', x: 0, y: 2, height: 3 },
+      { kind: 'tower', x: 0, y: 4, height: 3 },
+      { kind: 'tower', x: 2, y: 4, height: 2 },
     ],
-    start: 17,
+    start: 19,
     chest: 1,
-    sun: 'north',
+    sun: 'east',
   },
   {
     id: 'pagoda-2',
-    world: 'pagoda',
+    world: 'night',
     width: 4,
     rows: 5,
     things: [
-      { kind: 'tower', x: 1, y: 0, height: 3 },
-      { kind: 'tower', x: 3, y: 0, height: 2 },
-      { kind: 'tower', x: 0, y: 1, height: 2 },
-      { kind: 'bamboo', x: 3, y: 1, height: 1 },
-      { kind: 'tower', x: 3, y: 2, height: 3 },
-      { kind: 'bamboo', x: 2, y: 3, height: 1 },
+      { kind: 'tower', x: 2, y: 0, height: 2 },
+      { kind: 'tower', x: 3, y: 1, height: 3 },
+      { kind: 'tower', x: 1, y: 2, height: 3 },
+      { kind: 'tower', x: 2, y: 3, height: 2 },
+      { kind: 'lantern', x: 0, y: 4, height: 1 },
+      { kind: 'bamboo', x: 2, y: 4, height: 1 },
     ],
-    start: 16,
-    chest: 2,
+    start: 19,
+    chest: 0,
     sun: 'north',
   },
   {
     id: 'pagoda-3',
-    world: 'pagoda',
-    width: 5,
-    rows: 6,
+    world: 'night',
+    width: 4,
+    rows: 5,
     things: [
-      { kind: 'tower', x: 2, y: 0, height: 3 },
-      { kind: 'tower', x: 3, y: 0, height: 2 },
-      { kind: 'tower', x: 3, y: 1, height: 3 },
-      { kind: 'bamboo', x: 4, y: 1, height: 1 },
-      { kind: 'bamboo', x: 1, y: 4, height: 1 },
-      { kind: 'tower', x: 2, y: 4, height: 3 },
+      { kind: 'tower', x: 0, y: 1, height: 2 },
+      { kind: 'lantern', x: 3, y: 1, height: 1 },
+      { kind: 'bamboo', x: 2, y: 2, height: 1 },
+      { kind: 'lantern', x: 0, y: 3, height: 1 },
+      { kind: 'tower', x: 3, y: 3, height: 2 },
     ],
-    start: 28,
-    chest: 0,
-    sun: 'west',
-  },
-  {
-    id: 'pagoda-4',
-    world: 'pagoda',
-    width: 5,
-    rows: 6,
-    things: [
-      { kind: 'bamboo', x: 1, y: 0, height: 1 },
-      { kind: 'bamboo', x: 2, y: 0, height: 1 },
-      { kind: 'tower', x: 2, y: 1, height: 3 },
-      { kind: 'tower', x: 3, y: 2, height: 3 },
-      { kind: 'tower', x: 0, y: 3, height: 2 },
-      { kind: 'tower', x: 4, y: 4, height: 3 },
-    ],
-    start: 29,
-    chest: 0,
-    sun: 'east',
-  },
-  {
-    id: 'pagoda-5',
-    world: 'pagoda',
-    width: 5,
-    rows: 6,
-    things: [
-      { kind: 'tower', x: 2, y: 0, height: 2 },
-      { kind: 'tower', x: 3, y: 1, height: 3 },
-      { kind: 'bamboo', x: 2, y: 3, height: 1 },
-      { kind: 'tower', x: 2, y: 4, height: 2 },
-      { kind: 'bamboo', x: 0, y: 5, height: 1 },
-      { kind: 'tower', x: 2, y: 5, height: 2 },
-    ],
-    start: 29,
+    start: 18,
     chest: 1,
     sun: 'east',
   },
   {
-    id: 'pagoda-6',
-    world: 'pagoda',
-    width: 5,
-    rows: 7,
-    things: [
-      { kind: 'tower', x: 1, y: 0, height: 3 },
-      { kind: 'tower', x: 2, y: 1, height: 2 },
-      { kind: 'bamboo', x: 0, y: 2, height: 1 },
-      { kind: 'tower', x: 0, y: 3, height: 2 },
-      { kind: 'bamboo', x: 3, y: 3, height: 1 },
-      { kind: 'tower', x: 0, y: 4, height: 2 },
-      { kind: 'tower', x: 0, y: 5, height: 3 },
-    ],
-    start: 32,
-    chest: 0,
-    sun: 'north',
-  },
-  {
-    id: 'night-1',
+    id: 'pagoda-4',
     world: 'night',
     width: 5,
     rows: 6,
@@ -203,7 +152,25 @@ export const LEVELS: Level[] = [
     sun: 'east',
   },
   {
-    id: 'night-2',
+    id: 'pagoda-5',
+    world: 'night',
+    width: 5,
+    rows: 6,
+    things: [
+      { kind: 'tower', x: 1, y: 2, height: 2 },
+      { kind: 'tower', x: 2, y: 2, height: 2 },
+      { kind: 'tower', x: 3, y: 3, height: 3 },
+      { kind: 'tower', x: 4, y: 3, height: 2 },
+      { kind: 'lantern', x: 0, y: 4, height: 1 },
+      { kind: 'tower', x: 3, y: 4, height: 2 },
+      { kind: 'tower', x: 1, y: 5, height: 3 },
+    ],
+    start: 27,
+    chest: 0,
+    sun: 'north',
+  },
+  {
+    id: 'pagoda-6',
     world: 'night',
     width: 5,
     rows: 6,
@@ -222,7 +189,61 @@ export const LEVELS: Level[] = [
     sun: 'west',
   },
   {
+    id: 'night-1',
+    world: 'night',
+    width: 5,
+    rows: 6,
+    things: [
+      { kind: 'bamboo', x: 0, y: 0, height: 1 },
+      { kind: 'lantern', x: 1, y: 0, height: 1 },
+      { kind: 'tower', x: 4, y: 0, height: 3 },
+      { kind: 'tower', x: 0, y: 1, height: 3 },
+      { kind: 'lantern', x: 4, y: 1, height: 1 },
+      { kind: 'tower', x: 3, y: 4, height: 2 },
+      { kind: 'tower', x: 1, y: 5, height: 2 },
+    ],
+    start: 29,
+    chest: 2,
+    sun: 'north',
+  },
+  {
+    id: 'night-2',
+    world: 'night',
+    width: 5,
+    rows: 6,
+    things: [
+      { kind: 'tower', x: 1, y: 0, height: 3 },
+      { kind: 'bamboo', x: 3, y: 0, height: 1 },
+      { kind: 'lantern', x: 1, y: 1, height: 1 },
+      { kind: 'tower', x: 2, y: 2, height: 2 },
+      { kind: 'lantern', x: 3, y: 2, height: 1 },
+      { kind: 'tower', x: 0, y: 3, height: 3 },
+      { kind: 'tower', x: 3, y: 3, height: 3 },
+      { kind: 'tower', x: 1, y: 4, height: 3 },
+    ],
+    start: 26,
+    chest: 0,
+    sun: 'east',
+  },
+  {
     id: 'night-3',
+    world: 'night',
+    width: 5,
+    rows: 7,
+    things: [
+      { kind: 'tower', x: 1, y: 0, height: 3 },
+      { kind: 'lantern', x: 4, y: 0, height: 1 },
+      { kind: 'bamboo', x: 0, y: 1, height: 1 },
+      { kind: 'tower', x: 1, y: 1, height: 2 },
+      { kind: 'tower', x: 2, y: 1, height: 3 },
+      { kind: 'tower', x: 4, y: 2, height: 3 },
+    ],
+    start: 30,
+    chest: 3,
+    sun: 'west',
+  },
+  {
+    id: 'town-1',
     world: 'night',
     width: 6,
     rows: 7,
@@ -240,10 +261,27 @@ export const LEVELS: Level[] = [
     chest: 5,
     sun: 'moon',
   },
-  // The first night level made, still with its old name so saved games
-  // know it.
   {
-    id: 'town-1',
+    id: 'night-5',
+    world: 'night',
+    width: 6,
+    rows: 7,
+    things: [
+      { kind: 'tower', x: 1, y: 2, height: 3 },
+      { kind: 'tower', x: 2, y: 3, height: 3 },
+      { kind: 'tower', x: 0, y: 4, height: 3 },
+      { kind: 'tower', x: 2, y: 4, height: 3 },
+      { kind: 'bamboo', x: 4, y: 4, height: 1 },
+      { kind: 'lantern', x: 2, y: 5, height: 1 },
+      { kind: 'lantern', x: 3, y: 5, height: 1 },
+      { kind: 'tower', x: 4, y: 5, height: 2 },
+    ],
+    start: 36,
+    chest: 3,
+    sun: 'east',
+  },
+  {
+    id: 'night-6',
     world: 'night',
     width: 6,
     rows: 8,
@@ -261,7 +299,64 @@ export const LEVELS: Level[] = [
     sun: 'moon',
   },
   {
-    id: 'night-5',
+    id: 'night-7',
+    world: 'night',
+    width: 6,
+    rows: 8,
+    things: [
+      { kind: 'lantern', x: 3, y: 0, height: 1 },
+      { kind: 'tower', x: 1, y: 1, height: 2 },
+      { kind: 'tower', x: 3, y: 1, height: 3 },
+      { kind: 'tower', x: 5, y: 2, height: 3 },
+      { kind: 'tower', x: 1, y: 3, height: 2 },
+      { kind: 'lantern', x: 0, y: 4, height: 1 },
+      { kind: 'bamboo', x: 3, y: 5, height: 1 },
+    ],
+    start: 45,
+    chest: 2,
+    sun: 'north',
+  },
+  {
+    id: 'night-8',
+    world: 'night',
+    width: 6,
+    rows: 8,
+    things: [
+      { kind: 'tower', x: 1, y: 1, height: 3 },
+      { kind: 'tower', x: 3, y: 1, height: 2 },
+      { kind: 'lantern', x: 3, y: 2, height: 1 },
+      { kind: 'tower', x: 4, y: 2, height: 3 },
+      { kind: 'tower', x: 0, y: 3, height: 3 },
+      { kind: 'tower', x: 1, y: 3, height: 2 },
+      { kind: 'tower', x: 5, y: 3, height: 3 },
+      { kind: 'bamboo', x: 4, y: 4, height: 1 },
+    ],
+    start: 47,
+    chest: 4,
+    sun: 'east',
+  },
+  {
+    id: 'night-9',
+    world: 'night',
+    width: 6,
+    rows: 8,
+    things: [
+      { kind: 'bamboo', x: 3, y: 0, height: 1 },
+      { kind: 'bamboo', x: 0, y: 1, height: 1 },
+      { kind: 'lantern', x: 1, y: 1, height: 1 },
+      { kind: 'tower', x: 4, y: 1, height: 3 },
+      { kind: 'tower', x: 5, y: 2, height: 2 },
+      { kind: 'tower', x: 1, y: 3, height: 2 },
+      { kind: 'tower', x: 3, y: 3, height: 3 },
+      { kind: 'tower', x: 2, y: 4, height: 3 },
+      { kind: 'tower', x: 2, y: 7, height: 3 },
+    ],
+    start: 42,
+    chest: 2,
+    sun: 'west',
+  },
+  {
+    id: 'night-10',
     world: 'night',
     width: 6,
     rows: 8,
@@ -278,6 +373,46 @@ export const LEVELS: Level[] = [
     ],
     start: 47,
     chest: 4,
+    sun: 'west',
+  },
+  {
+    id: 'night-11',
+    world: 'night',
+    width: 6,
+    rows: 8,
+    things: [
+      { kind: 'tower', x: 4, y: 2, height: 2 },
+      { kind: 'bamboo', x: 1, y: 3, height: 1 },
+      { kind: 'lantern', x: 2, y: 3, height: 1 },
+      { kind: 'tower', x: 5, y: 3, height: 3 },
+      { kind: 'tower', x: 1, y: 5, height: 2 },
+      { kind: 'tower', x: 2, y: 5, height: 2 },
+      { kind: 'lantern', x: 2, y: 6, height: 1 },
+      { kind: 'tower', x: 4, y: 6, height: 2 },
+    ],
+    start: 46,
+    chest: 5,
+    sun: 'north',
+  },
+  {
+    id: 'night-12',
+    world: 'night',
+    width: 6,
+    rows: 8,
+    things: [
+      { kind: 'tower', x: 2, y: 0, height: 3 },
+      { kind: 'tower', x: 5, y: 1, height: 3 },
+      { kind: 'bamboo', x: 1, y: 2, height: 1 },
+      { kind: 'lantern', x: 3, y: 2, height: 1 },
+      { kind: 'tower', x: 1, y: 3, height: 3 },
+      { kind: 'tower', x: 5, y: 3, height: 3 },
+      { kind: 'lantern', x: 1, y: 4, height: 1 },
+      { kind: 'tower', x: 1, y: 5, height: 2 },
+      { kind: 'tower', x: 3, y: 5, height: 3 },
+      { kind: 'bamboo', x: 0, y: 6, height: 1 },
+    ],
+    start: 46,
+    chest: 3,
     sun: 'west',
   },
 ];

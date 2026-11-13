@@ -22,7 +22,6 @@ const en = {
   locked: 'locked',
   level: (n: number) => `Level ${n}`,
   worlds: {
-    pagoda: 'Pagodas',
     night: 'Night',
   } as Record<World, string>,
   clear: 'Start over',
@@ -62,7 +61,6 @@ const hr: Strings = {
   locked: 'zaključano',
   level: (n: number) => `Razina ${n}`,
   worlds: {
-    pagoda: 'Pagode',
     night: 'Noć',
   },
   clear: 'Ispočetka',

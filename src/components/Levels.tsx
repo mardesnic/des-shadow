@@ -1,15 +1,10 @@
-import { LEVELS, WORLDS, isOpen, type World } from '../lib/game';
+import { LEVELS, WORLDS, isOpen } from '../lib/game';
 import type { Strings } from '../lib/i18n';
-import { Lantern, Tower } from './Board';
+import { Lantern } from './Board';
 
-// Each world's picture: a pagoda for the days in town, a lit stone lantern
-// for the nights.
-function WorldIcon({ world }: { world: World }) {
-  return world === 'pagoda' ? (
-    <svg className='world__icon' viewBox='-7 -12.5 14 13.5' aria-hidden>
-      <Tower height={2} />
-    </svg>
-  ) : (
+// Each world's picture: a lit stone lantern for the nights.
+function WorldIcon() {
+  return (
     <svg className='world__icon' viewBox='-6 -13 12 14' aria-hidden>
       <Lantern on />
     </svg>
@@ -42,7 +37,7 @@ export function Levels({
             aria-label={t.worlds[world]}
           >
             <div className='world__name'>
-              <WorldIcon world={world} />
+              <WorldIcon />
             </div>
             <div className='levels'>
               {levels.map((level) => {

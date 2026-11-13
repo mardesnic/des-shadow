@@ -60,6 +60,9 @@ function town(): Level | null {
     )
   )
     return null;
+  // A pagoda just in front of the golden cell would hide it.
+  if (things.some((t) => t.kind === 'tower' && t.x === chest && t.y === 1))
+    return null;
   things.sort((a, b) => a.y - b.y || a.x - b.x);
   const level: Level = {
     id: '?',
@@ -107,15 +110,15 @@ for (let tries = 0; tries < 200000 && found < Number(n); tries++) {
   if (!level) continue;
   const way = solution(level);
   if (!way || way.length < Number(lo) || way.length > Number(hi)) continue;
-  // Where the ninja walks: by night both by the moon and by the sun, and
-  // by day by at least two suns.
+  // Where the ninja walks: by night always by the moon, and in all but the
+  // shortest levels by more than one sun or moon.
   const walks = new Set(
     way
       .filter((r, i) => r.ninja !== (way[i - 1]?.ninja ?? level.start))
       .map((r) => r.sun)
   );
-  if (world === 'night' && !(walks.has('moon') && walks.size >= 2)) continue;
-  if (world === 'pagoda' && walks.size < 2 && Number(hi) > 3) continue;
+  if (world === 'night' && !walks.has('moon')) continue;
+  if (walks.size < 2 && Number(hi) > 3) continue;
   if (from && level.sun !== from) continue;
   found++;
   const { id: _, ...rest } = level;

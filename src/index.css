@@ -41,10 +41,10 @@
   --sun-ray: #ffa94d;
   --leaf: #40a35a;
   --leaf-dark: #2f8a47;
-  --blossom: #f7b8cf;
-  --blossom-edge: #e891b2;
-  --petal: #fff0f5;
-  --trunk: #5c3b2a;
+  --ruby: #e03131;
+  --sapphire: #1c7ed6;
+  --emerald: #2fb344;
+  --gem-shine: #ffffff;
   --wall: #fbf6ec;
   --post: #c92a2a;
   --roof: #3f4a5a;
@@ -116,10 +116,10 @@
     --sun-ray: #f59f00;
     --leaf: #2f8a47;
     --leaf-dark: #23703a;
-    --blossom: #c9839e;
-    --blossom-edge: #a8657f;
-    --petal: #f3d6e1;
-    --trunk: #4a3022;
+    --ruby: #f03e3e;
+    --sapphire: #339af0;
+    --emerald: #40c057;
+    --gem-shine: #f1f3f5;
     --wall: #d8d2c4;
     --post: #a82424;
     --roof: #25303d;
@@ -1014,6 +1014,47 @@ h2 {
   fill: var(--gold);
   stroke: var(--chest-dark);
   stroke-width: 0.3;
+}
+
+/* The gems on top of the gold, a red, a blue and a green one, that pop
+   up as the lid flies open. */
+.gem {
+  stroke: var(--chest-dark);
+  stroke-width: 0.25;
+  stroke-linejoin: round;
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: gem-pop 0.5s ease-out both;
+}
+
+.gem--ruby {
+  fill: var(--ruby);
+}
+
+.gem--sapphire {
+  fill: var(--sapphire);
+  animation-delay: 0.1s;
+}
+
+.gem--emerald {
+  fill: var(--emerald);
+  animation-delay: 0.2s;
+}
+
+.gem__shine {
+  fill: var(--gem-shine);
+  opacity: 0.8;
+}
+
+@keyframes gem-pop {
+  0% {
+    transform: translateY(2px) scale(0.3);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(-1px) scale(1.15);
+    opacity: 1;
+  }
 }
 
 .chest__glow {
