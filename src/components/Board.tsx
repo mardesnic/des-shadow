@@ -335,12 +335,11 @@ function ThingShape({ thing, flat }: { thing: Thing; flat?: boolean }) {
   );
 }
 
-// The little ninja: a dark suit with a band of face, two eyes and a red
-// headband. When it bumps into the sun it screws its eyes shut.
+// The little ninja: a dark suit with a band of face and two eyes. When it
+// bumps into the sun it screws its eyes shut.
 function Ninja({ squint }: { squint: boolean }) {
   return (
     <g>
-      <path className='ninja__band' d='M6.4 -8.2 L9 -9.5 M6.4 -8.2 L8.6 -7' />
       <rect
         className='ninja__suit'
         x={2}
@@ -499,10 +498,6 @@ function Samurai({ x, awake }: { x: number; awake: boolean }) {
           width={9.2}
           height={1}
           rx={0.5}
-        />
-        <path
-          className='samurai__horns'
-          d='M-1.6 -12.4 L-3.4 -14.8 M1.6 -12.4 L3.4 -14.8'
         />
         <path
           className='samurai__moustache'

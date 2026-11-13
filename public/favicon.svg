@@ -8,5 +8,4 @@
   <rect x="44" y="45" width="10" height="11" rx="3" fill="#23263a"/>
   <circle cx="49" cy="41" r="5" fill="#23263a"/>
   <rect x="45" y="39.5" width="8" height="3" rx="1.5" fill="#f5c9a0"/>
-  <path d="M53.5 37.5 L58 35.5 M53.5 37.5 L57.5 39.5" stroke="#e03131" stroke-width="1.6" stroke-linecap="round"/>
 </svg>

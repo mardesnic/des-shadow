@@ -30,11 +30,9 @@
   --gold: #e0a800;
   --suit: #23263a;
   --skin: #f5c9a0;
-  --band: #e03131;
   --gate: #d9480f;
   --robe: #364fc7;
   --helmet: #495057;
-  --horns: #f2b200;
   --wrong: #e5484d;
   --selected: #f2b200;
   --good: #2fa36b;
@@ -85,11 +83,9 @@
     --gold: #f2b600;
     --suit: #0d0f18;
     --skin: #e0b48a;
-    --band: #ff6b6b;
     --gate: #c2410c;
     --robe: #4c6ef5;
     --helmet: #868e96;
-    --horns: #fcc419;
     --wrong: #ff6b6f;
     --good: #4cc38a;
   }
@@ -413,12 +409,6 @@ h2 {
   fill: var(--helmet);
 }
 
-.samurai__horns {
-  stroke: var(--horns);
-  stroke-width: 0.8;
-  stroke-linecap: round;
-}
-
 .samurai__eye {
   fill: var(--suit);
 }
@@ -496,13 +486,6 @@ h2 {
 .ninja__shut {
   stroke: var(--suit);
   stroke-width: 0.5;
-  stroke-linecap: round;
-}
-
-.ninja__band {
-  fill: none;
-  stroke: var(--band);
-  stroke-width: 0.9;
   stroke-linecap: round;
 }
 
