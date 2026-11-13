@@ -23,6 +23,7 @@ const en = {
   level: (n: number) => `Level ${n}`,
   worlds: {
     night: 'Night',
+    guards: 'Guards',
   } as Record<World, string>,
   clear: 'Start over',
   moveSun: 'Move the sun',
@@ -36,6 +37,7 @@ const en = {
   } as Record<Sun, string>,
   ground: 'Go here',
   chest: 'Treasure chest',
+  guard: 'Put the guard to sleep',
   solved: 'Well done!',
   finale: 'You did it all!',
   next: 'Next',
@@ -62,6 +64,7 @@ const hr: Strings = {
   level: (n: number) => `Razina ${n}`,
   worlds: {
     night: 'Noć',
+    guards: 'Stražari',
   },
   clear: 'Ispočetka',
   moveSun: 'Pomakni sunce',
@@ -75,6 +78,7 @@ const hr: Strings = {
   },
   ground: 'Idi ovamo',
   chest: 'Škrinja s blagom',
+  guard: 'Uspavaj stražara',
   solved: 'Bravo!',
   finale: 'Sve je riješeno!',
   next: 'Dalje',

@@ -4,6 +4,10 @@ import {
   LEVELS,
   cell,
   dark,
+  hidden,
+  nap,
+  seen,
+  tryNap,
   isOpen,
   isSolved,
   moveSun,
@@ -189,5 +193,66 @@ describe('every level', () => {
       expect(walks.has('moon')).toBe(true);
       if (way.length > 3) expect(walks.size).toBeGreaterThanOrEqual(2);
     }
+  });
+});
+
+// A guard in the middle of a small town, looking up at the chest.
+//
+//   . C .
+//   . . .
+//   . G .        looks up: sees the two cells above it
+//   . . .
+//   N . L        a lantern, so the moon comes out
+const GUARDED: Level = {
+  id: 'guarded',
+  world: 'guards',
+  width: 3,
+  rows: 5,
+  things: [
+    { kind: 'guard', x: 1, y: 2, height: 0, facing: 'up' },
+    { kind: 'lantern', x: 2, y: 4, height: 1 },
+  ],
+  start: 12,
+  chest: 1,
+  sun: 'moon',
+};
+const g = (x: number, y: number) => cell(GUARDED, x, y);
+
+describe('a guard', () => {
+  it('sees the two cells in front of it, day and night', () => {
+    expect(sorted(seen(GUARDED))).toEqual(cells(g(1, 1), g(1, 0)));
+    const r = newRound(GUARDED);
+    expect(hidden(r).has(g(1, 0))).toBe(false);
+    expect(hidden(r).has(g(0, 0))).toBe(true);
+  });
+
+  it('keeps the ninja out of where it sees', () => {
+    expect(walk(newRound(GUARDED), g(1, 0)).ninja).toBe(GUARDED.start);
+  });
+
+  it('is put to sleep from behind or the side, and then sees nothing', () => {
+    const r = newRound(GUARDED);
+    // The nearest cell it doesn't see: right behind it.
+    expect(tryNap(r, g(1, 2))).toEqual({
+      path: [g(0, 3), g(1, 3)],
+      at: g(1, 3),
+    });
+    const slept = nap(r, g(1, 2));
+    expect(slept.asleep).toEqual([g(1, 2)]);
+    expect(seen(GUARDED, slept.asleep).size).toBe(0);
+    expect(walk(slept, g(1, 0)).ninja).toBe(g(1, 0));
+    // Asleep, there is nothing more to do to it.
+    expect(tryNap(slept, g(1, 2))).toBeNull();
+  });
+
+  it('is never crept up on from the front', () => {
+    const front = { ...newRound(GUARDED), ninja: g(0, 1) };
+    // From the side: fine, without a step.
+    expect(tryNap(front, g(1, 2))?.at).not.toBe(g(1, 1));
+  });
+
+  it('in every level with guards has to be put to sleep', () => {
+    for (const level of LEVELS.filter((l) => l.world === 'guards'))
+      expect(solution(level)!.at(-1)!.asleep?.length).toBeGreaterThan(0);
   });
 });

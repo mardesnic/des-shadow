@@ -6,6 +6,7 @@
 
 import {
   cell,
+  seen,
   solution,
   sunsOf,
   type Kind,
@@ -51,7 +52,13 @@ function town(): Level | null {
   };
   for (let i = int(3, 6); i > 0; i--) add('tower', int(2, 3));
   for (let i = int(1, 2); i > 0; i--) add('bamboo', 1);
-  if (world === 'night') for (let i = int(1, 2); i > 0; i--) add('lantern', 1);
+  for (let i = int(1, 2); i > 0; i--) add('lantern', 1);
+  if (world === 'guards') {
+    const before = things.length;
+    add('guard', 0);
+    if (things.length === before) return null;
+    things[before].facing = pick(['up', 'right', 'down', 'left'] as const);
+  }
   // A lantern too near the start would light up the shelter.
   const [sx, sy] = [start % width, Math.floor(start / width)];
   if (
@@ -64,6 +71,8 @@ function town(): Level | null {
   if (things.some((t) => t.kind === 'tower' && t.x === chest && t.y === 1))
     return null;
   things.sort((a, b) => a.y - b.y || a.x - b.x);
+  // A guard looking at the shelter would see the ninja at the start.
+  if (seen({ width, rows, things } as Level).has(start)) return null;
   const level: Level = {
     id: '?',
     world: world as World,
@@ -83,6 +92,7 @@ function draw(level: Level) {
     tower: 'T',
     bamboo: 'B',
     lantern: 'L',
+    guard: 'G',
   };
   const out: string[] = [];
   for (let y = 0; y < level.rows; y++) {
@@ -92,7 +102,8 @@ function draw(level: Level) {
       const t = level.things.find((t) => t.x === x && t.y === y);
       line +=
         (t
-          ? sign[t.kind] + t.height
+          ? sign[t.kind] +
+            (t.facing ? '^>v<'['urdl'.indexOf(t.facing[0])] : t.height)
           : c === level.start
             ? 'N '
             : y === 0 && x === level.chest
@@ -117,7 +128,9 @@ for (let tries = 0; tries < 200000 && found < Number(n); tries++) {
       .filter((r, i) => r.ninja !== (way[i - 1]?.ninja ?? level.start))
       .map((r) => r.sun)
   );
-  if (world === 'night' && !walks.has('moon')) continue;
+  if (!walks.has('moon')) continue;
+  // With a guard, the way goes by putting it to sleep.
+  if (world === 'guards' && !way.at(-1)!.asleep?.length) continue;
   if (walks.size < 2 && Number(hi) > 3) continue;
   if (from && level.sun !== from) continue;
   found++;

@@ -11,7 +11,9 @@ import {
   SUNS,
   initialStats,
   initialStore,
+  isGuard,
   isSolved,
+  nap,
   nextSun,
   levelById,
   moveSun,
@@ -20,6 +22,7 @@ import {
   runWay,
   QUARTER_MS,
   seenAfter,
+  tryNap,
   tryWalk,
   type Round,
   type Stats,
@@ -52,7 +55,9 @@ function load(saved: Round | undefined): Round {
     !(saved.ninja >= 0 && saved.ninja < level.width * level.rows)
   )
     return newRound(level ?? LEVELS[0]);
-  return { ...saved, level };
+  // Only guards there are can be asleep.
+  const asleep = (saved.asleep ?? []).filter((c) => isGuard(level, c));
+  return { ...saved, level, asleep };
 }
 
 // The button that moves the sun on: a little sun, or the moon when night
@@ -170,8 +175,30 @@ export default function App() {
     });
   };
 
+  // A tap on a guard: the ninja sneaks up on it, through the shadow, and
+  // puts it to sleep; or, with no way there, shakes its head.
+  const onGuard = (c: number) => {
+    if (round.asleep?.includes(c)) return;
+    const n = tryNap(round, c);
+    if (!n) {
+      plop('no');
+      setSquint(Date.now());
+      later(SHAKE_MS, () => setSquint(0));
+      return;
+    }
+    const from = round.ninja;
+    setPos(from);
+    const there = along(from, n.path, STEP_MS);
+    later(there, () => {
+      setStore({ round: nap(round, c) });
+      setPos(null);
+      plop('sleep');
+    });
+  };
+
   const onCell = (c: number) => {
     if (solved || busy) return;
+    if (isGuard(round.level, c)) return onGuard(c);
     const w = tryWalk(round, c);
     if (!w) return;
     const { path, ok, to } = w;

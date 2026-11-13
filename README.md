@@ -13,7 +13,7 @@ On your phone, open it and choose **Add to Home Screen** (Safari) or **Install a
 ## Features
 
 - The sun on three sides and the moon on the fourth, with shadows by day and lanterns at night
-- 18 levels, each opening when the one before is solved
+- Levels by night, and then guards with lamps, who see two cells ahead but not behind them: sneak up from behind and put them to sleep
 - Tap where the ninja should go and it finds its own way through the shadow
 - Every level is checked by a solver, so every level can be solved
 - A count of puzzles solved

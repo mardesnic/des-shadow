@@ -7,12 +7,15 @@ import {
   lit,
   open,
   quarters,
+  seen,
   QUARTER_MS,
   chestCell,
   xy,
   sunsOf,
+  thingAt,
   type Level,
   type Round,
+  type Facing,
   type Sun,
   type Thing,
 } from '../lib/game';
@@ -264,7 +267,97 @@ function Shelter() {
   );
 }
 
-function ThingShape({ thing, night }: { thing: Thing; night: boolean }) {
+// A guard in a straw hat and a blue coat, holding up a little lamp the way
+// it looks: from the front its face, from behind its back, from the side
+// one eye. Asleep, it sits down, its eyes shut and its lamp out.
+export function Guard({ facing, asleep }: { facing: Facing; asleep: boolean }) {
+  const side = facing === 'left' ? -1 : facing === 'right' ? 1 : 0;
+  const eyes = facing === 'up' ? [] : side ? [side * 1.2] : [-0.9, 0.9];
+  const lamp = asleep
+    ? { x: 3.6, y: -0.9 }
+    : facing === 'down'
+      ? { x: 0, y: -3.4 }
+      : facing === 'up'
+        ? { x: 2.6, y: -6.4 }
+        : { x: side * 4.2, y: -4.6 };
+  return (
+    <g className={asleep ? 'guard guard--asleep' : 'guard'}>
+      <g className='guard__body'>
+        <path
+          className='guard__coat'
+          d='M-3.4 0 L-2.4 -6.4 L2.4 -6.4 L3.4 0 Z'
+        />
+        <rect
+          className='guard__belt'
+          x={-2.7}
+          y={-3.4}
+          width={5.4}
+          height={0.8}
+        />
+        <circle
+          className={facing === 'up' ? 'guard__hair' : 'guard__face'}
+          cx={0}
+          cy={-8}
+          r={2.3}
+        />
+        {eyes.map((x) =>
+          asleep ? (
+            <path
+              key={x}
+              className='guard__shut'
+              d={`M${x - 0.45} -7.8 l0.9 0`}
+            />
+          ) : (
+            <circle key={x} className='guard__eye' cx={x} cy={-7.8} r={0.38} />
+          )
+        )}
+        <path className='guard__hat' d='M-4.6 -9 L0 -12.4 L4.6 -9 Z' />
+      </g>
+      <g transform={`translate(${lamp.x} ${lamp.y})`}>
+        <rect
+          className='guard__lamp'
+          x={-0.9}
+          y={-1.2}
+          width={1.8}
+          height={2.2}
+          rx={0.5}
+        />
+        {!asleep && (
+          <rect
+            className='guard__flame'
+            x={-0.5}
+            y={-0.8}
+            width={1}
+            height={1.3}
+            rx={0.3}
+          />
+        )}
+      </g>
+      {asleep && (
+        <g className='guard__zz'>
+          <text x={2} y={-11}>
+            z
+          </text>
+          <text x={3.6} y={-13.4} fontSize={2.6}>
+            z
+          </text>
+        </g>
+      )}
+    </g>
+  );
+}
+
+function ThingShape({
+  thing,
+  night,
+  asleep = false,
+}: {
+  thing: Thing;
+  night: boolean;
+  asleep?: boolean;
+}) {
+  if (thing.kind === 'guard')
+    return <Guard facing={thing.facing ?? 'down'} asleep={asleep} />;
   if (thing.kind === 'lantern') return <Lantern on={night} />;
   if (thing.kind === 'tower') return <Tower height={thing.height} />;
   return <Bamboo />;
@@ -613,7 +706,11 @@ export function Board({
         const p = place(round, thing.y * level.width + thing.x);
         return (
           <g key={i} transform={`translate(${p.cx} ${p.foot})`}>
-            <ThingShape thing={thing} night={night} />
+            <ThingShape
+              thing={thing}
+              night={night}
+              asleep={round.asleep?.includes(cell(level, thing.x, thing.y))}
+            />
           </g>
         );
       })}
@@ -670,6 +767,25 @@ export function Board({
           })}
       </g>
 
+      {/* Where the guards that are awake look, lit by their lamps, day and
+          night: the ninja can't go there. */}
+      <g className='gaze'>
+        {[...seen(level, round.asleep)].map((c) => {
+          const p = place(round, c);
+          return (
+            <rect
+              key={c}
+              className='gaze__cell'
+              x={p.left + 0.4}
+              y={p.top + 0.4}
+              width={CELL - 0.8}
+              height={ROW - 0.8}
+              rx={1.2}
+            />
+          );
+        })}
+      </g>
+
       {/* The shelter over the start, always in the shade. */}
       <g
         transform={`translate(${place(round, level.start).cx} ${place(round, level.start).foot})`}
@@ -721,7 +837,13 @@ export function Board({
             height={ROW}
             onClick={() => onCell(c)}
           >
-            <title>{c === chestCell(level) ? t.chest : t.ground}</title>
+            <title>
+              {c === chestCell(level)
+                ? t.chest
+                : thingAt(level, c)?.kind === 'guard'
+                  ? t.guard
+                  : t.ground}
+            </title>
           </rect>
         );
       })}

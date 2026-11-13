@@ -74,15 +74,19 @@ export function useCheer(on: boolean) {
   return on ? cheer : quiet;
 }
 
-// A soft step when the ninja walks, a bright note when the sun moves, and a
-// low boop when the sun is in the way.
-function plop(kind: 'step' | 'sun' | 'no') {
+// A soft step when the ninja walks, a bright note when the sun moves, a
+// low boop when the sun is in the way, and two soft falling notes when a
+// guard falls asleep.
+function plop(kind: 'step' | 'sun' | 'no' | 'sleep') {
   wake();
   try {
     if (ctx) {
       if (kind === 'step') tone(ctx, 392, 0, 0.12);
       else if (kind === 'sun') tone(ctx, 783.99, 0, 0.35);
-      else tone(ctx, 196, 0, 0.25);
+      else if (kind === 'sleep') {
+        tone(ctx, 523.25, 0, 0.25);
+        tone(ctx, 392, 0.22, 0.4);
+      } else tone(ctx, 196, 0, 0.25);
     }
     navigator.vibrate?.(kind === 'no' ? 30 : 10);
   } catch {

@@ -1,10 +1,15 @@
-import { LEVELS, WORLDS, isOpen } from '../lib/game';
+import { ALL_OPEN, LEVELS, WORLDS, isOpen, type World } from '../lib/game';
 import type { Strings } from '../lib/i18n';
-import { Lantern } from './Board';
+import { Guard, Lantern } from './Board';
 
-// Each world's picture: a lit stone lantern for the nights.
-function WorldIcon() {
-  return (
+// Each world's picture: a lit stone lantern for the nights, a guard for
+// the guards.
+function WorldIcon({ world }: { world: World }) {
+  return world === 'guards' ? (
+    <svg className='world__icon' viewBox='-6 -13.5 12 14' aria-hidden>
+      <Guard facing='down' asleep={false} />
+    </svg>
+  ) : (
     <svg className='world__icon' viewBox='-6 -13 12 14' aria-hidden>
       <Lantern on />
     </svg>
@@ -37,13 +42,13 @@ export function Levels({
             aria-label={t.worlds[world]}
           >
             <div className='world__name'>
-              <WorldIcon />
+              <WorldIcon world={world} />
             </div>
             <div className='levels'>
               {levels.map((level) => {
                 const n = LEVELS.indexOf(level) + 1;
                 const done = won.includes(level.id);
-                const open = isOpen(level.id, won, current);
+                const open = ALL_OPEN || isOpen(level.id, won, current);
                 return (
                   <button
                     key={level.id}

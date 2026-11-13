@@ -54,6 +54,9 @@
   --suit: #23263a;
   --skin: #f5c9a0;
   --robe: #364fc7;
+  --hat: #d9a441;
+  --hat-edge: #a87a26;
+  --gaze: #ff922b;
   --helmet: #495057;
   --wrong: #e5484d;
   --selected: #f2b200;
@@ -129,6 +132,9 @@
     --suit: #0d0f18;
     --skin: #e0b48a;
     --robe: #4c6ef5;
+    --hat: #c4923a;
+    --hat-edge: #8c6420;
+    --gaze: #ff922b;
     --helmet: #868e96;
     --wrong: #ff6b6f;
     --good: #4cc38a;
@@ -671,6 +677,71 @@ h2 {
 .ninja {
   transition-property: transform, opacity;
   transition-timing-function: linear;
+}
+
+/* A guard, and where it looks: a warm, striped light no ninja goes in. */
+.guard__coat {
+  fill: var(--robe);
+}
+
+.guard__belt {
+  fill: var(--suit);
+}
+
+.guard__face {
+  fill: var(--skin);
+}
+
+.guard__hair,
+.guard__eye {
+  fill: var(--suit);
+}
+
+.guard__shut {
+  stroke: var(--suit);
+  stroke-width: 0.4;
+  stroke-linecap: round;
+}
+
+.guard__hat {
+  fill: var(--hat);
+  stroke: var(--hat-edge);
+  stroke-width: 0.4;
+  stroke-linejoin: round;
+}
+
+.guard__lamp {
+  fill: var(--roof);
+}
+
+.guard__flame {
+  fill: var(--gaze);
+}
+
+.guard--asleep .guard__body {
+  transform: translateY(1.6px) scale(1, 0.85);
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+
+.guard__zz text {
+  fill: var(--text);
+  font-size: 3.4px;
+  font-weight: 700;
+  animation: zz 2s ease-in-out infinite;
+}
+
+@keyframes zz {
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.gaze__cell {
+  fill: var(--gaze);
+  opacity: 0.55;
+  stroke: var(--gaze);
+  stroke-width: 0.5;
 }
 
 /* What hides the ninja, cut out of it. */

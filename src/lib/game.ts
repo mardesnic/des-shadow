@@ -8,6 +8,11 @@
 //
 // At the bottom there is the moon instead of a sun: then it is night, dark
 // everywhere but round the stone lanterns, which light up.
+//
+// In the later towns there are guards, each with a lamp, looking one way:
+// they see the two cells in front of them, day and night, but not behind
+// them. The ninja sneaks up on a guard from behind or the side and puts it
+// to sleep, and then it sees nothing.
 
 export type Sun = 'north' | 'east' | 'moon' | 'west';
 export const SUNS: readonly Sun[] = ['north', 'east', 'moon', 'west'];
@@ -29,27 +34,41 @@ export const quarters = (from: Sun, to: Sun) =>
 // How long the sun takes for each quarter.
 export const QUARTER_MS = 350;
 
-export type Kind = 'tower' | 'bamboo' | 'lantern';
+export type Kind = 'tower' | 'bamboo' | 'lantern' | 'guard';
 
-// Towers, bamboo and stone lanterns are all in the way.
+// Towers, bamboo, stone lanterns and guards are all in the way.
 export const SOLID: Record<Kind, boolean> = {
   tower: true,
   bamboo: true,
   lantern: true,
+  guard: true,
 };
+
+// Which way a guard looks, and how far it sees.
+export type Facing = 'up' | 'right' | 'down' | 'left';
+export const LOOK: Record<Facing, [number, number]> = {
+  up: [0, -1],
+  right: [1, 0],
+  down: [0, 1],
+  left: [-1, 0],
+};
+export const SIGHT = 2;
 
 export type Thing = {
   kind: Kind;
   x: number;
   y: number;
-  // How tall it is, in cells: its shadow is just as long.
+  // How tall it is, in cells: its shadow is just as long. A guard's is 0:
+  // it casts none.
   height: number;
+  // Which way a guard looks.
+  facing?: Facing;
 };
 
-// The worlds, each shown by a picture. For now there is one, the night in
-// town, with the moon and the lanterns.
-export type World = 'night';
-export const WORLDS: readonly World[] = ['night'];
+// The worlds, each shown by a picture: the night in town, with the moon and
+// the lanterns; then the guards.
+export type World = 'night' | 'guards';
+export const WORLDS: readonly World[] = ['night', 'guards'];
 
 export type Level = {
   id: string;
@@ -78,6 +97,8 @@ export type Round = {
   level: Level;
   sun: Sun;
   ninja: number;
+  // The cells of the guards put to sleep, in order.
+  asleep?: number[];
 };
 
 // The levels, picked from towns found by scripts/find-levels.ts, and
@@ -415,6 +436,24 @@ export const LEVELS: Level[] = [
     chest: 3,
     sun: 'west',
   },
+  // The first guard, in front of the chest, looking at it.
+  {
+    id: 'guard-1',
+    world: 'guards',
+    width: 5,
+    rows: 6,
+    things: [
+      { kind: 'lantern', x: 2, y: 0, height: 1 },
+      { kind: 'tower', x: 0, y: 1, height: 3 },
+      { kind: 'tower', x: 1, y: 1, height: 2 },
+      { kind: 'guard', x: 3, y: 2, height: 0, facing: 'up' },
+      { kind: 'bamboo', x: 0, y: 3, height: 1 },
+      { kind: 'tower', x: 1, y: 5, height: 3 },
+    ],
+    start: 25,
+    chest: 3,
+    sun: 'north',
+  },
 ];
 
 export const levelById = (id: string) => LEVELS.find((l) => l.id === id);
@@ -477,6 +516,36 @@ export function dark(level: Level, sun: Sun): Set<number> {
     }
   return cells;
 }
+
+// The cells the guards that are awake see: up to SIGHT cells in front of
+// each, as far as the first thing in the way.
+export function seen(level: Level, asleep: readonly number[] = []) {
+  const cells = new Set<number>();
+  for (const t of level.things) {
+    if (t.kind !== 'guard' || asleep.includes(cell(level, t.x, t.y))) continue;
+    const [dx, dy] = LOOK[t.facing ?? 'down'];
+    for (let i = 1; i <= SIGHT; i++) {
+      const x = t.x + dx * i;
+      const y = t.y + dy * i;
+      if (x < 0 || x >= level.width || y < 0 || y >= level.rows) break;
+      const c = cell(level, x, y);
+      if (!open(level, c)) break;
+      cells.add(c);
+    }
+  }
+  return cells;
+}
+
+// Where the ninja is hidden in a round: in the dark, and out of the sight
+// of the guards that are awake.
+export function hidden(r: Round, sun: Sun = r.sun) {
+  const cells = dark(r.level, sun);
+  for (const c of seen(r.level, r.asleep)) cells.delete(c);
+  return cells;
+}
+
+export const isGuard = (level: Level, c: number) =>
+  thingAt(level, c)?.kind === 'guard';
 
 function neighbours(level: Level, c: number) {
   const [x, y] = xy(level, c);
@@ -541,7 +610,7 @@ export function tryWalk(
 ): { path: number[]; ok: boolean; to: number } | null {
   const { level } = r;
   if (to === r.ninja || !open(level, to)) return null;
-  const shade = dark(level, r.sun);
+  const shade = hidden(r);
   const safe = route(level, r.ninja, to, (c) => open(level, c) && shade.has(c));
   if (safe) return { path: safe, ok: true, to };
   const any = route(level, r.ninja, to, (c) => open(level, c));
@@ -553,6 +622,41 @@ export function tryWalk(
 export function walk(r: Round, to: number): Round {
   const w = tryWalk(r, to);
   return w?.ok ? { ...r, ninja: w.to } : r;
+}
+
+// Where the ninja goes when the child taps a guard: the shortest way
+// through the shadow to a cell next to it that it doesn't see, behind or
+// beside it, from where it puts it to sleep. `path` ends there. Null when
+// the guard is asleep already, or there is no such way.
+export function tryNap(
+  r: Round,
+  guard: number
+): { path: number[]; at: number } | null {
+  const { level } = r;
+  if (!isGuard(level, guard) || r.asleep?.includes(guard)) return null;
+  const shade = hidden(r);
+  let best: { path: number[]; at: number } | null = null;
+  for (const n of neighbours(level, guard)) {
+    if (!open(level, n) || !shade.has(n)) continue;
+    const path =
+      n === r.ninja
+        ? []
+        : route(level, r.ninja, n, (c) => open(level, c) && shade.has(c));
+    if (path && (!best || path.length < best.path.length))
+      best = { path, at: n };
+  }
+  return best;
+}
+
+export function nap(r: Round, guard: number): Round {
+  const n = tryNap(r, guard);
+  return n
+    ? {
+        ...r,
+        ninja: n.at,
+        asleep: [...(r.asleep ?? []), guard].sort((a, b) => a - b),
+      }
+    : r;
 }
 
 // The way the ninja runs back to the start when it is seen, round the
@@ -576,7 +680,7 @@ export function seenAfter(r: Round, to: Sun): number | null {
   const q = quarters(r.sun, to);
   for (let k = 1; k <= q; k++) {
     const s = SUNS[(SUNS.indexOf(r.sun) + k) % SUNS.length];
-    if (suns.includes(s) && !dark(r.level, s).has(r.ninja)) return k;
+    if (suns.includes(s) && !hidden(r, s).has(r.ninja)) return k;
   }
   return null;
 }
@@ -597,12 +701,14 @@ function moves(r: Round): Round[] {
   const { level } = r;
   const all = [
     moveSun(r, nextSun(level, r.sun)),
-    ...Array.from({ length: level.width * level.rows }, (_, c) => walk(r, c)),
+    ...Array.from({ length: level.width * level.rows }, (_, c) =>
+      isGuard(level, c) ? nap(r, c) : walk(r, c)
+    ),
   ];
   return all.filter((o) => o !== r);
 }
 
-const key = (r: Round) => `${r.sun}:${r.ninja}`;
+const key = (r: Round) => `${r.sun}:${r.ninja}:${(r.asleep ?? []).join(',')}`;
 
 // The fewest taps (sun moves and walks) to the chest, and which, or null if
 // there is no way: every level is checked with it.
@@ -627,6 +733,9 @@ export function solution(level: Level): Round[] | null {
 }
 
 export const solve = (level: Level) => solution(level)?.length ?? null;
+
+// For now, while the levels are being tried out, every level is open.
+export const ALL_OPEN = true;
 
 // Whether a level can be played: the first one, one already won, the one
 // being played, and the one right after a level that's won.
