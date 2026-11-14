@@ -184,6 +184,16 @@ describe('every level', () => {
     }
   });
 
+  it('is won without the ninja ever being seen', () => {
+    for (const level of LEVELS) {
+      const way = solution(level)!;
+      way.forEach((r, i) => {
+        const was = way[i - 1] ?? newRound(level);
+        if (r.sun !== was.sun) expect(r.ninja).toBe(was.ninja);
+      });
+    }
+  });
+
   it('needs a walk by the moon, and in longer ones by a sun too', () => {
     for (const level of LEVELS) {
       const way = solution(level)!;
