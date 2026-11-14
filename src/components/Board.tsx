@@ -271,7 +271,18 @@ function Shelter() {
 // A guard in a straw hat and a purple coat, holding up a little lamp the way
 // it looks: from the front its face, from behind its back, from the side
 // one eye. Asleep, it sits down, its eyes shut and its lamp out.
-export function Guard({ facing, asleep }: { facing: Facing; asleep: boolean }) {
+//
+// In the castle the guard is a wizard instead: a tall starry hat, a white
+// beard, and a wand with a star on top that lights up where it looks.
+export function Guard({
+  facing,
+  asleep,
+  wizard = false,
+}: {
+  facing: Facing;
+  asleep: boolean;
+  wizard?: boolean;
+}) {
   const side = facing === 'left' ? -1 : facing === 'right' ? 1 : 0;
   const eyes = facing === 'up' ? [] : side ? [side * 1.2] : [-0.9, 0.9];
   const lamp = asleep
@@ -282,11 +293,19 @@ export function Guard({ facing, asleep }: { facing: Facing; asleep: boolean }) {
         ? { x: 2.6, y: -6.4 }
         : { x: side * 4.2, y: -4.6 };
   return (
-    <g className={asleep ? 'guard guard--asleep' : 'guard'}>
+    <g
+      className={['guard', asleep && 'guard--asleep', wizard && 'guard--wizard']
+        .filter(Boolean)
+        .join(' ')}
+    >
       <g className='guard__body'>
         <path
           className='guard__coat'
-          d='M-3.4 0 L-2.4 -6.4 L2.4 -6.4 L3.4 0 Z'
+          d={
+            wizard
+              ? 'M-3.8 0 L-2.2 -6.4 L2.2 -6.4 L3.8 0 Z'
+              : 'M-3.4 0 L-2.4 -6.4 L2.4 -6.4 L3.4 0 Z'
+          }
         />
         <rect
           className='guard__belt'
@@ -312,43 +331,79 @@ export function Guard({ facing, asleep }: { facing: Facing; asleep: boolean }) {
             <circle key={x} className='guard__eye' cx={x} cy={-7.8} r={0.38} />
           )
         )}
-        <path className='guard__hat' d='M-4.6 -9 L0 -12.4 L4.6 -9 Z' />
-      </g>
-      {/* An old oil lamp, held by its ring: a little cap, a glass with
-          the flame in it between two bars, and a foot. */}
-      <g
-        className='guard__lamp'
-        transform={`translate(${lamp.x} ${lamp.y}) scale(1.25)`}
-      >
-        <path className='guard__ring' d='M-0.7 -2 A0.7 0.8 0 0 1 0.7 -2' />
-        <rect
-          className={asleep ? 'guard__glass guard__glass--out' : 'guard__glass'}
-          x={-0.85}
-          y={-1.5}
-          width={1.7}
-          height={2.1}
-          rx={0.6}
-        />
-        {!asleep && (
+        {wizard && facing !== 'up' && (
           <path
-            className='guard__flame'
-            d='M0 -1.1 Q0.55 -0.3 0 0.25 Q-0.55 -0.3 0 -1.1 Z'
+            className='guard__beard'
+            d={`M${side * 0.9 - 1.9} -7 Q${side * 0.9} -2.8 ${side * 0.9 + 1.9} -7 Q${side * 0.9} -6.2 ${side * 0.9 - 1.9} -7 Z`}
           />
         )}
-        <path className='guard__bars' d='M-0.85 -1.3 v1.7 M0.85 -1.3 v1.7' />
-        <path
-          className='guard__metal'
-          d='M-1.1 -1.4 L-0.55 -2.1 L0.55 -2.1 L1.1 -1.4 Z'
-        />
-        <rect
-          className='guard__metal'
-          x={-1.1}
-          y={0.5}
-          width={2.2}
-          height={0.6}
-          rx={0.2}
-        />
+        {wizard ? (
+          <>
+            <path
+              className='guard__hat'
+              d='M-4.4 -9 Q0 -10 4.4 -9 L1.6 -10.2 L0.8 -14 Q0.2 -15.6 -1.8 -15.6 Q-0.6 -14.8 -0.9 -13.6 L-1.6 -10.2 Z'
+            />
+            <path
+              className='guard__star'
+              d='M0 -12.6 l0.35 0.7 0.75 0.1 -0.55 0.5 0.15 0.75 -0.7 -0.35 -0.7 0.35 0.15 -0.75 -0.55 -0.5 0.75 -0.1 Z'
+            />
+          </>
+        ) : (
+          <path className='guard__hat' d='M-4.6 -9 L0 -12.4 L4.6 -9 Z' />
+        )}
       </g>
+      {/* The wizard's wand: a stick, with a star at the top that shines,
+          and goes out once it is asleep. */}
+      {wizard && (
+        <g transform={`translate(${lamp.x} ${lamp.y}) scale(1.25)`}>
+          <path className='guard__wand' d='M0 1.2 L0 -1.2' />
+          <path
+            className={
+              asleep ? 'guard__magic guard__magic--out' : 'guard__magic'
+            }
+            d='M0 -3.1 l0.5 1 1.1 0.15 -0.8 0.75 0.2 1.1 -1 -0.5 -1 0.5 0.2 -1.1 -0.8 -0.75 1.1 -0.15 Z'
+          />
+        </g>
+      )}
+      {/* An old oil lamp, held by its ring: a little cap, a glass with
+          the flame in it between two bars, and a foot. */}
+      {!wizard && (
+        <g
+          className='guard__lamp'
+          transform={`translate(${lamp.x} ${lamp.y}) scale(1.25)`}
+        >
+          <path className='guard__ring' d='M-0.7 -2 A0.7 0.8 0 0 1 0.7 -2' />
+          <rect
+            className={
+              asleep ? 'guard__glass guard__glass--out' : 'guard__glass'
+            }
+            x={-0.85}
+            y={-1.5}
+            width={1.7}
+            height={2.1}
+            rx={0.6}
+          />
+          {!asleep && (
+            <path
+              className='guard__flame'
+              d='M0 -1.1 Q0.55 -0.3 0 0.25 Q-0.55 -0.3 0 -1.1 Z'
+            />
+          )}
+          <path className='guard__bars' d='M-0.85 -1.3 v1.7 M0.85 -1.3 v1.7' />
+          <path
+            className='guard__metal'
+            d='M-1.1 -1.4 L-0.55 -2.1 L0.55 -2.1 L1.1 -1.4 Z'
+          />
+          <rect
+            className='guard__metal'
+            x={-1.1}
+            y={0.5}
+            width={2.2}
+            height={0.6}
+            rx={0.2}
+          />
+        </g>
+      )}
       {asleep && (
         <g className='guard__zz'>
           <text x={2} y={-11}>
@@ -435,11 +490,13 @@ function ThingShape({
   night,
   asleep = false,
   opened = false,
+  wizard = false,
 }: {
   thing: Thing;
   night: boolean;
   asleep?: boolean;
   opened?: boolean;
+  wizard?: boolean;
 }) {
   if (thing.kind === 'key')
     return (
@@ -449,7 +506,9 @@ function ThingShape({
     );
   if (thing.kind === 'gate') return <Gate opened={opened} />;
   if (thing.kind === 'guard')
-    return <Guard facing={thing.facing ?? 'down'} asleep={asleep} />;
+    return (
+      <Guard facing={thing.facing ?? 'down'} asleep={asleep} wizard={wizard} />
+    );
   if (thing.kind === 'lantern') return <Lantern on={night} />;
   if (thing.kind === 'tower') return <Tower height={thing.height} />;
   return <Bamboo />;
@@ -494,12 +553,35 @@ function Ninja({ squint, holding }: { squint: boolean; holding: boolean }) {
   );
 }
 
+// The four gems in the chest, where each one lies: red, white, blue and
+// green. In the castle they are the ninja's friends, turned into gems.
+const GEMS = [
+  ['sapphire', -1.4, -7.6],
+  ['diamond', 1.4, -7.6],
+  ['ruby', -2.4, -6.2],
+  ['emerald', 2.4, -6.2],
+] as const;
+
+function Gem({ gem }: { gem: string }) {
+  return (
+    <g className={`gem gem--${gem}`}>
+      <path d='M-1.3 -0.6 L-0.7 -1.3 L0.7 -1.3 L1.3 -0.6 L0 1.1 Z' />
+      <path className='gem__shine' d='M-0.6 -1 L0 -1 L-0.5 -0.5 Z' />
+    </g>
+  );
+}
+
 // The treasure chest the ninja is after: a little wooden chest with gold
 // bands and a lock; at the end its lid flies open on the gold and gems
-// inside.
-function Chest({ open }: { open: boolean }) {
+// inside. In the castle it is all of gold, and its gems fly out on their
+// own (see Finale).
+function Chest({ open, gold }: { open: boolean; gold: boolean }) {
   return (
-    <g className={open ? 'chest chest--open' : 'chest'}>
+    <g
+      className={['chest', open && 'chest--open', gold && 'chest--gold']
+        .filter(Boolean)
+        .join(' ')}
+    >
       {open && (
         <>
           {/* The lid, thrown back, and the gold shining out. */}
@@ -511,21 +593,12 @@ function Chest({ open }: { open: boolean }) {
           <circle className='chest__coin' cx={-2.6} cy={-4.6} r={1} />
           <circle className='chest__coin' cx={2.7} cy={-4.6} r={1} />
           {/* And the gems on top: red, white, blue and green. */}
-          {(
-            [
-              ['sapphire', -1.4, -7.6],
-              ['diamond', 1.4, -7.6],
-              ['ruby', -2.4, -6.2],
-              ['emerald', 2.4, -6.2],
-            ] as const
-          ).map(([gem, x, y]) => (
-            <g key={gem} transform={`translate(${x} ${y}) scale(1.35)`}>
-              <g className={`gem gem--${gem}`}>
-                <path d='M-1.3 -0.6 L-0.7 -1.3 L0.7 -1.3 L1.3 -0.6 L0 1.1 Z' />
-                <path className='gem__shine' d='M-0.6 -1 L0 -1 L-0.5 -0.5 Z' />
+          {!gold &&
+            GEMS.map(([gem, x, y]) => (
+              <g key={gem} transform={`translate(${x} ${y}) scale(1.35)`}>
+                <Gem gem={gem} />
               </g>
-            </g>
-          ))}
+            ))}
         </>
       )}
       <rect
@@ -552,6 +625,128 @@ function Chest({ open }: { open: boolean }) {
         height={2.2}
         rx={0.4}
       />
+    </g>
+  );
+}
+
+// The castle wall along the top of the town, behind the chest: grey stone
+// with battlements, and a purple flag at each end.
+function CastleWall({ width }: { width: number }) {
+  const merlons = Math.floor(width / 6);
+  const step = width / merlons;
+  return (
+    <g className='castle'>
+      <rect
+        className='castle__wall'
+        x={0}
+        y={4}
+        width={width}
+        height={TOP - 4}
+      />
+      {Array.from({ length: merlons }, (_, i) => (
+        <rect
+          key={i}
+          className='castle__wall'
+          x={i * step + step * 0.2}
+          y={1.6}
+          width={step * 0.6}
+          height={3}
+        />
+      ))}
+      <path className='castle__joints' d={`M0 7.6 H${width} M0 11 H${width}`} />
+      {[9, width - 9].map((x) => (
+        <g key={x} transform={`translate(${x} 1.6)`}>
+          <path className='castle__pole' d='M0 0 V-6' />
+          <path className='castle__flag' d='M0 -6 L4 -4.8 L0 -3.6 Z' />
+        </g>
+      ))}
+    </g>
+  );
+}
+
+// Where the friends stand at the end, either side of the chest, and which
+// gem each one was.
+const FRIENDS = [
+  ['ruby', -17],
+  ['sapphire', -9],
+  ['diamond', 9],
+  ['emerald', 17],
+] as const;
+
+// The end of the castle: the gems fly out of the gold chest and turn back
+// into four little ninjas, red, blue, white and green, who jump for joy on
+// the castle wall, while paper lanterns float up over the town.
+function Finale({
+  cx,
+  ground,
+  width,
+  height,
+}: {
+  cx: number;
+  ground: number;
+  width: number;
+  height: number;
+}) {
+  return (
+    <g className='finale'>
+      {Array.from({ length: 7 }, (_, i) => (
+        <g
+          key={i}
+          transform={`translate(${((i + 0.5) * width) / 7} ${height + 8})`}
+        >
+          <g
+            className='sky-lantern'
+            style={
+              {
+                animationDelay: `${2.2 + ((i * 3) % 7) * 0.7}s`,
+                '--rise': `${-height - 24}px`,
+              } as React.CSSProperties
+            }
+          >
+            <path
+              className='sky-lantern__paper'
+              d='M-2.2 0 L-2.8 -5 Q0 -6.6 2.8 -5 L2.2 0 Z'
+            />
+            <circle className='sky-lantern__fire' cx={0} cy={-1} r={0.8} />
+          </g>
+        </g>
+      ))}
+      {FRIENDS.map(([gem, dx], i) => {
+        const [, gx, gy] = GEMS.find(([g]) => g === gem)!;
+        const from = { x: gx - dx, y: gy + 4 };
+        const delay = 0.3 + i * 0.15;
+        return (
+          <g key={gem} transform={`translate(${cx + dx} ${ground})`}>
+            <g transform='translate(0 -4)'>
+              <g
+                className='flying-gem'
+                style={
+                  {
+                    '--dx': `${from.x}px`,
+                    '--dy': `${from.y}px`,
+                    animationDelay: `${delay}s`,
+                  } as React.CSSProperties
+                }
+              >
+                <Gem gem={gem} />
+              </g>
+              <circle
+                className={`friend__burst friend__burst--${gem}`}
+                r={4}
+                style={{ animationDelay: `${delay + 1.45}s` }}
+              />
+            </g>
+            <g transform='scale(0.8) translate(-5 0)'>
+              <g
+                className={`friend friend--${gem}`}
+                style={{ '--in': `${delay + 1.45}s` } as React.CSSProperties}
+              >
+                <Ninja squint={false} holding={false} />
+              </g>
+            </g>
+          </g>
+        );
+      })}
     </g>
   );
 }
@@ -589,6 +784,7 @@ export function Board({
   };
   const SUN_R = sunR(level);
   const cells = Array.from({ length: level.width * level.rows }, (_, c) => c);
+  const castle = level.world === 'castle';
   const chest = place(round, chestCell(level));
   const cobbles = useId();
   const glow = useId();
@@ -687,6 +883,7 @@ export function Board({
                     thing={thing}
                     night={false}
                     opened={round.opened}
+                    wizard={castle}
                   />
                 </g>
               );
@@ -722,6 +919,7 @@ export function Board({
         </radialGradient>
       </defs>
       <rect className='garden' x={0} y={0} width={w} height={h} />
+      {castle && <CastleWall width={w} />}
       {/* The street, a stone for each cell. */}
       <rect
         className='surface'
@@ -818,6 +1016,7 @@ export function Board({
               night={night}
               asleep={round.asleep?.includes(cell(level, thing.x, thing.y))}
               opened={round.opened}
+              wizard={castle}
             />
           </g>
         );
@@ -877,7 +1076,7 @@ export function Board({
 
       {/* Where the guards that are awake look, lit by their lamps, day and
           night: the ninja can't go there. */}
-      <g className='gaze'>
+      <g className={castle ? 'gaze gaze--magic' : 'gaze'}>
         {[...seen(here, round.asleep)].map((c) => {
           const p = place(round, c);
           return (
@@ -903,8 +1102,11 @@ export function Board({
 
       {/* The chest, just beyond the town, over the last cell. */}
       <g transform={`translate(${chest.cx} ${chest.top - 0.4})`}>
-        <Chest open={gone} />
+        <Chest open={gone} gold={castle} />
       </g>
+      {castle && gone && (
+        <Finale cx={chest.cx} ground={chest.top - 0.4} width={w} height={h} />
+      )}
 
       {/* The ninja, over everything but the things in front of it. */}
       <g mask={`url(#${hide})`}>
@@ -919,7 +1121,9 @@ export function Board({
             <g
               className={
                 gone
-                  ? 'ninja__pose ninja--hop'
+                  ? castle
+                    ? 'ninja__pose ninja--party'
+                    : 'ninja__pose ninja--hop'
                   : squint
                     ? 'ninja__pose ninja--crouch'
                     : 'ninja__pose'
@@ -952,7 +1156,9 @@ export function Board({
               {c === chestCell(level)
                 ? t.chest
                 : thingAt(here, c)?.kind === 'guard'
-                  ? t.guard
+                  ? castle
+                    ? t.wizard
+                    : t.guard
                   : thingAt(here, c)?.kind === 'gate'
                     ? t.gate
                     : thingAt(here, c)?.kind === 'key'

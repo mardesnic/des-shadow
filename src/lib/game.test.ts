@@ -339,7 +339,9 @@ describe('a gate', () => {
   });
 
   it('in every level with gates has to be opened, and a guard put to sleep', () => {
-    for (const level of LEVELS.filter((l) => l.world === 'gates')) {
+    for (const level of LEVELS.filter(
+      (l) => l.world === 'gates' || l.world === 'castle'
+    )) {
       const way = solution(level)!;
       const last = way.at(-1)!;
       expect(way.some((r) => r.opened)).toBe(true);
@@ -347,5 +349,16 @@ describe('a gate', () => {
       const locked = level.things.filter((t) => t.kind !== 'key');
       expect(solution({ ...level, things: locked })).toBeNull();
     }
+  });
+});
+
+describe('the castle', () => {
+  it('is the last level, alone in its world, with the chest in the middle', () => {
+    const castle = LEVELS.at(-1)!;
+    expect(castle.world).toBe('castle');
+    expect(LEVELS.filter((l) => l.world === 'castle')).toHaveLength(1);
+    expect([2, 3]).toContain(castle.chest);
+    // Nothing in the top row, where the friends stand at the end.
+    expect(castle.things.some((t) => t.y === 0)).toBe(false);
   });
 });

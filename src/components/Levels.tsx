@@ -3,8 +3,14 @@ import type { Strings } from '../lib/i18n';
 import { Gate, Guard, Lantern } from './Board';
 
 // Each world's picture: a lit stone lantern for the nights, a guard for
-// the guards, a locked gate for the gates.
+// the guards, a locked gate for the gates, and the wizard for the castle.
 function WorldIcon({ world }: { world: World }) {
+  if (world === 'castle')
+    return (
+      <svg className='world__icon' viewBox='-6 -16 12 17' aria-hidden>
+        <Guard facing='down' asleep={false} wizard />
+      </svg>
+    );
   if (world === 'gates')
     return (
       <svg className='world__icon' viewBox='-7 -11 14 12' aria-hidden>

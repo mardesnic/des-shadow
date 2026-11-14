@@ -40,7 +40,12 @@ const int = (a: number, b: number) => a + Math.floor(rand() * (b - a + 1));
 
 function town(): Level | null {
   const start = cell({ width }, int(0, width - 1), rows - 1);
-  const chest = int(0, width - 1);
+  // In the castle the chest is in the middle, with room round it for the
+  // friends the gems turn back into.
+  const chest =
+    world === 'castle'
+      ? int(Math.floor((width - 1) / 2), Math.ceil((width - 1) / 2))
+      : int(0, width - 1);
   const taken = new Set([start, chest]);
   const things: Thing[] = [];
   const add = (kind: Kind, height: number) => {
@@ -54,13 +59,13 @@ function town(): Level | null {
   for (let i = int(3, 6); i > 0; i--) add('tower', int(2, 3));
   for (let i = int(1, 2); i > 0; i--) add('bamboo', 1);
   for (let i = int(1, 2); i > 0; i--) add('lantern', 1);
-  if (world === 'guards' || world === 'gates') {
+  if (world !== 'night') {
     const before = things.length;
     add('guard', 0);
     if (things.length === before) return null;
     things[before].facing = pick(['up', 'right', 'down', 'left'] as const);
   }
-  if (world === 'gates') {
+  if (world === 'gates' || world === 'castle') {
     const before = things.length;
     add('gate', 1);
     add('key', 0);
@@ -144,7 +149,7 @@ for (let tries = 0; tries < 200000 && found < Number(n); tries++) {
   // With a guard, the way goes by putting it to sleep.
   if (world !== 'night' && !way.at(-1)!.asleep?.length) continue;
   // With a gate, the way goes through it: without the key there is none.
-  if (world === 'gates') {
+  if (world === 'gates' || world === 'castle') {
     if (!way.some((r) => r.opened)) continue;
     const locked = level.things.filter((t) => t.kind !== 'key');
     if (solution({ ...level, things: locked })) continue;

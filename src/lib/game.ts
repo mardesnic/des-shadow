@@ -75,9 +75,11 @@ export type Thing = {
 };
 
 // The worlds, each shown by a picture: the night in town, with the moon and
-// the lanterns; then the guards; then the gates.
-export type World = 'night' | 'guards' | 'gates';
-export const WORLDS: readonly World[] = ['night', 'guards', 'gates'];
+// the lanterns; then the guards; then the gates. Last comes the castle, one
+// level with all of it, where the guard is a wizard who has turned the
+// ninja's four friends into gems and locked them in a gold chest.
+export type World = 'night' | 'guards' | 'gates' | 'castle';
+export const WORLDS: readonly World[] = ['night', 'guards', 'gates', 'castle'];
 
 export type Level = {
   id: string;
@@ -717,6 +719,29 @@ export const LEVELS: Level[] = [
     ],
     start: 44,
     chest: 0,
+    sun: 'west',
+  },
+  // The castle, the very end: the guard is a wizard, and in the gold chest
+  // are the ninja's friends, turned into gems.
+  {
+    id: 'castle',
+    world: 'castle',
+    width: 6,
+    rows: 8,
+    things: [
+      { kind: 'tower', x: 1, y: 2, height: 2 },
+      { kind: 'tower', x: 2, y: 2, height: 3 },
+      { kind: 'tower', x: 2, y: 3, height: 3 },
+      { kind: 'bamboo', x: 4, y: 3, height: 1 },
+      { kind: 'lantern', x: 2, y: 4, height: 1 },
+      { kind: 'key', x: 3, y: 4, height: 0 },
+      { kind: 'gate', x: 5, y: 4, height: 1 },
+      { kind: 'tower', x: 0, y: 5, height: 3 },
+      { kind: 'guard', x: 2, y: 5, height: 0, facing: 'right' },
+      { kind: 'tower', x: 3, y: 7, height: 2 },
+    ],
+    start: 44,
+    chest: 3,
     sun: 'west',
   },
 ];

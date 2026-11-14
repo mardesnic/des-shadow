@@ -15,6 +15,7 @@ On your phone, open it and choose **Add to Home Screen** (Safari) or **Install a
 - The sun on three sides and the moon on the fourth, with shadows by day and lanterns at night
 - Levels by night, and then guards with lamps, who see two cells ahead but not behind them: sneak up from behind and put them to sleep
 - Last, locked wooden gates that cast a shadow: pick up the key and open the gate to go through, but then its shadow is gone too
+- At the very end, a castle with a wizard for a guard: open its gold chest, and the gems turn back into the ninja's four friends, who all celebrate together
 - Tap where the ninja should go and it finds its own way through the shadow
 - Every level is checked by a solver, so every level can be solved
 - A count of puzzles solved

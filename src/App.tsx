@@ -47,6 +47,8 @@ type View = 'play' | 'levels' | 'settings';
 // How long the ninja shakes its head at a way out in the sun.
 const SHAKE_MS = 450;
 const FROZEN_MS = 350;
+// How long after the castle's chest opens the friends are all back.
+const FRIENDS_MS = 1900;
 
 // A saved round, with its level as the game has it now; a round saved by
 // an older version of the game starts again.
@@ -263,7 +265,10 @@ export default function App() {
     if (isSolved({ ...round, ninja: to })) {
       // Up to the chest, which opens, then the cheer.
       const through = there + 2 * STEP_MS;
-      setCardWait(through);
+      // In the castle the gems fly out and turn back into the friends
+      // first, cheered again, and only then comes the card.
+      const castle = round.level.world === 'castle';
+      setCardWait(castle ? through + FRIENDS_MS + 600 : through);
       setStats({
         solved: stats.solved + 1,
         won: won.includes(round.level.id) ? won : [...won, round.level.id],
@@ -272,6 +277,12 @@ export default function App() {
         setCelebrating(true);
         cheer();
       });
+      if (castle)
+        later(through + FRIENDS_MS, () => {
+          setCelebrating(false);
+          later(0, () => setCelebrating(true));
+          cheer();
+        });
     }
   };
 

@@ -57,6 +57,15 @@
   --suit: #23263a;
   --skin: #f5c9a0;
   --robe: #862e9c;
+  --wizard: #5f3dc4;
+  --wizard-hat: #3b2a8a;
+  --magic: #b197fc;
+  --magic-light: #e5dbff;
+  --beard: #f1f3f5;
+  --castle: #adb5bd;
+  --castle-joint: #868e96;
+  --gold-dark: #b08600;
+  --sky-lantern: #ff922b;
   --hat: #d9a441;
   --hat-edge: #a87a26;
   --lamp-glass: #ffe8a3;
@@ -138,6 +147,15 @@
     --suit: #0d0f18;
     --skin: #e0b48a;
     --robe: #be4bdb;
+    --wizard: #7950f2;
+    --wizard-hat: #4c3a9e;
+    --magic: #b197fc;
+    --magic-light: #5f4b9e;
+    --beard: #dee2e6;
+    --castle: #495057;
+    --castle-joint: #343a40;
+    --gold-dark: #b8860b;
+    --sky-lantern: #ff922b;
     --hat: #c4923a;
     --hat-edge: #8c6420;
     --lamp-glass: #ffd66b;
@@ -1214,4 +1232,241 @@ h2 {
   animation: chest-open 0.35s ease-out;
   transform-box: fill-box;
   transform-origin: 50% 100%;
+}
+
+/* The castle at the end: the guard is a wizard, whose wand lights up where
+   it looks in a purple magic light instead of a lamp's. */
+.guard--wizard .guard__coat {
+  fill: var(--wizard);
+}
+
+.guard--wizard .guard__hat {
+  fill: var(--wizard-hat);
+  stroke: var(--wizard-hat);
+}
+
+.guard__star {
+  fill: var(--gold);
+}
+
+.guard__beard {
+  fill: var(--beard);
+}
+
+.guard__wand {
+  stroke: var(--chest-dark);
+  stroke-width: 0.45;
+  stroke-linecap: round;
+}
+
+.guard__magic {
+  fill: var(--magic);
+  stroke: var(--gold);
+  stroke-width: 0.2;
+  stroke-linejoin: round;
+}
+
+.guard__magic--out {
+  fill: var(--stone);
+  stroke: none;
+}
+
+.gaze--magic .gaze__cell {
+  fill: var(--magic-light);
+  stroke: var(--magic);
+}
+
+.castle__wall {
+  fill: var(--castle);
+}
+
+.castle__joints,
+.castle__pole {
+  fill: none;
+  stroke: var(--castle-joint);
+  stroke-width: 0.35;
+}
+
+.castle__pole {
+  stroke: var(--chest-dark);
+  stroke-width: 0.5;
+}
+
+.castle__flag {
+  fill: var(--wizard);
+}
+
+/* The gold chest. */
+.chest--gold .chest__body {
+  fill: var(--gold);
+}
+
+.chest--gold .chest__lid {
+  fill: var(--gold-dark);
+}
+
+.chest--gold .chest__band,
+.chest--gold .chest__lock {
+  fill: var(--gold-dark);
+}
+
+/* The gems pop up out of the chest, rest a moment, then fly off to either
+   side and burst into the friends they were. */
+.flying-gem {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: gem-fly 1.5s ease-in-out both;
+}
+
+@keyframes gem-fly {
+  0% {
+    transform: translate(var(--dx), var(--dy)) scale(0.4);
+    opacity: 0;
+  }
+  15% {
+    transform: translate(var(--dx), var(--dy)) scale(1.35);
+    opacity: 1;
+  }
+  45% {
+    transform: translate(var(--dx), var(--dy)) scale(1.35);
+  }
+  75% {
+    transform: translate(calc(var(--dx) * 0.4), -2px) scale(1.6);
+  }
+  95% {
+    transform: translate(0, 0) scale(2);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(0, 0) scale(2.4);
+    opacity: 0;
+  }
+}
+
+.friend__burst {
+  fill: none;
+  stroke-width: 0.6;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: burst 0.5s ease-out forwards;
+}
+
+.friend__burst--ruby {
+  stroke: var(--ruby);
+}
+.friend__burst--sapphire {
+  stroke: var(--sapphire);
+}
+.friend__burst--emerald {
+  stroke: var(--emerald);
+}
+.friend__burst--diamond {
+  stroke: var(--diamond-shine);
+}
+
+@keyframes burst {
+  0% {
+    transform: scale(0.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+.friend {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation:
+    friend-in 0.4s ease-out var(--in) both,
+    party 0.6s ease-in-out calc(var(--in) + 0.4s) infinite;
+}
+
+.friend--ruby .ninja__suit {
+  fill: var(--ruby);
+}
+.friend--sapphire .ninja__suit {
+  fill: var(--sapphire);
+}
+.friend--emerald .ninja__suit {
+  fill: var(--emerald);
+}
+.friend--diamond .ninja__suit {
+  fill: var(--diamond);
+  stroke: var(--diamond-shine);
+  stroke-width: 0.3;
+}
+
+@keyframes friend-in {
+  0% {
+    transform: scale(0);
+  }
+  70% {
+    transform: scale(1.2);
+  }
+}
+
+/* Everyone jumps for joy, again and again. */
+.ninja--party {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: party 0.6s ease-in-out infinite;
+}
+
+@keyframes party {
+  0%,
+  100% {
+    transform: none;
+  }
+  15% {
+    transform: scale(1.08, 0.9);
+  }
+  45% {
+    transform: translateY(-3px) scale(0.95, 1.08);
+  }
+  80% {
+    transform: none;
+  }
+}
+
+/* Paper lanterns float up over the town, swaying, and start again. */
+.sky-lantern {
+  animation: sky-lantern 7s linear infinite both;
+}
+
+.sky-lantern__paper {
+  fill: var(--sky-lantern);
+  opacity: 0.9;
+}
+
+.sky-lantern__fire {
+  fill: var(--fire);
+}
+
+@keyframes sky-lantern {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(2px, calc(var(--rise) * 0.25));
+  }
+  50% {
+    transform: translate(-2px, calc(var(--rise) * 0.5));
+  }
+  75% {
+    transform: translate(2px, calc(var(--rise) * 0.75));
+  }
+  100% {
+    transform: translate(0, var(--rise));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .friend,
+  .ninja--party,
+  .sky-lantern {
+    animation: none;
+  }
 }
