@@ -73,7 +73,7 @@ function town(): Level | null {
     )
   )
     return null;
-  // A pagoda just in front of the golden cell would hide it.
+  // A pagoda just in front of the green cell would hide it.
   if (things.some((t) => t.kind === 'tower' && t.x === chest && t.y === 1))
     return null;
   things.sort((a, b) => a.y - b.y || a.x - b.x);

@@ -34,7 +34,8 @@
   --stone: #d6d1c7;
   --cobble: #e2ded5;
   --chest: #a0652d;
-  --goal: #ecd9a0;
+  --goal: #b2f2bb;
+  --goal-edge: #2f9e44;
   --chest-dark: #6b3f17;
   --shadow: #282c46;
   --sun: #ffc61a;
@@ -58,7 +59,6 @@
   --robe: #862e9c;
   --hat: #d9a441;
   --hat-edge: #a87a26;
-  --gaze: #ff922b;
   --lamp-glass: #ffe8a3;
   --helmet: #495057;
   --wrong: #e5484d;
@@ -115,7 +115,8 @@
     --stone: #8a857c;
     --cobble: #969188;
     --chest: #94602e;
-    --goal: #8f7c48;
+    --goal: #3f7a4c;
+    --goal-edge: #69db7c;
     --chest-dark: #5a3414;
     --shadow: #080a14;
     --sun: #ffd43b;
@@ -139,7 +140,6 @@
     --robe: #be4bdb;
     --hat: #c4923a;
     --hat-edge: #8c6420;
-    --gaze: #ff922b;
     --lamp-glass: #ffd66b;
     --helmet: #868e96;
     --wrong: #ff6b6f;
@@ -781,7 +781,7 @@ h2 {
 }
 
 .guard__flame {
-  fill: var(--gaze);
+  fill: var(--fire);
 }
 
 .guard--asleep .guard__body {
@@ -804,10 +804,10 @@ h2 {
 }
 
 .gaze__cell {
-  fill: var(--gaze);
-  opacity: 0.55;
-  stroke: var(--gaze);
-  stroke-width: 0.5;
+  fill: var(--light);
+  opacity: 0.7;
+  stroke: var(--fire);
+  stroke-width: 0.7;
 }
 
 /* What hides the ninja, cut out of it. */
@@ -1129,7 +1129,7 @@ h2 {
 /* The last cell, under the treasure chest. */
 .stone--goal {
   fill: var(--goal);
-  stroke: var(--gold);
+  stroke: var(--goal-edge);
   stroke-width: 0.6;
 }
 
