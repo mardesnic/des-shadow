@@ -866,6 +866,14 @@ export function Board({
         >
           <rect x={0} y={0} width={w} height={h} fill='#fff' />
           <g className='cut'>
+            {/* The shelter at the start, too, when the ninja is behind it. */}
+            {Math.floor(level.start / level.width) > row && (
+              <g
+                transform={`translate(${place(round, level.start).cx} ${place(round, level.start).foot})`}
+              >
+                <Shelter />
+              </g>
+            )}
             {front.map((thing, i) => {
               const p = place(round, thing.y * level.width + thing.x);
               return (
@@ -998,6 +1006,12 @@ export function Board({
         );
       })}
 
+      {/* The way out, or in the castle the chest, just beyond the town,
+          over the last cell, behind all the town. */}
+      <g transform={`translate(${chest.cx} ${chest.top - 0.4})`}>
+        {castle ? <Chest open={gone} gold /> : <Exit />}
+      </g>
+
       {things.map((thing, i) => {
         const p = place(round, thing.y * level.width + thing.x);
         return (
@@ -1091,11 +1105,6 @@ export function Board({
         <Shelter />
       </g>
 
-      {/* The way out, or in the castle the chest, just beyond the town,
-          over the last cell. */}
-      <g transform={`translate(${chest.cx} ${chest.top - 0.4})`}>
-        {castle ? <Chest open={gone} gold /> : <Exit />}
-      </g>
       {castle && gone && (
         <Finale
           cx={chest.cx}
