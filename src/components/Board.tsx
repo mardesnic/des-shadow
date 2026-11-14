@@ -670,45 +670,19 @@ const FRIENDS = ['ruby', 'sapphire', 'diamond', 'emerald'] as const;
 
 // The end of the castle: the gems fly out of the gold chest and turn back
 // into four little ninjas, red, blue, white and green, who jump for joy on
-// the castle wall, while paper lanterns float up over the town.
+// the castle wall.
 function Finale({
   cx,
   spots,
   ground,
-  width,
-  height,
 }: {
   cx: number;
   // Where each friend stands, from left to right.
   spots: number[];
   ground: number;
-  width: number;
-  height: number;
 }) {
   return (
     <g className='finale'>
-      {Array.from({ length: 7 }, (_, i) => (
-        <g
-          key={i}
-          transform={`translate(${((i + 0.5) * width) / 7} ${height + 8})`}
-        >
-          <g
-            className='sky-lantern'
-            style={
-              {
-                animationDelay: `${2.2 + ((i * 3) % 7) * 0.7}s`,
-                '--rise': `${-height - 24}px`,
-              } as React.CSSProperties
-            }
-          >
-            <path
-              className='sky-lantern__paper'
-              d='M-2.2 0 L-2.8 -5 Q0 -6.6 2.8 -5 L2.2 0 Z'
-            />
-            <circle className='sky-lantern__fire' cx={0} cy={-1} r={0.8} />
-          </g>
-        </g>
-      ))}
       {FRIENDS.map((gem, i) => {
         const dx = spots[i] - cx;
         const [, gx, gy] = GEMS.find(([g]) => g === gem)!;
@@ -1110,8 +1084,6 @@ export function Board({
             (x) => place(round, cell(level, x, 0)).cx
           )}
           ground={chest.top - 0.4}
-          width={w}
-          height={h}
         />
       )}
 

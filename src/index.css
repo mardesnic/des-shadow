@@ -66,7 +66,6 @@
   --castle: #adb5bd;
   --castle-joint: #868e96;
   --gold-dark: #b08600;
-  --sky-lantern: #ff922b;
   --hat: #d9a441;
   --hat-edge: #a87a26;
   --lamp-glass: #ffe8a3;
@@ -157,7 +156,6 @@
     --castle: #495057;
     --castle-joint: #343a40;
     --gold-dark: #b8860b;
-    --sky-lantern: #ff922b;
     --hat: #c4923a;
     --hat-edge: #8c6420;
     --lamp-glass: #ffd66b;
@@ -1444,42 +1442,9 @@ h2 {
   }
 }
 
-/* Paper lanterns float up over the town, swaying, and start again. */
-.sky-lantern {
-  animation: sky-lantern 7s linear infinite both;
-}
-
-.sky-lantern__paper {
-  fill: var(--sky-lantern);
-  opacity: 0.9;
-}
-
-.sky-lantern__fire {
-  fill: var(--fire);
-}
-
-@keyframes sky-lantern {
-  0% {
-    transform: translate(0, 0);
-  }
-  25% {
-    transform: translate(2px, calc(var(--rise) * 0.25));
-  }
-  50% {
-    transform: translate(-2px, calc(var(--rise) * 0.5));
-  }
-  75% {
-    transform: translate(2px, calc(var(--rise) * 0.75));
-  }
-  100% {
-    transform: translate(0, var(--rise));
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .friend,
-  .ninja--party,
-  .sky-lantern {
+  .ninja--party {
     animation: none;
   }
 }

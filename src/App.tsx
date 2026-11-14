@@ -274,13 +274,13 @@ export default function App() {
         won: won.includes(round.level.id) ? won : [...won, round.level.id],
       });
       later(through, () => {
-        setCelebrating(true);
+        // In the castle the confetti waits for the friends.
+        if (!castle) setCelebrating(true);
         cheer();
       });
       if (castle)
         later(through + FRIENDS_MS, () => {
-          setCelebrating(false);
-          later(0, () => setCelebrating(true));
+          setCelebrating(true);
           cheer();
         });
     }
