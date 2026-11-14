@@ -881,7 +881,7 @@ h2 {
   stroke-linecap: round;
 }
 
-/* Under the board: which level, and Start over. */
+/* Under the board: which level, and the sun. */
 .bar {
   display: flex;
   justify-content: center;

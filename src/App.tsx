@@ -143,8 +143,6 @@ export default function App() {
   const solved = isSolved(round);
   const last = LEVELS.indexOf(round.level) === LEVELS.length - 1;
   const busy = pos !== null;
-  const fresh =
-    round.sun === round.level.sun && round.ninja === round.level.start;
 
   // Shows the ninja going along `path` from `from`, a cell every `ms`,
   // starting at `at`; returns when it gets there.
@@ -416,14 +414,6 @@ export default function App() {
               aria-label={t.moveSun}
             >
               <SunIcon />
-            </button>
-            <button
-              className='tool'
-              onClick={() => start(round.level.id)}
-              disabled={fresh || busy || solved}
-              aria-label={t.clear}
-            >
-              <Icon name='clear' />
             </button>
           </div>
 
