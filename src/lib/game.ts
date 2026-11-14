@@ -701,31 +701,8 @@ export const LEVELS: Level[] = [
     sun: 'north',
   },
   {
-    id: 'gate-6',
+    id: 'gate-7',
     world: 'gates',
-    width: 6,
-    rows: 8,
-    things: [
-      { kind: 'gate', x: 2, y: 0, height: 1 },
-      { kind: 'guard', x: 3, y: 1, height: 0, facing: 'right' },
-      { kind: 'tower', x: 5, y: 1, height: 3 },
-      { kind: 'bamboo', x: 0, y: 2, height: 1 },
-      { kind: 'lantern', x: 2, y: 2, height: 1 },
-      { kind: 'tower', x: 1, y: 3, height: 3 },
-      { kind: 'tower', x: 4, y: 3, height: 3 },
-      { kind: 'tower', x: 1, y: 5, height: 3 },
-      { kind: 'tower', x: 0, y: 6, height: 3 },
-      { kind: 'key', x: 1, y: 7, height: 0 },
-    ],
-    start: 44,
-    chest: 0,
-    sun: 'west',
-  },
-  // The castle, the very end: the guard is a wizard, and in the gold chest
-  // are the ninja's friends, turned into gems.
-  {
-    id: 'castle',
-    world: 'castle',
     width: 6,
     rows: 8,
     things: [
@@ -744,6 +721,29 @@ export const LEVELS: Level[] = [
     chest: 3,
     sun: 'west',
   },
+  // The castle, the very end: the guard is a wizard, and in the gold chest
+  // are the ninja's friends, turned into gems.
+  {
+    id: 'castle',
+    world: 'castle',
+    width: 6,
+    rows: 8,
+    things: [
+      { kind: 'gate', x: 2, y: 0, height: 1 },
+      { kind: 'guard', x: 3, y: 1, height: 0, facing: 'right' },
+      { kind: 'tower', x: 5, y: 1, height: 3 },
+      { kind: 'bamboo', x: 0, y: 2, height: 1 },
+      { kind: 'lantern', x: 2, y: 2, height: 1 },
+      { kind: 'tower', x: 1, y: 3, height: 3 },
+      { kind: 'tower', x: 4, y: 3, height: 3 },
+      { kind: 'tower', x: 1, y: 5, height: 3 },
+      { kind: 'tower', x: 0, y: 6, height: 3 },
+      { kind: 'key', x: 1, y: 7, height: 0 },
+    ],
+    start: 44,
+    chest: 0,
+    sun: 'west',
+  },
 ];
 
 export const levelById = (id: string) => LEVELS.find((l) => l.id === id);
@@ -755,6 +755,23 @@ export function nextLevel(id: string): Level {
 }
 
 export const chestCell = (level: Level) => cell(level, level.chest, 0);
+
+// Where the ninja's friends stand at the end of the castle, on the wall
+// over the top row: the four columns nearest the chest with nothing in the
+// way there, from left to right.
+export function friendSpots(level: Level): number[] {
+  return Array.from({ length: level.width }, (_, x) => x)
+    .filter(
+      (x) =>
+        x !== level.chest &&
+        !level.things.some((t) => t.y === 0 && t.x === x && t.height > 0)
+    )
+    .sort(
+      (a, b) => Math.abs(a - level.chest) - Math.abs(b - level.chest) || a - b
+    )
+    .slice(0, 4)
+    .sort((a, b) => a - b);
+}
 
 // Where the sun can be: the moon only comes out where there are lanterns,
 // or the night would hide the ninja everywhere.

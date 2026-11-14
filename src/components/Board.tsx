@@ -10,6 +10,7 @@ import {
   seen,
   QUARTER_MS,
   chestCell,
+  friendSpots,
   xy,
   sunsOf,
   thingAt,
@@ -664,25 +665,22 @@ function CastleWall({ width }: { width: number }) {
   );
 }
 
-// Where the friends stand at the end, either side of the chest, and which
-// gem each one was.
-const FRIENDS = [
-  ['ruby', -17],
-  ['sapphire', -9],
-  ['diamond', 9],
-  ['emerald', 17],
-] as const;
+// Which gem each friend was, from left to right.
+const FRIENDS = ['ruby', 'sapphire', 'diamond', 'emerald'] as const;
 
 // The end of the castle: the gems fly out of the gold chest and turn back
 // into four little ninjas, red, blue, white and green, who jump for joy on
 // the castle wall, while paper lanterns float up over the town.
 function Finale({
   cx,
+  spots,
   ground,
   width,
   height,
 }: {
   cx: number;
+  // Where each friend stands, from left to right.
+  spots: number[];
   ground: number;
   width: number;
   height: number;
@@ -711,7 +709,8 @@ function Finale({
           </g>
         </g>
       ))}
-      {FRIENDS.map(([gem, dx], i) => {
+      {FRIENDS.map((gem, i) => {
+        const dx = spots[i] - cx;
         const [, gx, gy] = GEMS.find(([g]) => g === gem)!;
         const from = { x: gx - dx, y: gy + 4 };
         const delay = 0.3 + i * 0.15;
@@ -1105,7 +1104,15 @@ export function Board({
         <Chest open={gone} gold={castle} />
       </g>
       {castle && gone && (
-        <Finale cx={chest.cx} ground={chest.top - 0.4} width={w} height={h} />
+        <Finale
+          cx={chest.cx}
+          spots={friendSpots(level).map(
+            (x) => place(round, cell(level, x, 0)).cx
+          )}
+          ground={chest.top - 0.4}
+          width={w}
+          height={h}
+        />
       )}
 
       {/* The ninja, over everything but the things in front of it. */}

@@ -17,6 +17,7 @@ import {
   open,
   SUNS,
   WORLDS,
+  friendSpots,
   quarters,
   solution,
   solve,
@@ -353,12 +354,10 @@ describe('a gate', () => {
 });
 
 describe('the castle', () => {
-  it('is the last level, alone in its world, with the chest in the middle', () => {
+  it('is the last level, alone in its world, with room for the friends', () => {
     const castle = LEVELS.at(-1)!;
     expect(castle.world).toBe('castle');
     expect(LEVELS.filter((l) => l.world === 'castle')).toHaveLength(1);
-    expect([2, 3]).toContain(castle.chest);
-    // Nothing in the top row, where the friends stand at the end.
-    expect(castle.things.some((t) => t.y === 0)).toBe(false);
+    expect(friendSpots(castle)).toHaveLength(4);
   });
 });
