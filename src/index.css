@@ -45,6 +45,8 @@
   --sapphire: #1c7ed6;
   --emerald: #2fb344;
   --gem-shine: #ffffff;
+  --diamond: #f8f9fa;
+  --diamond-shine: #a5d8ff;
   --wall: #fbf6ec;
   --post: #c92a2a;
   --roof: #3f4a5a;
@@ -53,7 +55,7 @@
   --gold: #e0a800;
   --suit: #23263a;
   --skin: #f5c9a0;
-  --robe: #364fc7;
+  --robe: #862e9c;
   --hat: #d9a441;
   --hat-edge: #a87a26;
   --gaze: #ff922b;
@@ -123,6 +125,8 @@
     --sapphire: #339af0;
     --emerald: #40c057;
     --gem-shine: #f1f3f5;
+    --diamond: #f1f3f5;
+    --diamond-shine: #74c0fc;
     --wall: #d8d2c4;
     --post: #a82424;
     --roof: #25303d;
@@ -131,7 +135,7 @@
     --gold: #f2b600;
     --suit: #0d0f18;
     --skin: #e0b48a;
-    --robe: #4c6ef5;
+    --robe: #be4bdb;
     --hat: #c4923a;
     --hat-edge: #8c6420;
     --gaze: #ff922b;
@@ -1087,7 +1091,7 @@ h2 {
   stroke-width: 0.3;
 }
 
-/* The gems on top of the gold, a red, a blue and a green one, that pop
+/* The gems on top of the gold, red, white, blue and green, that pop
    up as the lid flies open. */
 .gem {
   stroke: var(--chest-dark);
@@ -1112,8 +1116,18 @@ h2 {
   animation-delay: 0.2s;
 }
 
+.gem--diamond {
+  fill: var(--diamond);
+  animation-delay: 0.3s;
+}
+
+.gem--diamond .gem__shine {
+  fill: var(--diamond-shine);
+}
+
 .gem__shine {
   fill: var(--gem-shine);
+  stroke: none;
   opacity: 0.8;
 }
 

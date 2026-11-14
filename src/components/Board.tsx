@@ -267,7 +267,7 @@ function Shelter() {
   );
 }
 
-// A guard in a straw hat and a blue coat, holding up a little lamp the way
+// A guard in a straw hat and a purple coat, holding up a little lamp the way
 // it looks: from the front its face, from behind its back, from the side
 // one eye. Asleep, it sits down, its eyes shut and its lamp out.
 export function Guard({ facing, asleep }: { facing: Facing; asleep: boolean }) {
@@ -413,12 +413,13 @@ function Chest({ open }: { open: boolean }) {
           <ellipse className='chest__glow' cx={0} cy={-4.8} rx={4.2} ry={1.3} />
           <circle className='chest__coin' cx={-2.6} cy={-4.6} r={1} />
           <circle className='chest__coin' cx={2.7} cy={-4.6} r={1} />
-          {/* And the gems on top: a ruby, a sapphire and an emerald. */}
+          {/* And the gems on top: red, white, blue and green. */}
           {(
             [
-              ['ruby', -2.1, -6.4],
-              ['emerald', 2.1, -6.4],
-              ['sapphire', 0, -7.3],
+              ['sapphire', -1.4, -7.6],
+              ['diamond', 1.4, -7.6],
+              ['ruby', -2.4, -6.2],
+              ['emerald', 2.4, -6.2],
             ] as const
           ).map(([gem, x, y]) => (
             <g key={gem} transform={`translate(${x} ${y}) scale(1.35)`}>
