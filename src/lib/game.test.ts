@@ -23,7 +23,7 @@ import {
   sunsOf,
   tryGate,
   tryWalk,
-  useGate,
+  openGate,
   walk,
   type Level,
 } from './game';
@@ -307,7 +307,7 @@ describe('a gate', () => {
   });
 
   it('once open, can be gone through, and casts no more shadow', () => {
-    const r = useGate(walk(newRound(GATED), d(2, 2)), d(1, 1));
+    const r = openGate(walk(newRound(GATED), d(2, 2)), d(1, 1));
     expect(r.opened).toBe(true);
     // Its shadow gone, the ninja next to it is out in the light: it is
     // seen, and runs back to the start.
@@ -327,7 +327,7 @@ describe('a gate', () => {
         { kind: 'lantern' as const, x: 2, y: 3, height: 1 },
       ],
     };
-    const r = useGate(
+    const r = openGate(
       { ...newRound(lamp), sun: 'moon' as const, ninja: d(1, 2), got: true },
       d(1, 1)
     );

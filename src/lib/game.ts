@@ -965,7 +965,7 @@ export function tryGate(
 
 // Opening the gate takes its shadow away, and may let a guard see past it:
 // left out in the light, the ninja is seen and runs back to the start.
-export function useGate(r: Round, gate: number): Round {
+export function openGate(r: Round, gate: number): Round {
   const n = tryGate(r, gate);
   if (!n) return r;
   const next = { ...arrive(r, n.path, n.at), opened: true };
@@ -1020,7 +1020,7 @@ function moves(r: Round): Round[] {
       isGuard(level, c)
         ? nap(r, c)
         : usesGate(r, c)
-          ? useGate(r, c)
+          ? openGate(r, c)
           : walk(r, c)
     ),
   ];

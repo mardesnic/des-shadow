@@ -17,7 +17,7 @@ import {
   nap,
   town,
   tryGate,
-  useGate,
+  openGate,
   walk,
   nextSun,
   levelById,
@@ -217,7 +217,7 @@ export default function App() {
     const from = round.ninja;
     setPos(from);
     const there = along(from, n.path, STEP_MS);
-    const next = useGate(round, c);
+    const next = openGate(round, c);
     later(there, () => {
       plop('unlock');
       if (next.ninja === n.at) {
