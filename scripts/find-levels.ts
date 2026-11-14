@@ -144,7 +144,7 @@ for (let tries = 0; tries < 200000 && found < Number(n); tries++) {
   if (world !== 'night' && !way.at(-1)!.asleep?.length) continue;
   // With a gate, the way goes through it: without the key there is none.
   if (world === 'gates') {
-    if (!way.at(-1)!.opened) continue;
+    if (!way.some((r) => r.opened)) continue;
     const locked = level.things.filter((t) => t.kind !== 'key');
     if (solution({ ...level, things: locked })) continue;
   }

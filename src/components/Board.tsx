@@ -926,10 +926,7 @@ export function Board({
               }
               style={gone ? { animationDelay: `${stepMs * 2}ms` } : undefined}
             >
-              <Ninja
-                squint={squint > 0}
-                holding={!!round.got && !round.opened}
-              />
+              <Ninja squint={squint > 0} holding={!!round.got} />
             </g>
           </g>
         </g>

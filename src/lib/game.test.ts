@@ -20,9 +20,9 @@ import {
   solution,
   solve,
   sunsOf,
-  tryUnlock,
+  tryGate,
   tryWalk,
-  unlock,
+  useGate,
   walk,
   type Level,
 } from './game';
@@ -292,29 +292,37 @@ describe('a gate', () => {
 
   it('opens only with the key, picked up on the way', () => {
     const r = newRound(GATED);
-    expect(tryUnlock(r, d(1, 1))).toBeNull();
+    expect(tryGate(r, d(1, 1))).toBeNull();
     const got = walk(r, d(2, 2));
     expect(got.got).toBe(true);
     // Going by the key picks it up too.
     expect(walk({ ...r, ninja: d(1, 2) }, d(2, 2)).got).toBe(true);
     expect(walk(r, d(1, 2)).got).toBeUndefined();
-    expect(tryUnlock(got, d(1, 1))).toEqual({ path: [d(1, 2)], at: d(1, 2) });
+    expect(tryGate(got, d(1, 1))).toEqual({ path: [d(1, 2)], at: d(1, 2) });
   });
 
   it('once open, can be gone through, and casts no more shadow', () => {
-    const r = unlock(walk(newRound(GATED), d(2, 2)), d(1, 1));
+    const r = useGate(walk(newRound(GATED), d(2, 2)), d(1, 1));
     expect(r.opened).toBe(true);
     expect(r.ninja).toBe(d(1, 2));
     expect(hidden(r).has(d(1, 2))).toBe(false);
-    // Open, there is nothing more to do to it.
-    expect(tryUnlock(r, d(1, 1))).toBeNull();
     expect(tryWalk({ ...r, sun: 'east' }, d(1, 1))?.path).toEqual([d(1, 1)]);
+  });
+
+  it('can be shut again with the key, and casts its shadow again', () => {
+    const r = useGate(walk(newRound(GATED), d(2, 2)), d(1, 1));
+    const shut = useGate(r, d(1, 1));
+    expect(shut.opened).toBe(false);
+    expect(shut.got).toBe(true);
+    expect(hidden(shut).has(d(1, 2))).toBe(true);
+    expect(open(GATED, d(1, 1))).toBe(false);
   });
 
   it('in every level with gates has to be opened, and a guard put to sleep', () => {
     for (const level of LEVELS.filter((l) => l.world === 'gates')) {
-      const last = solution(level)!.at(-1)!;
-      expect(last.opened).toBe(true);
+      const way = solution(level)!;
+      const last = way.at(-1)!;
+      expect(way.some((r) => r.opened)).toBe(true);
       expect(last.asleep?.length).toBeGreaterThan(0);
       const locked = level.things.filter((t) => t.kind !== 'key');
       expect(solution({ ...level, things: locked })).toBeNull();

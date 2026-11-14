@@ -17,7 +17,7 @@
 // Last there are wooden gates, locked, and a key somewhere in the town. A
 // gate is in the way and casts a shadow like bamboo; once the ninja has the
 // key, it can open the gate and go through, but then the gate's shadow is
-// gone too.
+// gone too, until the ninja shuts it again.
 
 export type Sun = 'north' | 'east' | 'moon' | 'west';
 export const SUNS: readonly Sun[] = ['north', 'east', 'moon', 'west'];
@@ -911,8 +911,10 @@ function nextTo(r: Round, thing: number) {
   const shade = hidden(r);
   let best: { path: number[]; at: number } | null = null;
   for (const n of neighbours(level, thing)) {
-    // Not the chest: that is only got to on foot.
-    if (!open(level, n) || !shade.has(n) || n === chestCell(level)) continue;
+    // Not the chest: that is only got to on foot. Where the ninja is
+    // already, even out in the light, it needn't go.
+    if (!open(level, n) || n === chestCell(level)) continue;
+    if (n !== r.ninja && !shade.has(n)) continue;
     const path =
       n === r.ninja
         ? []
@@ -947,18 +949,19 @@ export function nap(r: Round, guard: number): Round {
 
 // Where the ninja goes when the child taps the gate: with the key, the
 // shortest way through the shadow to a cell next to it, from where it
-// opens it. Null without the key, once it is open, or with no such way.
-export function tryUnlock(
+// opens it, or shuts it again, and its shadow is back. Null without the
+// key, or with no such way.
+export function tryGate(
   r: Round,
   gate: number
 ): { path: number[]; at: number } | null {
-  if (!isGate(r.level, gate) || !r.got || r.opened) return null;
+  if (!isGate(r.level, gate) || !r.got) return null;
   return nextTo(r, gate);
 }
 
-export function unlock(r: Round, gate: number): Round {
-  const n = tryUnlock(r, gate);
-  return n ? { ...arrive(r, n.path, n.at), opened: true } : r;
+export function useGate(r: Round, gate: number): Round {
+  const n = tryGate(r, gate);
+  return n ? { ...arrive(r, n.path, n.at), opened: !r.opened } : r;
 }
 
 // The way the ninja runs back to the start when it is seen, round the
@@ -1007,7 +1010,7 @@ function moves(r: Round): Round[] {
       isGuard(level, c)
         ? nap(r, c)
         : isGate(level, c)
-          ? unlock(r, c)
+          ? useGate(r, c)
           : walk(r, c)
     ),
   ];

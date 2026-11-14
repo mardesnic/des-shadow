@@ -16,8 +16,8 @@ import {
   isSolved,
   nap,
   town,
-  tryUnlock,
-  unlock,
+  tryGate,
+  useGate,
   walk,
   nextSun,
   levelById,
@@ -62,7 +62,7 @@ function load(saved: Round | undefined): Round {
     return newRound(level ?? LEVELS[0]);
   // Only guards there are can be asleep.
   const asleep = (saved.asleep ?? []).filter((c) => isGuard(level, c));
-  // And only a key there is can be picked up, and a gate there is opened.
+  // And only a key there is can be picked up, and a gate there opened.
   const got = !!saved.got && level.things.some((t) => t.kind === 'key');
   const opened = got && !!saved.opened;
   return { ...saved, level, asleep, got, opened };
@@ -207,9 +207,8 @@ export default function App() {
   // A tap on the gate: with the key, the ninja goes up to it and opens it;
   // without, or with no way there, it shakes its head.
   const onGate = (c: number) => {
-    const n = tryUnlock(round, c);
+    const n = tryGate(round, c);
     if (!n) {
-      if (round.opened) return;
       plop('no');
       setSquint(Date.now());
       later(SHAKE_MS, () => setSquint(0));
@@ -219,9 +218,9 @@ export default function App() {
     setPos(from);
     const there = along(from, n.path, STEP_MS);
     later(there, () => {
-      setStore({ round: unlock(round, c) });
+      setStore({ round: useGate(round, c) });
       setPos(null);
-      plop('unlock');
+      plop(round.opened ? 'lock' : 'unlock');
     });
   };
 
