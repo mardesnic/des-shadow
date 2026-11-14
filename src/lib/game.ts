@@ -983,8 +983,8 @@ export function deadEnds(level: Level): Round[] {
     .map(([, r]) => r);
 }
 
-// For now, while the levels are being tried out, every level is open.
-export const ALL_OPEN = true;
+// Set to true to open every level, to try them out.
+export const ALL_OPEN = false;
 
 // Whether a level can be played: the first one, one already won, the one
 // being played, and the one right after a level that's won.
