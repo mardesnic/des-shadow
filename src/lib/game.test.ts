@@ -4,6 +4,7 @@ import {
   LEVELS,
   cell,
   dark,
+  deadEnds,
   hidden,
   nap,
   seen,
@@ -184,6 +185,10 @@ describe('every level', () => {
     }
   });
 
+  it('never leaves the child stuck, with no way left to the chest', () => {
+    for (const level of LEVELS) expect(deadEnds(level)).toEqual([]);
+  });
+
   it('needs a walk by the moon, and in longer ones by a sun too', () => {
     for (const level of LEVELS) {
       const way = solution(level)!;
@@ -313,7 +318,7 @@ describe('a gate', () => {
     ).toEqual([d(1, 1)]);
   });
 
-  it('once open is walked into, and from in it shut again behind', () => {
+  it('once open is walked into, and stays open', () => {
     // A lantern at the bottom right, for the night.
     const lamp = {
       ...GATED,
@@ -327,16 +332,10 @@ describe('a gate', () => {
       d(1, 1)
     );
     expect(r.opened).toBe(true);
-    // A tap on the open gate goes in, and doesn't shut it.
+    // In the dark, the ninja stays where it opened it.
+    expect(r.ninja).toBe(d(1, 2));
     expect(tryGate(r, d(1, 1))).toBeNull();
-    const inGate = walk(r, d(1, 1));
-    expect(inGate.ninja).toBe(d(1, 1));
-    // From in it, it steps out into the dark and shuts it.
-    const shut = useGate(inGate, d(1, 1));
-    expect(shut.opened).toBe(false);
-    expect(shut.ninja).toBe(d(1, 2));
-    expect(shut.got).toBe(true);
-    expect(hidden({ ...shut, sun: 'north' }).has(d(1, 2))).toBe(true);
+    expect(walk(r, d(1, 1)).ninja).toBe(d(1, 1));
   });
 
   it('in every level with gates has to be opened, and a guard put to sleep', () => {

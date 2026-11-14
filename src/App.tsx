@@ -219,7 +219,7 @@ export default function App() {
     const there = along(from, n.path, STEP_MS);
     const next = useGate(round, c);
     later(there, () => {
-      plop(round.opened ? 'lock' : 'unlock');
+      plop('unlock');
       if (next.ninja === n.at) {
         setStore({ round: next });
         setPos(null);

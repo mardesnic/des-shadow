@@ -6,6 +6,7 @@
 
 import {
   cell,
+  deadEnds,
   seen,
   solution,
   sunsOf,
@@ -150,6 +151,8 @@ for (let tries = 0; tries < 200000 && found < Number(n); tries++) {
   }
   if (walks.size < 2 && Number(hi) > 3) continue;
   if (from && level.sun !== from) continue;
+  // Nowhere a child can get stuck, with no way left to the chest.
+  if (deadEnds(level).length) continue;
   found++;
   const { id: _, ...rest } = level;
   console.log(`#${found}, ${way.length} taps, from ${level.sun}:`);

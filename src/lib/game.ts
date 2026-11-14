@@ -17,7 +17,8 @@
 // Last there are wooden gates, locked, and a key somewhere in the town. A
 // gate is in the way and casts a shadow like bamboo; once the ninja has the
 // key, it can open the gate and go through, but then the gate's shadow is
-// gone too, until the ninja shuts it again.
+// gone too: if that leaves the ninja in the light, it is seen and runs
+// back to the start.
 
 export type Sun = 'north' | 'east' | 'moon' | 'west';
 export const SUNS: readonly Sun[] = ['north', 'east', 'moon', 'west'];
@@ -946,16 +947,14 @@ export function nap(r: Round, guard: number): Round {
     : r;
 }
 
-// Whether a tap on the gate opens or shuts it: always while it is shut,
-// and once open only from in it; otherwise the ninja just walks in.
+// Whether a tap on the gate opens it: while it is shut. Once open, the
+// ninja just walks in.
 export const usesGate = (r: Round, c: number) =>
-  isGate(r.level, c) && (!r.opened || r.ninja === c);
+  isGate(r.level, c) && !r.opened;
 
 // Where the ninja goes when the child taps the gate: with the key, the
 // shortest way through the shadow to a cell next to it, from where it
-// opens it; or, standing in it once open, a step out of it into the
-// shadow, to shut it behind it, and its shadow is back. Null without the
-// key, or with no such way.
+// opens it. Null without the key, once it is open, or with no such way.
 export function tryGate(
   r: Round,
   gate: number
@@ -969,7 +968,7 @@ export function tryGate(
 export function useGate(r: Round, gate: number): Round {
   const n = tryGate(r, gate);
   if (!n) return r;
-  const next = { ...arrive(r, n.path, n.at), opened: !r.opened };
+  const next = { ...arrive(r, n.path, n.at), opened: true };
   return hidden(next).has(next.ninja)
     ? next
     : { ...next, ninja: r.level.start };
@@ -1054,6 +1053,42 @@ export function solution(level: Level): Round[] | null {
 }
 
 export const solve = (level: Level) => solution(level)?.length ?? null;
+
+// The rounds a child can get to in a level from which there is no way left
+// to the chest, whatever it taps: there must be none, or the child would
+// have to start over.
+export function deadEnds(level: Level): Round[] {
+  const start = newRound(level);
+  const seenRounds = new Map<string, Round>([[key(start), start]]);
+  const next = new Map<string, string[]>();
+  const queue = [start];
+  while (queue.length) {
+    const r = queue.shift()!;
+    if (isSolved(r)) continue;
+    const out = moves(r);
+    next.set(key(r), out.map(key));
+    for (const o of out)
+      if (!seenRounds.has(key(o))) {
+        seenRounds.set(key(o), o);
+        queue.push(o);
+      }
+  }
+  // Back from the won rounds: every round with a way to one.
+  const back = new Map<string, string[]>();
+  for (const [k, outs] of next)
+    for (const o of outs) back.set(o, [...(back.get(o) ?? []), k]);
+  const good = new Set([...seenRounds.values()].filter(isSolved).map(key));
+  const todo = [...good];
+  while (todo.length)
+    for (const p of back.get(todo.pop()!) ?? [])
+      if (!good.has(p)) {
+        good.add(p);
+        todo.push(p);
+      }
+  return [...seenRounds.entries()]
+    .filter(([k]) => !good.has(k))
+    .map(([, r]) => r);
+}
 
 // For now, while the levels are being tried out, every level is open.
 export const ALL_OPEN = true;

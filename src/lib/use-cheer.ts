@@ -77,10 +77,8 @@ export function useCheer(on: boolean) {
 // A soft step when the ninja walks, a bright note when the sun moves, a
 // low boop when the sun is in the way, two soft falling notes when a
 // guard falls asleep, a jingle for the key and three rising notes as the
-// gate opens, falling as it shuts.
-function plop(
-  kind: 'step' | 'sun' | 'no' | 'sleep' | 'key' | 'unlock' | 'lock'
-) {
+// gate opens.
+function plop(kind: 'step' | 'sun' | 'no' | 'sleep' | 'key' | 'unlock') {
   wake();
   try {
     if (ctx) {
@@ -92,10 +90,6 @@ function plop(
       } else if (kind === 'key') {
         tone(ctx, 880, 0, 0.12);
         tone(ctx, 1174.66, 0.1, 0.2);
-      } else if (kind === 'lock') {
-        tone(ctx, 783.99, 0, 0.15);
-        tone(ctx, 587.33, 0.12, 0.15);
-        tone(ctx, 392, 0.24, 0.3);
       } else if (kind === 'unlock') {
         tone(ctx, 392, 0, 0.15);
         tone(ctx, 587.33, 0.12, 0.15);
