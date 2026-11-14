@@ -131,7 +131,7 @@ export default function App() {
   const [pos, setPos] = useState<number | null>(null);
   const [stepMs, setStepMs] = useState(STEP_MS);
   const [squint, setSquint] = useState(0);
-  // How long the Well done card waits: until the ninja is at the chest.
+  // How long the Well done card waits: until the ninja is out, or at the chest.
   const [cardWait, setCardWait] = useState(0);
   // Counts the rounds started, so each starts on a fresh board.
   const [game, setGame] = useState(0);
@@ -263,7 +263,7 @@ export default function App() {
       }
     });
     if (isSolved({ ...round, ninja: to })) {
-      // Up to the chest, which opens, then the cheer.
+      // Through the way out, or up to the chest, which opens, then the cheer.
       const through = there + 2 * STEP_MS;
       // In the castle the gems fly out and turn back into the friends
       // first, cheered again, and only then comes the card.

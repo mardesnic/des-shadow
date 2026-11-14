@@ -38,6 +38,8 @@
   --goal: #b2f2bb;
   --goal-edge: #2f9e44;
   --chest-dark: #6b3f17;
+  --exit: #e03131;
+  --exit-top: #343a40;
   --shadow: #282c46;
   --sun: #ffc61a;
   --sun-ray: #ffa94d;
@@ -128,6 +130,8 @@
     --goal: #3f7a4c;
     --goal-edge: #69db7c;
     --chest-dark: #5a3414;
+    --exit: #e8590c;
+    --exit-top: #adb5bd;
     --shadow: #080a14;
     --sun: #ffd43b;
     --sun-ray: #f59f00;
@@ -639,23 +643,6 @@ h2 {
   fill: var(--garden-dark);
 }
 
-/* At the chest, the ninja hops for joy. */
-.ninja--hop {
-  animation: hop 0.5s ease-out 2;
-}
-
-@keyframes hop {
-  40% {
-    transform: translateY(-4px) scale(0.95, 1.08);
-  }
-  70% {
-    transform: none;
-  }
-  85% {
-    transform: scale(1.06, 0.92);
-  }
-}
-
 /* Strong enough to beat each thing's own colours. */
 .shadows .shadow,
 .shadows .shadow__shape * {
@@ -1155,11 +1142,26 @@ h2 {
   box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
 }
 
-/* The last cell, under the treasure chest. */
+/* The last cell, under the way out or the treasure chest. */
 .stone--goal {
   fill: var(--goal);
   stroke: var(--goal-edge);
   stroke-width: 0.6;
+}
+
+/* The way out of town: a red arch. */
+.exit__post,
+.exit__beam {
+  fill: var(--exit);
+}
+
+.exit__top {
+  fill: var(--exit-top);
+}
+
+/* Through the way out, the ninja is gone. */
+.ninja--away {
+  opacity: 0;
 }
 
 /* The treasure chest. */

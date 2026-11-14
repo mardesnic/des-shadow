@@ -572,7 +572,23 @@ function Gem({ gem }: { gem: string }) {
   );
 }
 
-// The treasure chest the ninja is after: a little wooden chest with gold
+// The way out of town at the top, over the last cell: a red arch of two
+// posts and two beams, which the ninja walks through and is gone.
+function Exit() {
+  return (
+    <g className='exit'>
+      <rect className='exit__post' x={-4} y={-9} width={1.2} height={9} />
+      <rect className='exit__post' x={2.8} y={-9} width={1.2} height={9} />
+      <rect className='exit__beam' x={-4.8} y={-7.4} width={9.6} height={1} />
+      <path
+        className='exit__top'
+        d='M-6 -10.6 Q0 -9.4 6 -10.6 L5.4 -9.2 Q0 -8.4 -5.4 -9.2 Z'
+      />
+    </g>
+  );
+}
+
+// The treasure chest the ninja is after in the castle: a little wooden chest with gold
 // bands and a lock; at the end its lid flies open on the gold and gems
 // inside. In the castle it is all of gold, and its gems fly out on their
 // own (see Finale).
@@ -816,7 +832,9 @@ export function Board({
   const night = shown === 'moon';
 
   const me = place(round, at);
-  const ninjaY = me.foot;
+  // Out of town, the ninja walks on through the way out and is gone.
+  const away = gone && !castle;
+  const ninjaY = away ? chest.top - 0.4 : me.foot;
 
   // Things further back are drawn first, so the ones in front stand over
   // them. A key, once picked up, is gone.
@@ -1073,9 +1091,10 @@ export function Board({
         <Shelter />
       </g>
 
-      {/* The chest, just beyond the town, over the last cell. */}
+      {/* The way out, or in the castle the chest, just beyond the town,
+          over the last cell. */}
       <g transform={`translate(${chest.cx} ${chest.top - 0.4})`}>
-        <Chest open={gone} gold={castle} />
+        {castle ? <Chest open={gone} gold /> : <Exit />}
       </g>
       {castle && gone && (
         <Finale
@@ -1090,20 +1109,21 @@ export function Board({
       {/* The ninja, over everything but the things in front of it. */}
       <g mask={`url(#${hide})`}>
         <g
-          className='ninja'
+          className={away ? 'ninja ninja--away' : 'ninja'}
           style={{
             transform: `translate(${me.cx}px, ${ninjaY}px)`,
-            transitionDuration: `${gone ? stepMs * 2 : stepMs}ms`,
+            transitionDuration: away
+              ? `${stepMs * 2}ms, ${stepMs}ms`
+              : `${gone ? stepMs * 2 : stepMs}ms`,
+            transitionDelay: away ? `0ms, ${stepMs}ms` : undefined,
           }}
         >
           <g transform='scale(0.8) translate(-5 0)'>
             <g
               className={
-                gone
-                  ? castle
-                    ? 'ninja__pose ninja--party'
-                    : 'ninja__pose ninja--hop'
-                  : squint
+                gone && castle
+                  ? 'ninja__pose ninja--party'
+                  : squint && !gone
                     ? 'ninja__pose ninja--crouch'
                     : 'ninja__pose'
               }
@@ -1133,7 +1153,9 @@ export function Board({
           >
             <title>
               {c === chestCell(level)
-                ? t.chest
+                ? castle
+                  ? t.chest
+                  : t.exit
                 : thingAt(here, c)?.kind === 'guard'
                   ? castle
                     ? t.wizard
