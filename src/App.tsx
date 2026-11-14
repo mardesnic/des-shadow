@@ -311,6 +311,20 @@ export default function App() {
     if (view !== 'play') setView('play');
   };
 
+  // Every level unsolved again, starting from the first. The Solved count
+  // in Statistics stays.
+  const resetProgress = () => {
+    timers.current.forEach(clearTimeout);
+    timers.current = [];
+    setGame((g) => g + 1);
+    setPos(null);
+    setSquint(0);
+    setCardWait(0);
+    setCelebrating(false);
+    setStore({ round: newRound(LEVELS[0]) });
+    setStats({ ...stats, won: [] });
+  };
+
   return (
     <main className={view === 'play' ? 'app app--play' : 'app'}>
       <header className='header'>
@@ -359,6 +373,9 @@ export default function App() {
             sound={sound}
             setSound={setSound}
             stats={stats}
+            done={LEVELS.filter((l) => won.includes(l.id)).length}
+            total={LEVELS.length}
+            onReset={resetProgress}
             t={t}
           />
           <footer className='footer'>
