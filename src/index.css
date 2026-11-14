@@ -881,12 +881,12 @@ h2 {
   stroke-linecap: round;
 }
 
-/* Under the board: which level, and the sun. */
+/* Under the board: which level, and under it the sun, in the middle. */
 .bar {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 8px;
 }
 
 .bar__level {
