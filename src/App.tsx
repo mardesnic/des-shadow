@@ -162,18 +162,18 @@ export default function App() {
 
   // Seen at `from`, out in the light: the ninja ducks and runs, fast,
   // all the way back to the start, under the shelter. The sun stays.
-  const caught = (from: number, at: number, sun: Sun) => {
+  const caught = (from: number, at: number, after: Round) => {
     const { level } = round;
     later(at, () => {
       plop('no');
       setSquint(Date.now());
     });
     later(at + FROZEN_MS, () =>
-      setStore({ round: { ...round, sun, ninja: level.start } })
+      setStore({ round: { ...after, ninja: level.start } })
     );
     const home = along(
       from,
-      runWay(town(round), from, level.start),
+      runWay(town(after), from, level.start),
       STEP_MS / 2,
       at + FROZEN_MS
     );
@@ -217,11 +217,19 @@ export default function App() {
     const from = round.ninja;
     setPos(from);
     const there = along(from, n.path, STEP_MS);
+    const next = useGate(round, c);
     later(there, () => {
-      setStore({ round: useGate(round, c) });
-      setPos(null);
       plop(round.opened ? 'lock' : 'unlock');
+      if (next.ninja === n.at) {
+        setStore({ round: next });
+        setPos(null);
+        return;
+      }
+      // Out in the light once the gate is open: the gate opens, and the
+      // ninja is seen there and runs home.
+      setStore({ round: { ...next, ninja: n.at } });
     });
+    if (next.ninja !== n.at) caught(n.at, there + SHAKE_MS / 2, next);
   };
 
   const onCell = (c: number) => {
@@ -277,7 +285,7 @@ export default function App() {
     setStore({ round: { ...round, sun: s } });
     setStepMs(STEP_MS);
     setPos(round.ninja);
-    caught(round.ninja, k * QUARTER_MS, s);
+    caught(round.ninja, k * QUARTER_MS, { ...round, sun: s });
   };
 
   const start = (id: string) => {

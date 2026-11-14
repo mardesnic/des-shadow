@@ -641,21 +641,20 @@ export const LEVELS: Level[] = [
     width: 6,
     rows: 7,
     things: [
-      { kind: 'tower', x: 2, y: 0, height: 2 },
-      { kind: 'tower', x: 3, y: 1, height: 2 },
-      { kind: 'lantern', x: 2, y: 2, height: 1 },
-      { kind: 'lantern', x: 5, y: 2, height: 1 },
-      { kind: 'guard', x: 1, y: 3, height: 0, facing: 'down' },
-      { kind: 'gate', x: 2, y: 3, height: 1 },
-      { kind: 'tower', x: 3, y: 3, height: 2 },
-      { kind: 'tower', x: 5, y: 3, height: 2 },
-      { kind: 'key', x: 4, y: 4, height: 0 },
-      { kind: 'tower', x: 0, y: 5, height: 2 },
-      { kind: 'bamboo', x: 2, y: 5, height: 1 },
+      { kind: 'tower', x: 2, y: 0, height: 3 },
+      { kind: 'key', x: 4, y: 0, height: 0 },
+      { kind: 'gate', x: 1, y: 1, height: 1 },
+      { kind: 'tower', x: 0, y: 2, height: 3 },
+      { kind: 'lantern', x: 1, y: 3, height: 1 },
+      { kind: 'tower', x: 4, y: 3, height: 2 },
+      { kind: 'guard', x: 2, y: 4, height: 0, facing: 'down' },
+      { kind: 'bamboo', x: 1, y: 6, height: 1 },
+      { kind: 'tower', x: 3, y: 6, height: 3 },
+      { kind: 'tower', x: 5, y: 6, height: 2 },
     ],
-    start: 38,
-    chest: 1,
-    sun: 'moon',
+    start: 36,
+    chest: 0,
+    sun: 'east',
   },
   {
     id: 'gate-4',
@@ -965,9 +964,15 @@ export function tryGate(
   return nextTo(r, gate);
 }
 
+// Opening the gate takes its shadow away, and may let a guard see past it:
+// left out in the light, the ninja is seen and runs back to the start.
 export function useGate(r: Round, gate: number): Round {
   const n = tryGate(r, gate);
-  return n ? { ...arrive(r, n.path, n.at), opened: !r.opened } : r;
+  if (!n) return r;
+  const next = { ...arrive(r, n.path, n.at), opened: !r.opened };
+  return hidden(next).has(next.ninja)
+    ? next
+    : { ...next, ninja: r.level.start };
 }
 
 // The way the ninja runs back to the start when it is seen, round the

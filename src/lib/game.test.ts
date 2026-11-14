@@ -304,9 +304,13 @@ describe('a gate', () => {
   it('once open, can be gone through, and casts no more shadow', () => {
     const r = useGate(walk(newRound(GATED), d(2, 2)), d(1, 1));
     expect(r.opened).toBe(true);
-    expect(r.ninja).toBe(d(1, 2));
+    // Its shadow gone, the ninja next to it is out in the light: it is
+    // seen, and runs back to the start.
+    expect(r.ninja).toBe(GATED.start);
     expect(hidden(r).has(d(1, 2))).toBe(false);
-    expect(tryWalk({ ...r, sun: 'east' }, d(1, 1))?.path).toEqual([d(1, 1)]);
+    expect(
+      tryWalk({ ...r, sun: 'east', ninja: d(1, 2) }, d(1, 1))?.path
+    ).toEqual([d(1, 1)]);
   });
 
   it('once open is walked into, and from in it shut again behind', () => {
