@@ -947,15 +947,21 @@ export function nap(r: Round, guard: number): Round {
     : r;
 }
 
+// Whether a tap on the gate opens or shuts it: always while it is shut,
+// and once open only from in it; otherwise the ninja just walks in.
+export const usesGate = (r: Round, c: number) =>
+  isGate(r.level, c) && (!r.opened || r.ninja === c);
+
 // Where the ninja goes when the child taps the gate: with the key, the
 // shortest way through the shadow to a cell next to it, from where it
-// opens it, or shuts it again, and its shadow is back. Null without the
+// opens it; or, standing in it once open, a step out of it into the
+// shadow, to shut it behind it, and its shadow is back. Null without the
 // key, or with no such way.
 export function tryGate(
   r: Round,
   gate: number
 ): { path: number[]; at: number } | null {
-  if (!isGate(r.level, gate) || !r.got) return null;
+  if (!usesGate(r, gate) || !r.got) return null;
   return nextTo(r, gate);
 }
 
@@ -1009,7 +1015,7 @@ function moves(r: Round): Round[] {
     ...Array.from({ length: level.width * level.rows }, (_, c) =>
       isGuard(level, c)
         ? nap(r, c)
-        : isGate(level, c)
+        : usesGate(r, c)
           ? useGate(r, c)
           : walk(r, c)
     ),

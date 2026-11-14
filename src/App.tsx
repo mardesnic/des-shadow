@@ -11,7 +11,7 @@ import {
   SUNS,
   initialStats,
   initialStore,
-  isGate,
+  usesGate,
   isGuard,
   isSolved,
   nap,
@@ -227,7 +227,7 @@ export default function App() {
   const onCell = (c: number) => {
     if (solved || busy) return;
     if (isGuard(round.level, c)) return onGuard(c);
-    if (isGate(round.level, c)) return onGate(c);
+    if (usesGate(round, c)) return onGate(c);
     const w = tryWalk(round, c);
     if (!w) return;
     const { path, ok, to } = w;

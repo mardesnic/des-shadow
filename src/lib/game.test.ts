@@ -309,13 +309,30 @@ describe('a gate', () => {
     expect(tryWalk({ ...r, sun: 'east' }, d(1, 1))?.path).toEqual([d(1, 1)]);
   });
 
-  it('can be shut again with the key, and casts its shadow again', () => {
-    const r = useGate(walk(newRound(GATED), d(2, 2)), d(1, 1));
-    const shut = useGate(r, d(1, 1));
+  it('once open is walked into, and from in it shut again behind', () => {
+    // A lantern at the bottom right, for the night.
+    const lamp = {
+      ...GATED,
+      things: [
+        ...GATED.things,
+        { kind: 'lantern' as const, x: 2, y: 3, height: 1 },
+      ],
+    };
+    const r = useGate(
+      { ...newRound(lamp), sun: 'moon' as const, ninja: d(1, 2), got: true },
+      d(1, 1)
+    );
+    expect(r.opened).toBe(true);
+    // A tap on the open gate goes in, and doesn't shut it.
+    expect(tryGate(r, d(1, 1))).toBeNull();
+    const inGate = walk(r, d(1, 1));
+    expect(inGate.ninja).toBe(d(1, 1));
+    // From in it, it steps out into the dark and shuts it.
+    const shut = useGate(inGate, d(1, 1));
     expect(shut.opened).toBe(false);
+    expect(shut.ninja).toBe(d(1, 2));
     expect(shut.got).toBe(true);
-    expect(hidden(shut).has(d(1, 2))).toBe(true);
-    expect(open(GATED, d(1, 1))).toBe(false);
+    expect(hidden({ ...shut, sun: 'north' }).has(d(1, 2))).toBe(true);
   });
 
   it('in every level with gates has to be opened, and a guard put to sleep', () => {
