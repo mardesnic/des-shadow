@@ -13,6 +13,11 @@
 // they see the two cells in front of them, day and night, but not behind
 // them. The ninja sneaks up on a guard from behind or the side and puts it
 // to sleep, and then it sees nothing.
+//
+// Last there are wooden gates, locked, and a key somewhere in the town. A
+// gate is in the way and casts a shadow like bamboo; once the ninja has the
+// key, it can open the gate and go through, but then the gate's shadow is
+// gone too.
 
 export type Sun = 'north' | 'east' | 'moon' | 'west';
 export const SUNS: readonly Sun[] = ['north', 'east', 'moon', 'west'];
@@ -34,14 +39,17 @@ export const quarters = (from: Sun, to: Sun) =>
 // How long the sun takes for each quarter.
 export const QUARTER_MS = 350;
 
-export type Kind = 'tower' | 'bamboo' | 'lantern' | 'guard';
+export type Kind = 'tower' | 'bamboo' | 'lantern' | 'guard' | 'gate' | 'key';
 
-// Towers, bamboo, stone lanterns and guards are all in the way.
+// Towers, bamboo, stone lanterns, guards and locked gates are all in the
+// way; a key lies on the street, to be picked up.
 export const SOLID: Record<Kind, boolean> = {
   tower: true,
   bamboo: true,
   lantern: true,
   guard: true,
+  gate: true,
+  key: false,
 };
 
 // Which way a guard looks, and how far it sees.
@@ -58,17 +66,17 @@ export type Thing = {
   kind: Kind;
   x: number;
   y: number;
-  // How tall it is, in cells: its shadow is just as long. A guard's is 0:
-  // it casts none.
+  // How tall it is, in cells: its shadow is just as long. A guard's and a
+  // key's is 0: they cast none.
   height: number;
   // Which way a guard looks.
   facing?: Facing;
 };
 
 // The worlds, each shown by a picture: the night in town, with the moon and
-// the lanterns; then the guards.
-export type World = 'night' | 'guards';
-export const WORLDS: readonly World[] = ['night', 'guards'];
+// the lanterns; then the guards; then the gates.
+export type World = 'night' | 'guards' | 'gates';
+export const WORLDS: readonly World[] = ['night', 'guards', 'gates'];
 
 export type Level = {
   id: string;
@@ -99,7 +107,23 @@ export type Round = {
   ninja: number;
   // The cells of the guards put to sleep, in order.
   asleep?: number[];
+  // Whether the ninja has picked up the key, and opened the gate with it.
+  got?: boolean;
+  opened?: boolean;
 };
+
+// The town as it is in a round: without the key once it is picked up, and
+// without the gate once it is open.
+export const town = (r: Round): Level =>
+  r.got || r.opened
+    ? {
+        ...r.level,
+        things: r.level.things.filter(
+          (t) =>
+            !(t.kind === 'key' && r.got) && !(t.kind === 'gate' && r.opened)
+        ),
+      }
+    : r.level;
 
 // The levels, picked from towns found by scripts/find-levels.ts, and
 // checked by the solver in the tests. All by night, with lanterns. Their
@@ -529,6 +553,172 @@ export const LEVELS: Level[] = [
     chest: 5,
     sun: 'north',
   },
+  {
+    id: 'guard-6',
+    world: 'guards',
+    width: 6,
+    rows: 8,
+    things: [
+      { kind: 'tower', x: 4, y: 0, height: 2 },
+      { kind: 'tower', x: 1, y: 2, height: 3 },
+      { kind: 'guard', x: 2, y: 2, height: 0, facing: 'right' },
+      { kind: 'lantern', x: 1, y: 3, height: 1 },
+      { kind: 'tower', x: 4, y: 3, height: 2 },
+      { kind: 'tower', x: 5, y: 4, height: 3 },
+      { kind: 'tower', x: 3, y: 5, height: 3 },
+      { kind: 'lantern', x: 5, y: 6, height: 1 },
+      { kind: 'bamboo', x: 0, y: 7, height: 1 },
+      { kind: 'bamboo', x: 1, y: 7, height: 1 },
+    ],
+    start: 45,
+    chest: 0,
+    sun: 'west',
+  },
+  {
+    id: 'guard-7',
+    world: 'guards',
+    width: 6,
+    rows: 8,
+    things: [
+      { kind: 'bamboo', x: 2, y: 1, height: 1 },
+      { kind: 'lantern', x: 0, y: 2, height: 1 },
+      { kind: 'tower', x: 3, y: 2, height: 2 },
+      { kind: 'guard', x: 5, y: 2, height: 0, facing: 'up' },
+      { kind: 'tower', x: 4, y: 3, height: 3 },
+      { kind: 'tower', x: 1, y: 4, height: 2 },
+      { kind: 'bamboo', x: 1, y: 5, height: 1 },
+      { kind: 'tower', x: 3, y: 6, height: 2 },
+      { kind: 'tower', x: 5, y: 6, height: 2 },
+    ],
+    start: 43,
+    chest: 5,
+    sun: 'west',
+  },
+  {
+    id: 'gate-1',
+    world: 'gates',
+    width: 5,
+    rows: 6,
+    things: [
+      { kind: 'tower', x: 0, y: 0, height: 2 },
+      { kind: 'bamboo', x: 2, y: 0, height: 1 },
+      { kind: 'lantern', x: 4, y: 0, height: 1 },
+      { kind: 'tower', x: 2, y: 1, height: 2 },
+      { kind: 'tower', x: 1, y: 3, height: 3 },
+      { kind: 'gate', x: 2, y: 3, height: 1 },
+      { kind: 'tower', x: 3, y: 3, height: 3 },
+      { kind: 'guard', x: 4, y: 3, height: 0, facing: 'up' },
+      { kind: 'tower', x: 0, y: 4, height: 3 },
+      { kind: 'key', x: 4, y: 4, height: 0 },
+    ],
+    start: 27,
+    chest: 3,
+    sun: 'north',
+  },
+  {
+    id: 'gate-2',
+    world: 'gates',
+    width: 5,
+    rows: 7,
+    things: [
+      { kind: 'bamboo', x: 3, y: 0, height: 1 },
+      { kind: 'guard', x: 0, y: 1, height: 0, facing: 'right' },
+      { kind: 'key', x: 2, y: 1, height: 0 },
+      { kind: 'gate', x: 3, y: 1, height: 1 },
+      { kind: 'tower', x: 4, y: 2, height: 2 },
+      { kind: 'bamboo', x: 2, y: 3, height: 1 },
+      { kind: 'lantern', x: 0, y: 4, height: 1 },
+      { kind: 'tower', x: 3, y: 4, height: 3 },
+      { kind: 'tower', x: 4, y: 5, height: 3 },
+    ],
+    start: 33,
+    chest: 4,
+    sun: 'west',
+  },
+  {
+    id: 'gate-3',
+    world: 'gates',
+    width: 6,
+    rows: 7,
+    things: [
+      { kind: 'tower', x: 2, y: 0, height: 2 },
+      { kind: 'tower', x: 3, y: 1, height: 2 },
+      { kind: 'lantern', x: 2, y: 2, height: 1 },
+      { kind: 'lantern', x: 5, y: 2, height: 1 },
+      { kind: 'guard', x: 1, y: 3, height: 0, facing: 'down' },
+      { kind: 'gate', x: 2, y: 3, height: 1 },
+      { kind: 'tower', x: 3, y: 3, height: 2 },
+      { kind: 'tower', x: 5, y: 3, height: 2 },
+      { kind: 'key', x: 4, y: 4, height: 0 },
+      { kind: 'tower', x: 0, y: 5, height: 2 },
+      { kind: 'bamboo', x: 2, y: 5, height: 1 },
+    ],
+    start: 38,
+    chest: 1,
+    sun: 'moon',
+  },
+  {
+    id: 'gate-4',
+    world: 'gates',
+    width: 6,
+    rows: 7,
+    things: [
+      { kind: 'tower', x: 0, y: 1, height: 3 },
+      { kind: 'guard', x: 1, y: 1, height: 0, facing: 'down' },
+      { kind: 'key', x: 2, y: 1, height: 0 },
+      { kind: 'lantern', x: 4, y: 1, height: 1 },
+      { kind: 'gate', x: 2, y: 2, height: 1 },
+      { kind: 'bamboo', x: 5, y: 3, height: 1 },
+      { kind: 'tower', x: 0, y: 6, height: 2 },
+    ],
+    start: 38,
+    chest: 3,
+    sun: 'north',
+  },
+  {
+    id: 'gate-5',
+    world: 'gates',
+    width: 6,
+    rows: 8,
+    things: [
+      { kind: 'bamboo', x: 4, y: 1, height: 1 },
+      { kind: 'tower', x: 5, y: 1, height: 3 },
+      { kind: 'tower', x: 0, y: 2, height: 2 },
+      { kind: 'guard', x: 1, y: 2, height: 0, facing: 'right' },
+      { kind: 'bamboo', x: 3, y: 2, height: 1 },
+      { kind: 'gate', x: 1, y: 3, height: 1 },
+      { kind: 'lantern', x: 0, y: 4, height: 1 },
+      { kind: 'key', x: 1, y: 4, height: 0 },
+      { kind: 'tower', x: 0, y: 5, height: 2 },
+      { kind: 'tower', x: 3, y: 5, height: 3 },
+      { kind: 'tower', x: 4, y: 6, height: 3 },
+      { kind: 'tower', x: 1, y: 7, height: 2 },
+    ],
+    start: 45,
+    chest: 2,
+    sun: 'north',
+  },
+  {
+    id: 'gate-6',
+    world: 'gates',
+    width: 6,
+    rows: 8,
+    things: [
+      { kind: 'gate', x: 2, y: 0, height: 1 },
+      { kind: 'guard', x: 3, y: 1, height: 0, facing: 'right' },
+      { kind: 'tower', x: 5, y: 1, height: 3 },
+      { kind: 'bamboo', x: 0, y: 2, height: 1 },
+      { kind: 'lantern', x: 2, y: 2, height: 1 },
+      { kind: 'tower', x: 1, y: 3, height: 3 },
+      { kind: 'tower', x: 4, y: 3, height: 3 },
+      { kind: 'tower', x: 1, y: 5, height: 3 },
+      { kind: 'tower', x: 0, y: 6, height: 3 },
+      { kind: 'key', x: 1, y: 7, height: 0 },
+    ],
+    start: 44,
+    chest: 0,
+    sun: 'west',
+  },
 ];
 
 export const levelById = (id: string) => LEVELS.find((l) => l.id === id);
@@ -583,7 +773,7 @@ export function dark(level: Level, sun: Sun): Set<number> {
   }
   const [dx, dy] = FALL[sun];
   for (const t of level.things)
-    for (let i = 0; i <= t.height; i++) {
+    for (let i = t.kind === 'key' ? 1 : 0; i <= t.height; i++) {
       const x = t.x + dx * i;
       const y = t.y + dy * i;
       if (x >= 0 && x < level.width && y >= 0 && y < level.rows)
@@ -614,13 +804,28 @@ export function seen(level: Level, asleep: readonly number[] = []) {
 // Where the ninja is hidden in a round: in the dark, and out of the sight
 // of the guards that are awake.
 export function hidden(r: Round, sun: Sun = r.sun) {
-  const cells = dark(r.level, sun);
-  for (const c of seen(r.level, r.asleep)) cells.delete(c);
+  const here = town(r);
+  const cells = dark(here, sun);
+  for (const c of seen(here, r.asleep)) cells.delete(c);
   return cells;
 }
 
 export const isGuard = (level: Level, c: number) =>
   thingAt(level, c)?.kind === 'guard';
+export const isGate = (level: Level, c: number) =>
+  thingAt(level, c)?.kind === 'gate';
+const keyCell = (level: Level) => {
+  const k = level.things.find((t) => t.kind === 'key');
+  return k ? cell(level, k.x, k.y) : -1;
+};
+
+// The ninja gets to a cell along a path, and picks up the key if it goes
+// by it.
+const arrive = (r: Round, path: number[], at: number): Round => ({
+  ...r,
+  ninja: at,
+  ...(!r.got && path.includes(keyCell(r.level)) ? { got: true } : {}),
+});
 
 function neighbours(level: Level, c: number) {
   const [x, y] = xy(level, c);
@@ -683,7 +888,7 @@ export function tryWalk(
   r: Round,
   to: number
 ): { path: number[]; ok: boolean; to: number } | null {
-  const { level } = r;
+  const level = town(r);
   if (to === r.ninja || !open(level, to)) return null;
   const shade = hidden(r);
   const safe = route(level, r.ninja, to, (c) => open(level, c) && shade.has(c));
@@ -696,23 +901,18 @@ export function tryWalk(
 
 export function walk(r: Round, to: number): Round {
   const w = tryWalk(r, to);
-  return w?.ok ? { ...r, ninja: w.to } : r;
+  return w?.ok ? arrive(r, w.path, w.to) : r;
 }
 
-// Where the ninja goes when the child taps a guard: the shortest way
-// through the shadow to a cell next to it that it doesn't see, behind or
-// beside it, from where it puts it to sleep. `path` ends there. Null when
-// the guard is asleep already, or there is no such way.
-export function tryNap(
-  r: Round,
-  guard: number
-): { path: number[]; at: number } | null {
-  const { level } = r;
-  if (!isGuard(level, guard) || r.asleep?.includes(guard)) return null;
+// The shortest way through the shadow to a cell next to a thing, out of
+// sight; null if there is none.
+function nextTo(r: Round, thing: number) {
+  const level = town(r);
   const shade = hidden(r);
   let best: { path: number[]; at: number } | null = null;
-  for (const n of neighbours(level, guard)) {
-    if (!open(level, n) || !shade.has(n)) continue;
+  for (const n of neighbours(level, thing)) {
+    // Not the chest: that is only got to on foot.
+    if (!open(level, n) || !shade.has(n) || n === chestCell(level)) continue;
     const path =
       n === r.ninja
         ? []
@@ -723,15 +923,42 @@ export function tryNap(
   return best;
 }
 
+// Where the ninja goes when the child taps a guard: the shortest way
+// through the shadow to a cell next to it that it doesn't see, behind or
+// beside it, from where it puts it to sleep. `path` ends there. Null when
+// the guard is asleep already, or there is no such way.
+export function tryNap(
+  r: Round,
+  guard: number
+): { path: number[]; at: number } | null {
+  if (!isGuard(r.level, guard) || r.asleep?.includes(guard)) return null;
+  return nextTo(r, guard);
+}
+
 export function nap(r: Round, guard: number): Round {
   const n = tryNap(r, guard);
   return n
     ? {
-        ...r,
-        ninja: n.at,
+        ...arrive(r, n.path, n.at),
         asleep: [...(r.asleep ?? []), guard].sort((a, b) => a - b),
       }
     : r;
+}
+
+// Where the ninja goes when the child taps the gate: with the key, the
+// shortest way through the shadow to a cell next to it, from where it
+// opens it. Null without the key, once it is open, or with no such way.
+export function tryUnlock(
+  r: Round,
+  gate: number
+): { path: number[]; at: number } | null {
+  if (!isGate(r.level, gate) || !r.got || r.opened) return null;
+  return nextTo(r, gate);
+}
+
+export function unlock(r: Round, gate: number): Round {
+  const n = tryUnlock(r, gate);
+  return n ? { ...arrive(r, n.path, n.at), opened: true } : r;
 }
 
 // The way the ninja runs back to the start when it is seen, round the
@@ -777,13 +1004,18 @@ function moves(r: Round): Round[] {
   const all = [
     moveSun(r, nextSun(level, r.sun)),
     ...Array.from({ length: level.width * level.rows }, (_, c) =>
-      isGuard(level, c) ? nap(r, c) : walk(r, c)
+      isGuard(level, c)
+        ? nap(r, c)
+        : isGate(level, c)
+          ? unlock(r, c)
+          : walk(r, c)
     ),
   ];
   return all.filter((o) => o !== r);
 }
 
-const key = (r: Round) => `${r.sun}:${r.ninja}:${(r.asleep ?? []).join(',')}`;
+const key = (r: Round) =>
+  `${r.sun}:${r.ninja}:${(r.asleep ?? []).join(',')}:${r.got ? 1 : 0}${r.opened ? 1 : 0}`;
 
 // The fewest taps (sun moves and walks) to the chest, and which, or null if
 // there is no way: every level is checked with it.

@@ -1,10 +1,16 @@
 import { ALL_OPEN, LEVELS, WORLDS, isOpen, type World } from '../lib/game';
 import type { Strings } from '../lib/i18n';
-import { Guard, Lantern } from './Board';
+import { Gate, Guard, Lantern } from './Board';
 
 // Each world's picture: a lit stone lantern for the nights, a guard for
-// the guards.
+// the guards, a locked gate for the gates.
 function WorldIcon({ world }: { world: World }) {
+  if (world === 'gates')
+    return (
+      <svg className='world__icon' viewBox='-7 -11 14 12' aria-hidden>
+        <Gate opened={false} />
+      </svg>
+    );
   return world === 'guards' ? (
     <svg className='world__icon' viewBox='-6 -13.5 12 14' aria-hidden>
       <Guard facing='down' asleep={false} />

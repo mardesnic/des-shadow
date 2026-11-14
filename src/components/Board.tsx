@@ -13,6 +13,7 @@ import {
   xy,
   sunsOf,
   thingAt,
+  town,
   type Level,
   type Round,
   type Facing,
@@ -274,7 +275,7 @@ export function Guard({ facing, asleep }: { facing: Facing; asleep: boolean }) {
   const side = facing === 'left' ? -1 : facing === 'right' ? 1 : 0;
   const eyes = facing === 'up' ? [] : side ? [side * 1.2] : [-0.9, 0.9];
   const lamp = asleep
-    ? { x: 3.6, y: -0.9 }
+    ? { x: 3.8, y: -1.4 }
     : facing === 'down'
       ? { x: 0, y: -3.4 }
       : facing === 'up'
@@ -313,25 +314,40 @@ export function Guard({ facing, asleep }: { facing: Facing; asleep: boolean }) {
         )}
         <path className='guard__hat' d='M-4.6 -9 L0 -12.4 L4.6 -9 Z' />
       </g>
-      <g transform={`translate(${lamp.x} ${lamp.y})`}>
+      {/* An old oil lamp, held by its ring: a little cap, a glass with
+          the flame in it between two bars, and a foot. */}
+      <g
+        className='guard__lamp'
+        transform={`translate(${lamp.x} ${lamp.y}) scale(1.25)`}
+      >
+        <path className='guard__ring' d='M-0.7 -2 A0.7 0.8 0 0 1 0.7 -2' />
         <rect
-          className='guard__lamp'
-          x={-0.9}
-          y={-1.2}
-          width={1.8}
-          height={2.2}
-          rx={0.5}
+          className={asleep ? 'guard__glass guard__glass--out' : 'guard__glass'}
+          x={-0.85}
+          y={-1.5}
+          width={1.7}
+          height={2.1}
+          rx={0.6}
         />
         {!asleep && (
-          <rect
+          <path
             className='guard__flame'
-            x={-0.5}
-            y={-0.8}
-            width={1}
-            height={1.3}
-            rx={0.3}
+            d='M0 -1.1 Q0.55 -0.3 0 0.25 Q-0.55 -0.3 0 -1.1 Z'
           />
         )}
+        <path className='guard__bars' d='M-0.85 -1.3 v1.7 M0.85 -1.3 v1.7' />
+        <path
+          className='guard__metal'
+          d='M-1.1 -1.4 L-0.55 -2.1 L0.55 -2.1 L1.1 -1.4 Z'
+        />
+        <rect
+          className='guard__metal'
+          x={-1.1}
+          y={0.5}
+          width={2.2}
+          height={0.6}
+          rx={0.2}
+        />
       </g>
       {asleep && (
         <g className='guard__zz'>
@@ -347,15 +363,91 @@ export function Guard({ facing, asleep }: { facing: Facing; asleep: boolean }) {
   );
 }
 
+// A wooden gate under a little tiled roof, its two doors shut with a gold
+// lock. Open, the doors are swung back to the posts and the way through
+// is clear.
+export function Gate({ opened }: { opened: boolean }) {
+  return (
+    <g className={opened ? 'gate gate--open' : 'gate'}>
+      <rect className='gate__post' x={-4.6} y={-8.6} width={1.1} height={8.6} />
+      <rect className='gate__post' x={3.5} y={-8.6} width={1.1} height={8.6} />
+      {opened ? (
+        <>
+          <rect
+            className='gate__door'
+            x={-3.5}
+            y={-7.6}
+            width={1}
+            height={7.4}
+          />
+          <rect
+            className='gate__door'
+            x={2.5}
+            y={-7.6}
+            width={1}
+            height={7.4}
+          />
+        </>
+      ) : (
+        <>
+          <rect
+            className='gate__door'
+            x={-3.5}
+            y={-7.6}
+            width={7}
+            height={7.4}
+          />
+          <path
+            className='gate__plank'
+            d='M-1.75 -7.6 v7.4 M0 -7.6 v7.4 M1.75 -7.6 v7.4 M-3.5 -5.4 h7 M-3.5 -2.2 h7'
+          />
+          <rect
+            className='gate__lock'
+            x={-0.8}
+            y={-4.6}
+            width={1.6}
+            height={1.6}
+            rx={0.3}
+          />
+          <path className='gate__keyhole' d='M0 -4.1 v0.7' />
+        </>
+      )}
+      <path
+        className='tower__roof'
+        d='M-6.4 -8.2 Q-5 -8.2 -4.2 -10.2 L4.2 -10.2 Q5 -8.2 6.4 -8.2 L5.4 -7.6 L-5.4 -7.6 Z'
+      />
+    </g>
+  );
+}
+
+// A gold key lying on the street; held up by the ninja once picked up.
+export function Key() {
+  return (
+    <g className='key'>
+      <circle className='key__bow' cx={-1.6} cy={0} r={1.2} />
+      <path className='key__bit' d='M-0.5 0 h3 v1 M1.6 0 v0.8' />
+    </g>
+  );
+}
+
 function ThingShape({
   thing,
   night,
   asleep = false,
+  opened = false,
 }: {
   thing: Thing;
   night: boolean;
   asleep?: boolean;
+  opened?: boolean;
 }) {
+  if (thing.kind === 'key')
+    return (
+      <g transform='translate(0 -2) scale(1.4)'>
+        <Key />
+      </g>
+    );
+  if (thing.kind === 'gate') return <Gate opened={opened} />;
   if (thing.kind === 'guard')
     return <Guard facing={thing.facing ?? 'down'} asleep={asleep} />;
   if (thing.kind === 'lantern') return <Lantern on={night} />;
@@ -365,9 +457,14 @@ function ThingShape({
 
 // The little ninja: a dark suit with a band of face and two eyes. When it
 // bumps into the sun it screws its eyes shut.
-function Ninja({ squint }: { squint: boolean }) {
+function Ninja({ squint, holding }: { squint: boolean; holding: boolean }) {
   return (
     <g>
+      {holding && (
+        <g transform='translate(9.4 -5) rotate(-60)'>
+          <Key />
+        </g>
+      )}
       <rect
         className='ninja__suit'
         x={2}
@@ -481,6 +578,9 @@ export function Board({
   t: Strings;
 }) {
   const { level } = round;
+  // The town as it is now: without the key once picked up, without the
+  // gate once open. Its things are still drawn from the level.
+  const here = town(round);
   const w = SIDE * 2 + level.width * CELL;
   const h = TOP + BOTTOM + level.rows * ROW;
   const centre = {
@@ -550,12 +650,14 @@ export function Board({
   const ninjaY = me.foot;
 
   // Things further back are drawn first, so the ones in front stand over
-  // them.
-  const things = [...level.things].sort((a, b) => a.y - b.y || a.x - b.x);
+  // them. A key, once picked up, is gone.
+  const things = level.things
+    .filter((t) => !(t.kind === 'key' && round.got))
+    .sort((a, b) => a.y - b.y || a.x - b.x);
   // The things in front of the ninja, nearer the bottom, stand over it: a
   // tower in front hides all of the ninja behind it but its head.
   const row = Math.floor(at / level.width);
-  const front = things.filter((thing) => thing.y > row);
+  const front = things.filter((thing) => thing.y > row && thing.kind !== 'key');
   const hide = useId();
 
   return (
@@ -581,7 +683,11 @@ export function Board({
               const p = place(round, thing.y * level.width + thing.x);
               return (
                 <g key={i} transform={`translate(${p.cx} ${p.foot})`}>
-                  <ThingShape thing={thing} night={false} />
+                  <ThingShape
+                    thing={thing}
+                    night={false}
+                    opened={round.opened}
+                  />
                 </g>
               );
             })}
@@ -629,7 +735,7 @@ export function Board({
         const p = place(round, c);
         // Where a wall stands, a raised block of stone, so it is plain the
         // ninja can't go there.
-        if (!open(level, c))
+        if (!open(here, c))
           return (
             <g key={c}>
               <rect
@@ -676,7 +782,7 @@ export function Board({
           where it is shows, and they fade into each other. One see-through
           layer each, so overlapping shadows are no darker. */}
       {SUNS.filter((s) => s !== 'moon').map((s) => {
-        const shade = dark(level, s);
+        const shade = dark(here, s);
         return (
           <g
             key={s}
@@ -684,7 +790,7 @@ export function Board({
           >
             {/* Only on the street: a wall is never somewhere to hide. */}
             {[...shade]
-              .filter((c) => open(level, c))
+              .filter((c) => open(here, c))
               .map((c) => {
                 const p = place(round, c);
                 return (
@@ -711,6 +817,7 @@ export function Board({
               thing={thing}
               night={night}
               asleep={round.asleep?.includes(cell(level, thing.x, thing.y))}
+              opened={round.opened}
             />
           </g>
         );
@@ -726,7 +833,7 @@ export function Board({
       />
       <g className={night ? 'lights' : 'lights lights--off'}>
         {[...lit(level)]
-          .filter((c) => open(level, c))
+          .filter((c) => open(here, c))
           .map((c) => {
             const p = place(round, c);
             return (
@@ -771,7 +878,7 @@ export function Board({
       {/* Where the guards that are awake look, lit by their lamps, day and
           night: the ninja can't go there. */}
       <g className='gaze'>
-        {[...seen(level, round.asleep)].map((c) => {
+        {[...seen(here, round.asleep)].map((c) => {
           const p = place(round, c);
           return (
             <rect
@@ -819,7 +926,10 @@ export function Board({
               }
               style={gone ? { animationDelay: `${stepMs * 2}ms` } : undefined}
             >
-              <Ninja squint={squint > 0} />
+              <Ninja
+                squint={squint > 0}
+                holding={!!round.got && !round.opened}
+              />
             </g>
           </g>
         </g>
@@ -841,9 +951,13 @@ export function Board({
             <title>
               {c === chestCell(level)
                 ? t.chest
-                : thingAt(level, c)?.kind === 'guard'
+                : thingAt(here, c)?.kind === 'guard'
                   ? t.guard
-                  : t.ground}
+                  : thingAt(here, c)?.kind === 'gate'
+                    ? t.gate
+                    : thingAt(here, c)?.kind === 'key'
+                      ? t.key
+                      : t.ground}
             </title>
           </rect>
         );

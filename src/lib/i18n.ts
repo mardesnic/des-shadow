@@ -24,6 +24,7 @@ const en = {
   worlds: {
     night: 'Night',
     guards: 'Guards',
+    gates: 'Gates',
   } as Record<World, string>,
   clear: 'Start over',
   moveSun: 'Move the sun',
@@ -38,6 +39,8 @@ const en = {
   ground: 'Go here',
   chest: 'Treasure chest',
   guard: 'Put the guard to sleep',
+  gate: 'Open the gate with the key',
+  key: 'The key',
   solved: 'Well done!',
   finale: 'You did it all!',
   next: 'Next',
@@ -65,6 +68,7 @@ const hr: Strings = {
   worlds: {
     night: 'Noć',
     guards: 'Stražari',
+    gates: 'Vrata',
   },
   clear: 'Ispočetka',
   moveSun: 'Pomakni sunce',
@@ -79,6 +83,8 @@ const hr: Strings = {
   ground: 'Idi ovamo',
   chest: 'Škrinja s blagom',
   guard: 'Uspavaj stražara',
+  gate: 'Otključaj vrata ključem',
+  key: 'Ključ',
   solved: 'Bravo!',
   finale: 'Sve je riješeno!',
   next: 'Dalje',

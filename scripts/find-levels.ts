@@ -17,7 +17,7 @@ import {
 } from '../src/lib/game.ts';
 
 const [
-  world = 'pagoda',
+  world = 'night',
   w = '5',
   h = '6',
   lo = '6',
@@ -53,11 +53,17 @@ function town(): Level | null {
   for (let i = int(3, 6); i > 0; i--) add('tower', int(2, 3));
   for (let i = int(1, 2); i > 0; i--) add('bamboo', 1);
   for (let i = int(1, 2); i > 0; i--) add('lantern', 1);
-  if (world === 'guards') {
+  if (world === 'guards' || world === 'gates') {
     const before = things.length;
     add('guard', 0);
     if (things.length === before) return null;
     things[before].facing = pick(['up', 'right', 'down', 'left'] as const);
+  }
+  if (world === 'gates') {
+    const before = things.length;
+    add('gate', 1);
+    add('key', 0);
+    if (things.length !== before + 2) return null;
   }
   // A lantern too near the start would light up the shelter.
   const [sx, sy] = [start % width, Math.floor(start / width)];
@@ -73,6 +79,9 @@ function town(): Level | null {
   things.sort((a, b) => a.y - b.y || a.x - b.x);
   // A guard looking at the shelter would see the ninja at the start.
   if (seen({ width, rows, things } as Level).has(start)) return null;
+  // And a guard looking out of the town would see nothing.
+  const sees = seen({ width, rows, things } as Level).size;
+  if (things.some((t) => t.kind === 'guard') && sees < 2) return null;
   const level: Level = {
     id: '?',
     world: world as World,
@@ -93,6 +102,8 @@ function draw(level: Level) {
     bamboo: 'B',
     lantern: 'L',
     guard: 'G',
+    gate: 'D',
+    key: 'K',
   };
   const out: string[] = [];
   for (let y = 0; y < level.rows; y++) {
@@ -130,7 +141,13 @@ for (let tries = 0; tries < 200000 && found < Number(n); tries++) {
   );
   if (!walks.has('moon')) continue;
   // With a guard, the way goes by putting it to sleep.
-  if (world === 'guards' && !way.at(-1)!.asleep?.length) continue;
+  if (world !== 'night' && !way.at(-1)!.asleep?.length) continue;
+  // With a gate, the way goes through it: without the key there is none.
+  if (world === 'gates') {
+    if (!way.at(-1)!.opened) continue;
+    const locked = level.things.filter((t) => t.kind !== 'key');
+    if (solution({ ...level, things: locked })) continue;
+  }
   if (walks.size < 2 && Number(hi) > 3) continue;
   if (from && level.sun !== from) continue;
   found++;

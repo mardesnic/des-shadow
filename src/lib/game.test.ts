@@ -20,7 +20,9 @@ import {
   solution,
   solve,
   sunsOf,
+  tryUnlock,
   tryWalk,
+  unlock,
   walk,
   type Level,
 } from './game';
@@ -254,5 +256,68 @@ describe('a guard', () => {
   it('in every level with guards has to be put to sleep', () => {
     for (const level of LEVELS.filter((l) => l.world === 'guards'))
       expect(solution(level)!.at(-1)!.asleep?.length).toBeGreaterThan(0);
+  });
+});
+
+// A gate in a wall of pagodas, and the key to it.
+//
+//   . C .
+//   T D T        a gate between two pagodas
+//   . . K        the key on the right
+//   N . .
+const GATED: Level = {
+  id: 'gated',
+  world: 'gates',
+  width: 3,
+  rows: 4,
+  things: [
+    { kind: 'tower', x: 0, y: 1, height: 2 },
+    { kind: 'gate', x: 1, y: 1, height: 1 },
+    { kind: 'tower', x: 2, y: 1, height: 2 },
+    { kind: 'key', x: 2, y: 2, height: 0 },
+  ],
+  start: 9,
+  chest: 1,
+  sun: 'north',
+};
+const d = (x: number, y: number) => cell(GATED, x, y);
+
+describe('a gate', () => {
+  it('is in the way, and casts a shadow like bamboo; the key casts none', () => {
+    expect(open(GATED, d(1, 1))).toBe(false);
+    expect(open(GATED, d(2, 2))).toBe(true);
+    expect(dark(GATED, 'north').has(d(1, 2))).toBe(true);
+    expect(dark(GATED, 'east').has(d(1, 2))).toBe(false);
+  });
+
+  it('opens only with the key, picked up on the way', () => {
+    const r = newRound(GATED);
+    expect(tryUnlock(r, d(1, 1))).toBeNull();
+    const got = walk(r, d(2, 2));
+    expect(got.got).toBe(true);
+    // Going by the key picks it up too.
+    expect(walk({ ...r, ninja: d(1, 2) }, d(2, 2)).got).toBe(true);
+    expect(walk(r, d(1, 2)).got).toBeUndefined();
+    expect(tryUnlock(got, d(1, 1))).toEqual({ path: [d(1, 2)], at: d(1, 2) });
+  });
+
+  it('once open, can be gone through, and casts no more shadow', () => {
+    const r = unlock(walk(newRound(GATED), d(2, 2)), d(1, 1));
+    expect(r.opened).toBe(true);
+    expect(r.ninja).toBe(d(1, 2));
+    expect(hidden(r).has(d(1, 2))).toBe(false);
+    // Open, there is nothing more to do to it.
+    expect(tryUnlock(r, d(1, 1))).toBeNull();
+    expect(tryWalk({ ...r, sun: 'east' }, d(1, 1))?.path).toEqual([d(1, 1)]);
+  });
+
+  it('in every level with gates has to be opened, and a guard put to sleep', () => {
+    for (const level of LEVELS.filter((l) => l.world === 'gates')) {
+      const last = solution(level)!.at(-1)!;
+      expect(last.opened).toBe(true);
+      expect(last.asleep?.length).toBeGreaterThan(0);
+      const locked = level.things.filter((t) => t.kind !== 'key');
+      expect(solution({ ...level, things: locked })).toBeNull();
+    }
   });
 });

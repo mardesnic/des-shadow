@@ -11,9 +11,14 @@ import {
   SUNS,
   initialStats,
   initialStore,
+  isGate,
   isGuard,
   isSolved,
   nap,
+  town,
+  tryUnlock,
+  unlock,
+  walk,
   nextSun,
   levelById,
   moveSun,
@@ -57,7 +62,10 @@ function load(saved: Round | undefined): Round {
     return newRound(level ?? LEVELS[0]);
   // Only guards there are can be asleep.
   const asleep = (saved.asleep ?? []).filter((c) => isGuard(level, c));
-  return { ...saved, level, asleep };
+  // And only a key there is can be picked up, and a gate there is opened.
+  const got = !!saved.got && level.things.some((t) => t.kind === 'key');
+  const opened = got && !!saved.opened;
+  return { ...saved, level, asleep, got, opened };
 }
 
 // The button that moves the sun on: a little sun, or the moon when night
@@ -165,7 +173,7 @@ export default function App() {
     );
     const home = along(
       from,
-      runWay(level, from, level.start),
+      runWay(town(round), from, level.start),
       STEP_MS / 2,
       at + FROZEN_MS
     );
@@ -196,9 +204,31 @@ export default function App() {
     });
   };
 
+  // A tap on the gate: with the key, the ninja goes up to it and opens it;
+  // without, or with no way there, it shakes its head.
+  const onGate = (c: number) => {
+    const n = tryUnlock(round, c);
+    if (!n) {
+      if (round.opened) return;
+      plop('no');
+      setSquint(Date.now());
+      later(SHAKE_MS, () => setSquint(0));
+      return;
+    }
+    const from = round.ninja;
+    setPos(from);
+    const there = along(from, n.path, STEP_MS);
+    later(there, () => {
+      setStore({ round: unlock(round, c) });
+      setPos(null);
+      plop('unlock');
+    });
+  };
+
   const onCell = (c: number) => {
     if (solved || busy) return;
     if (isGuard(round.level, c)) return onGuard(c);
+    if (isGate(round.level, c)) return onGate(c);
     const w = tryWalk(round, c);
     if (!w) return;
     const { path, ok, to } = w;
@@ -214,7 +244,15 @@ export default function App() {
     setPos(from);
     setStore({ round: { ...round, ninja: to } });
     const there = along(from, path, STEP_MS);
-    later(there, () => setPos(null));
+    // On the way it picks up the key, if it goes by it.
+    const next = walk(round, c);
+    later(there, () => {
+      setPos(null);
+      if (next.got && !round.got) {
+        setStore({ round: next });
+        plop('key');
+      }
+    });
     if (isSolved({ ...round, ninja: to })) {
       // Up to the chest, which opens, then the cheer.
       const through = there + 2 * STEP_MS;

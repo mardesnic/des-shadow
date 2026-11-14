@@ -59,6 +59,7 @@
   --hat: #d9a441;
   --hat-edge: #a87a26;
   --gaze: #ff922b;
+  --lamp-glass: #ffe8a3;
   --helmet: #495057;
   --wrong: #e5484d;
   --selected: #f2b200;
@@ -139,6 +140,7 @@
     --hat: #c4923a;
     --hat-edge: #8c6420;
     --gaze: #ff922b;
+    --lamp-glass: #ffd66b;
     --helmet: #868e96;
     --wrong: #ff6b6f;
     --good: #4cc38a;
@@ -714,8 +716,68 @@ h2 {
   stroke-linejoin: round;
 }
 
-.guard__lamp {
+.guard__metal {
   fill: var(--roof);
+}
+
+.guard__ring,
+.guard__bars {
+  fill: none;
+  stroke: var(--roof);
+  stroke-width: 0.35;
+  stroke-linecap: round;
+}
+
+.guard__glass {
+  fill: var(--lamp-glass);
+  stroke: var(--roof);
+  stroke-width: 0.2;
+}
+
+.guard__glass--out {
+  fill: var(--stone);
+}
+
+/* A wooden gate, shut with a gold lock; and the gold key that opens it. */
+.gate__post {
+  fill: var(--chest-dark);
+}
+
+.gate__door {
+  fill: var(--chest);
+  stroke: var(--chest-dark);
+  stroke-width: 0.3;
+}
+
+.gate__plank {
+  fill: none;
+  stroke: var(--chest-dark);
+  stroke-width: 0.2;
+}
+
+.gate__lock {
+  fill: var(--gold);
+  stroke: var(--chest-dark);
+  stroke-width: 0.2;
+}
+
+.gate__keyhole {
+  stroke: var(--chest-dark);
+  stroke-width: 0.35;
+  stroke-linecap: round;
+}
+
+.key__bow {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 0.7;
+}
+
+.key__bit {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 0.7;
+  stroke-linejoin: round;
 }
 
 .guard__flame {
