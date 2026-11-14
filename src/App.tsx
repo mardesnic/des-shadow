@@ -399,22 +399,22 @@ export default function App() {
               onCell={onCell}
               t={t}
             />
-          </div>
 
-          {/* The bar stays, so nothing moves when the card comes up over
-              the game. */}
-          <div className='bar'>
-            <span className='bar__level'>
-              {t.level(LEVELS.indexOf(round.level) + 1)}
-            </span>
-            <button
-              className='tool tool--sun'
-              onClick={() => onSun(nextSun(round.level, round.sun))}
-              disabled={busy || solved}
-              aria-label={t.moveSun}
-            >
-              <SunIcon />
-            </button>
+            {/* Right under the board: which level, and the sun. The bar
+                stays, so nothing moves when the card comes up. */}
+            <div className='bar'>
+              <span className='bar__level'>
+                {t.level(LEVELS.indexOf(round.level) + 1)}
+              </span>
+              <button
+                className='tool tool--sun'
+                onClick={() => onSun(nextSun(round.level, round.sun))}
+                disabled={busy || solved}
+                aria-label={t.moveSun}
+              >
+                <SunIcon />
+              </button>
+            </div>
           </div>
 
           {solved && (

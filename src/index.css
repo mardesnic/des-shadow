@@ -333,13 +333,16 @@ h2 {
    height is left after the header, program and controls. */
 .app--play {
   height: 100dvh;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr);
 }
 
 .stage {
   container-type: size;
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
   min-height: 0;
 }
 
@@ -347,7 +350,7 @@ h2 {
 
 .board {
   display: block;
-  width: min(100cqw, 640px, 100cqh * var(--ratio));
+  width: min(100cqw, 640px, (100cqh - 142px) * var(--ratio));
   user-select: none;
   -webkit-user-select: none;
   border-radius: var(--radius);
@@ -931,12 +934,14 @@ h2 {
 }
 
 .tool--sun {
-  width: 72px;
+  width: 104px;
+  padding: 18px 2px;
+  border-radius: 22px;
 }
 
 .tool--sun .icon {
-  width: 30px;
-  height: 30px;
+  width: 48px;
+  height: 48px;
 }
 
 .tool:disabled {
